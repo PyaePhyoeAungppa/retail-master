@@ -2,6 +2,8 @@
 
 Retail Master is a high-performance, aesthetically stunning Point of Sale (POS) solution designed for modern retail environments. It combines powerful backend synchronization with a fluid, "app-like" user interface to streamline business operations and provide deep actionable insights.
 
+**🔗 [Live App Demo](https://retail-master-plum.vercel.app/)**
+
 ## ✨ Core Features
 
 ### 🚀 High-Performance POS
