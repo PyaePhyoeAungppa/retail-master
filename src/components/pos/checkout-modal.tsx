@@ -191,7 +191,7 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
 
   if (isSuccess) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={(val) => !val && handleDone()}>
         <DialogContent className="sm:max-w-[425px] text-center p-0 rounded-[2rem] max-h-[90vh] flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto p-12 custom-scrollbar">
             <div className="flex flex-col items-center">
