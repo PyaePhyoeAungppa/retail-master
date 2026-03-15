@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ExternalLink, Loader2, User, Search, Edit2, Trash2 } from "lucide-react"
+import { ExternalLink, Loader2, User, Search, Edit2, Trash2, Star } from "lucide-react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import Link from "next/link"
@@ -20,6 +20,7 @@ import { useAuthStore } from "@/store/use-auth-store"
 import { CustomerModal } from "./customer-modal"
 import { ConfirmDialog } from "@/components/ui/confirm-dialog"
 import { useToastStore } from "@/store/use-toast-store"
+import { useCartStore } from "@/store/use-cart-store"
 
 export function CustomerTable({ searchQuery = "" }: { searchQuery?: string }) {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | undefined>(undefined)
@@ -29,6 +30,8 @@ export function CustomerTable({ searchQuery = "" }: { searchQuery?: string }) {
   const { storeId } = useAuthStore()
   const { toast } = useToastStore()
   const queryClient = useQueryClient()
+  const { setCustomer, selectedCustomer: currentCartCustomer } = useCartStore()
+  const [settingDefault, setSettingDefault] = useState<string | null>(null)
 
   const { data: customers, isLoading: custLoading } = useQuery<Customer[]>({
     queryKey: ['customers', storeId],
@@ -73,6 +76,52 @@ export function CustomerTable({ searchQuery = "" }: { searchQuery?: string }) {
     return { totalSpend, visitCount }
   }
 
+  const handleSetDefault = async (customer: Customer) => {
+    if (!storeId || settingDefault) return
+    setSettingDefault(customer.id)
+
+    try {
+      // 1. Unset all other defaults for this store
+      const { error: unsetError } = await supabase
+        .from('customers')
+        .update({ is_default: false })
+        .eq('store_id', storeId)
+        .neq('id', customer.id)
+      
+      if (unsetError) throw unsetError
+
+      // 2. Set this one as default
+      const { error: setError } = await supabase
+        .from('customers')
+        .update({ is_default: !customer.is_default })
+        .eq('id', customer.id)
+
+      if (setError) throw setError
+
+      // 3. Update cart store if this is now/no longer the default
+      if (!customer.is_default) {
+        setCustomer(customer)
+      } else if (currentCartCustomer?.id === customer.id) {
+        setCustomer(null)
+      }
+
+      toast({
+        title: !customer.is_default ? "Default Customer Set" : "Default Customer Removed",
+        description: `"${customer.name}" status updated.`,
+        variant: "success"
+      })
+      queryClient.invalidateQueries({ queryKey: ['customers'] })
+    } catch (error: any) {
+      toast({
+        title: "Action Failed",
+        description: error.message || "Failed to update default status",
+        variant: "destructive"
+      })
+    } finally {
+      setSettingDefault(null)
+    }
+  }
+
   const handleDelete = async () => {
     if (!customerToDelete) return
 
@@ -113,6 +162,7 @@ export function CustomerTable({ searchQuery = "" }: { searchQuery?: string }) {
             <TableHead>Phone</TableHead>
             <TableHead className="text-center">Visits</TableHead>
             <TableHead>Total Spend</TableHead>
+            <TableHead className="text-center">Default</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -141,6 +191,23 @@ export function CustomerTable({ searchQuery = "" }: { searchQuery?: string }) {
                 </TableCell>
                 <TableCell className="font-black text-primary">
                   ${totalSpend.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </TableCell>
+                <TableCell className="text-center">
+                  <button 
+                    onClick={() => handleSetDefault(customer)}
+                    disabled={settingDefault === customer.id}
+                    className={`p-2 rounded-xl transition-all duration-300 ${
+                      customer.is_default 
+                        ? 'bg-yellow-500/10 text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.2)]' 
+                        : 'text-muted-foreground/30 hover:text-yellow-500/50 hover:bg-yellow-500/5'
+                    }`}
+                  >
+                    {settingDefault === customer.id ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Star className={`w-5 h-5 ${customer.is_default ? 'fill-current' : ''}`} />
+                    )}
+                  </button>
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">

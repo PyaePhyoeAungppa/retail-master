@@ -12,6 +12,7 @@ export interface Customer {
   name: string;
   email?: string;
   phone?: string;
+  is_default?: boolean;
 }
 
 export interface Category {

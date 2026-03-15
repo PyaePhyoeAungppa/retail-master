@@ -13,10 +13,11 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Loader2, User, Mail, Phone } from "lucide-react"
+import { Loader2, User, Mail, Phone, Star } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useAuthStore } from "@/store/use-auth-store"
 import { useToastStore } from "@/store/use-toast-store"
+import { useCartStore } from "@/store/use-cart-store"
 
 interface CustomerModalProps {
   open: boolean
@@ -28,20 +29,24 @@ export function CustomerModal({ open, onOpenChange, customer }: CustomerModalPro
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
+  const [isDefault, setIsDefault] = useState(false)
   const [loading, setLoading] = useState(false)
   const { storeId } = useAuthStore()
   const { toast } = useToastStore()
   const queryClient = useQueryClient()
+  const { setCustomer } = useCartStore()
 
   useEffect(() => {
     if (customer) {
       setName(customer.name)
       setEmail(customer.email || "")
       setPhone(customer.phone || "")
+      setIsDefault(customer.is_default || false)
     } else {
       setName("")
       setEmail("")
       setPhone("")
+      setIsDefault(false)
     }
   }, [customer, open])
 
@@ -50,14 +55,28 @@ export function CustomerModal({ open, onOpenChange, customer }: CustomerModalPro
     setLoading(true)
 
     try {
+      if (isDefault) {
+        // Unset all other defaults for this store
+        await supabase
+          .from("customers")
+          .update({ is_default: false })
+          .eq("store_id", storeId)
+          .neq("id", customer?.id || "temporary-id")
+      }
+
       if (customer) {
         // Update existing customer
         const { error } = await supabase
           .from("customers")
-          .update({ name, email, phone })
+          .update({ name, email, phone, is_default: isDefault })
           .eq("id", customer.id)
         
         if (error) throw error
+
+        if (isDefault) {
+          setCustomer({ ...customer, name, email, phone, is_default: isDefault })
+        }
+
         toast({
           title: "Customer Updated",
           description: `"${name}" has been updated successfully.`,
@@ -65,11 +84,17 @@ export function CustomerModal({ open, onOpenChange, customer }: CustomerModalPro
         })
       } else {
         // Create new customer
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("customers")
-          .insert([{ name, email, phone, store_id: storeId }])
+          .insert([{ name, email, phone, is_default: isDefault, store_id: storeId }])
+          .select()
         
         if (error) throw error
+        
+        if (isDefault && data?.[0]) {
+          setCustomer(data[0] as Customer)
+        }
+
         toast({
           title: "Customer Created",
           description: `"${name}" has been added to your directory.`,
@@ -149,6 +174,22 @@ export function CustomerModal({ open, onOpenChange, customer }: CustomerModalPro
                   onChange={(e) => setPhone(e.target.value)}
                 />
               </div>
+            </div>
+
+            <div 
+              className="flex items-center gap-3 p-4 rounded-2xl border-2 border-dashed border-muted hover:border-primary/50 hover:bg-primary/5 cursor-pointer transition-all group"
+              onClick={() => setIsDefault(!isDefault)}
+            >
+               <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isDefault ? 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/20' : 'bg-muted text-muted-foreground'}`}>
+                  <Star className={`w-5 h-5 ${isDefault ? 'fill-current' : ''}`} />
+               </div>
+               <div className="flex-1">
+                  <p className="text-sm font-bold group-hover:text-primary transition-colors">Set as Default Customer</p>
+                  <p className="text-[10px] text-muted-foreground font-medium">Automatic selection for new sales.</p>
+               </div>
+               <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isDefault ? 'border-primary bg-primary' : 'border-muted'}`}>
+                  {isDefault && <div className="w-2 h-2 rounded-full bg-white animate-in zoom-in-50" />}
+               </div>
             </div>
           </div>
 

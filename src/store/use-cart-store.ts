@@ -12,7 +12,7 @@ interface CartStore {
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, delta: number) => void;
-  setCustomer: (customer: Customer) => void;
+  setCustomer: (customer: Customer | null) => void;
   clearCart: () => void;
   calculateTotal: () => void;
   total: number;
@@ -20,14 +20,9 @@ interface CartStore {
   setReceiptTemplate: (template: 'standard' | 'thermal' | 'modern') => void;
 }
 
-const DEFAULT_CUSTOMER: Customer = {
-  id: "walk-in-customer-uuid",
-  name: "Walk In"
-};
-
 export const useCartStore = create<CartStore>((set, get) => ({
   items: [],
-  selectedCustomer: DEFAULT_CUSTOMER,
+  selectedCustomer: null,
   total: 0,
   addItem: (product, quantity = 1) => {
     const items = get().items;
@@ -65,7 +60,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
     get().calculateTotal();
   },
   setCustomer: (customer) => set({ selectedCustomer: customer }),
-  clearCart: () => set({ items: [], total: 0, selectedCustomer: DEFAULT_CUSTOMER }),
+  clearCart: () => set({ items: [], total: 0 }),
   receiptTemplate: 'standard',
   setReceiptTemplate: (template) => set({ receiptTemplate: template }),
   calculateTotal: () => {

@@ -2,8 +2,9 @@
 "use client"
 
 import { useState } from "react"
-import { Product, Category } from "@/lib/data"
+import { Product, Category, Customer } from "@/lib/data"
 import { useCartStore } from "@/store/use-cart-store"
+import { useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -20,6 +21,31 @@ export function ProductGrid() {
   const [searchQuery, setSearchQuery] = useState("")
   const { storeId } = useAuthStore()
   const addItem = useCartStore((state) => state.addItem)
+  const { setCustomer, selectedCustomer } = useCartStore()
+
+  // Auto-set default customer on load
+  useEffect(() => {
+    if (!storeId || selectedCustomer) return
+
+    const fetchDefaultCustomer = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('customers')
+          .select('*')
+          .eq('store_id', storeId)
+          .eq('is_default', true)
+          .maybeSingle()
+        
+        if (data && !error) {
+          setCustomer(data as Customer)
+        }
+      } catch (err) {
+        console.error("Error fetching default customer:", err)
+      }
+    }
+
+    fetchDefaultCustomer()
+  }, [storeId, setCustomer, selectedCustomer])
  
   const { data: products, isLoading } = useQuery({
     queryKey: ['products', storeId],

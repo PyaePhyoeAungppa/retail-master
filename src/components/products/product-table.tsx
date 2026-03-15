@@ -45,11 +45,27 @@ export function ProductTable() {
     if (!productToDelete) return
 
     try {
+      // 1. Get product details to find image URL
+      const product = products?.find(p => p.id === productToDelete.id)
+      
+      // 2. Remove image from storage if it exists
+      if (product?.image) {
+        try {
+          const urlParts = product.image.split('/')
+          const filePath = `products/${urlParts[urlParts.length - 1]}`
+          await supabase.storage.from('product-images').remove([filePath])
+        } catch (storageError) {
+          console.error("Storage cleanup failed:", storageError)
+        }
+      }
+
+      // 3. Delete product record
       const { error } = await supabase.from('products').delete().eq('id', productToDelete.id)
       if (error) throw error
+      
       toast({ 
         title: "Product Deleted", 
-        description: `"${productToDelete.name}" has been removed.`,
+        description: `"${productToDelete.name}" and its image have been removed.`,
         variant: "success" 
       })
       queryClient.invalidateQueries({ queryKey: ['products'] })
