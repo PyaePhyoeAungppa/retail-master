@@ -1,6 +1,7 @@
 
 "use client"
 
+import { useState, useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { 
@@ -37,10 +38,14 @@ import { format, parse, startOfDay, subDays, isWithinInterval } from 'date-fns'
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 export default function DashboardPage() {
+  const [range, setRange] = useState<'daily' | 'weekly' | 'monthly'>('weekly')
+
   const { data: transactions, isLoading: txLoading } = useQuery<Transaction[]>({
     queryKey: ['transactions'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('transactions').select('*').order('created_at', { ascending: false })
+      const { data, error } = await supabase.from('transactions')
+        .select('*')
+        .order('date', { ascending: false })
       if (error) throw error
       return data
     }
@@ -64,41 +69,92 @@ export default function DashboardPage() {
     }
   })
 
-  if (txLoading || prodLoading || itemsLoading) {
-    return (
-      <div className="p-8 flex items-center justify-center h-full">
-        <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-12 h-12 bg-primary/20 rounded-full" />
-          <p className="text-muted-foreground font-medium">Loading analytics...</p>
-        </div>
-      </div>
-    )
-  }
 
-  const completedTx = transactions?.filter(tx => tx.status === 'completed') || []
-  const voidedTx = transactions?.filter(tx => tx.status === 'void') || []
+  // Filter transactions based on selected range
+  const filteredTx = useMemo(() => {
+    if (!transactions) return []
+    const now = new Date()
+    const completed = transactions.filter(tx => tx.status === 'completed')
+    
+    if (range === 'daily') {
+      const today = format(now, 'yyyy-MM-dd')
+      return completed.filter(tx => tx.date.startsWith(today))
+    }
+    
+    if (range === 'weekly') {
+      const sevenDaysAgo = subDays(now, 7)
+      return completed.filter(tx => new Date(tx.date) >= sevenDaysAgo)
+    }
+    
+    if (range === 'monthly') {
+      const thirtyDaysAgo = subDays(now, 30)
+      return completed.filter(tx => new Date(tx.date) >= thirtyDaysAgo)
+    }
+    
+    return completed
+  }, [transactions, range])
+
+  const completedTx = filteredTx
+  const voidedTx = transactions?.filter(tx => {
+    const isVoid = tx.status === 'void'
+    if (!isVoid) return false
+    
+    const now = new Date()
+    if (range === 'daily') return tx.date.startsWith(format(now, 'yyyy-MM-dd'))
+    if (range === 'weekly') return new Date(tx.date) >= subDays(now, 7)
+    if (range === 'monthly') return new Date(tx.date) >= subDays(now, 30)
+    return true
+  }) || []
   
-  const totalRevenue = completedTx.reduce((sum, tx) => sum + tx.total, 0)
+  const totalRevenue = completedTx.reduce((sum: number, tx: Transaction) => sum + tx.total, 0)
   const totalOrders = completedTx.length
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0
   const totalVoids = voidedTx.length
 
   // Process data for charts
-  
-  // 1. Sales Trend (Last 7 days)
-  const last7DaysStrings = Array.from({ length: 7 }, (_, i) => {
-    const d = subDays(new Date(), i)
-    return format(d, 'yyyy-MM-dd')
-  }).reverse()
+  const salesTrendData = useMemo(() => {
+    if (!transactions) return []
+    const now = new Date()
+    const completed = transactions.filter(tx => tx.status === 'completed')
 
-  const salesTrendData = last7DaysStrings.map(dayStr => {
-    const dayTotal = completedTx
-      .filter(tx => tx.date.startsWith(dayStr))
-      .reduce((sum, tx) => sum + tx.total, 0)
-    return { name: format(parse(dayStr, 'yyyy-MM-dd', new Date()), 'MMM dd'), total: dayTotal }
-  })
+    if (range === 'daily') {
+      // Last 24 hours (aggregated by hour)
+      return Array.from({ length: 24 }, (_, i) => {
+        const hour = i
+        const hourTotal = completed
+          .filter(tx => {
+            const txDate = new Date(tx.date)
+            return txDate.getHours() === hour && tx.date.startsWith(format(now, 'yyyy-MM-dd'))
+          })
+          .reduce((sum: number, tx: Transaction) => sum + tx.total, 0)
+        return { name: `${hour}:00`, total: hourTotal }
+      })
+    }
 
-  // 2. Payment Methods Distribution
+    if (range === 'weekly') {
+      const days = Array.from({ length: 7 }, (_, i) => format(subDays(now, i), 'yyyy-MM-dd')).reverse()
+      return days.map((dayStr: string) => {
+        const dayTotal = completed
+          .filter((tx: Transaction) => tx.date.startsWith(dayStr))
+          .reduce((sum: number, tx: Transaction) => sum + tx.total, 0)
+        return { name: format(parse(dayStr, 'yyyy-MM-dd', new Date()), 'EEE'), total: dayTotal }
+      })
+    }
+
+    if (range === 'monthly') {
+      const days = Array.from({ length: 30 }, (_, i) => format(subDays(now, i), 'yyyy-MM-dd')).reverse()
+      return days.map((dayStr: string) => {
+        const dayTotal = completed
+          .filter((tx: Transaction) => tx.date.startsWith(dayStr))
+          .reduce((sum: number, tx: Transaction) => sum + tx.total, 0)
+        return { name: format(parse(dayStr, 'yyyy-MM-dd', new Date()), 'MMM dd'), total: dayTotal }
+      })
+    }
+
+    return []
+  }, [transactions, range])
+
+  // Payment Methods Distribution
   const paymentData = [
     { name: 'Cash', value: completedTx.filter(tx => tx.method === 'cash').length },
     { name: 'Card', value: completedTx.filter(tx => tx.method === 'card').length },
@@ -117,6 +173,17 @@ export default function DashboardPage() {
   const categoryData = Object.entries(categoryCounts).map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value)
 
+  if (txLoading || prodLoading || itemsLoading) {
+    return (
+      <div className="p-8 flex items-center justify-center h-full">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="w-12 h-12 bg-primary/20 rounded-full" />
+          <p className="text-muted-foreground font-medium">Loading analytics...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-8 space-y-8 max-w-[1400px] mx-auto animate-in fade-in duration-500">
       <div className="flex justify-between items-end">
@@ -125,9 +192,33 @@ export default function DashboardPage() {
           <p className="text-muted-foreground font-medium">Overview of your store's performance and trends.</p>
         </div>
         <div className="flex bg-muted/50 p-1 rounded-xl border border-border">
-          <button className="px-4 py-1.5 rounded-lg text-xs font-bold bg-white shadow-sm">Daily</button>
-          <button className="px-4 py-1.5 rounded-lg text-xs font-bold text-muted-foreground hover:text-foreground transition-colors">Weekly</button>
-          <button className="px-4 py-1.5 rounded-lg text-xs font-bold text-muted-foreground hover:text-foreground transition-colors">Monthly</button>
+          <button 
+            onClick={() => setRange('daily')}
+            className={cn(
+              "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+              range === 'daily' ? "bg-white shadow-sm" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Daily
+          </button>
+          <button 
+            onClick={() => setRange('weekly')}
+            className={cn(
+              "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+              range === 'weekly' ? "bg-white shadow-sm" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Weekly
+          </button>
+          <button 
+            onClick={() => setRange('monthly')}
+            className={cn(
+              "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+              range === 'monthly' ? "bg-white shadow-sm" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Monthly
+          </button>
         </div>
       </div>
 
@@ -168,7 +259,11 @@ export default function DashboardPage() {
         <Card className="lg:col-span-2 border-none shadow-xl shadow-slate-200/50 rounded-[2rem] overflow-hidden">
           <CardHeader className="p-8 pb-0">
             <CardTitle className="text-xl font-black">Revenue Trend</CardTitle>
-            <p className="text-sm text-muted-foreground">Daily sales performance for the last 7 days.</p>
+            <p className="text-sm text-muted-foreground">
+              {range === 'daily' ? "Hourly sales for today." : 
+               range === 'weekly' ? "Daily sales for the last 7 days." : 
+               "Daily sales for the last 30 days."}
+            </p>
           </CardHeader>
           <CardContent className="p-8 pt-4">
             <div className="h-[350px] w-full mt-4">

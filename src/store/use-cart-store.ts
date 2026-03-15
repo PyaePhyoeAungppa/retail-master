@@ -30,13 +30,24 @@ export const useCartStore = create<CartStore>((set, get) => ({
 
     let newItems;
     if (existingItem) {
-      newItems = items.map((item) =>
-        item.id === product.id
-          ? { ...item, quantity: item.quantity + quantity }
-          : item
-      );
+      const newQuantity = existingItem.quantity + quantity;
+      if (newQuantity > product.stock) {
+        // Limit to available stock
+        newItems = items.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: product.stock }
+            : item
+        );
+      } else {
+        newItems = items.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: newQuantity }
+            : item
+        );
+      }
     } else {
-      newItems = [...items, { ...product, quantity }];
+      const securedQuantity = Math.min(quantity, product.stock);
+      newItems = [...items, { ...product, quantity: securedQuantity }];
     }
     
     set({ items: newItems });
@@ -53,7 +64,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
     set({
       items: items.map((item) =>
         item.id === productId
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+          ? { ...item, quantity: Math.min(item.stock, Math.max(1, item.quantity + delta)) }
           : item
       ),
     });

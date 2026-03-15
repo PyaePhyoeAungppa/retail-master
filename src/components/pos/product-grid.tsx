@@ -115,7 +115,7 @@ export function ProductGrid() {
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 overflow-y-auto p-4 pb-32 scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto p-4 pb-32 scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} onAdd={addItem} />
           ))}
@@ -142,18 +142,18 @@ function ProductCard({ product, onAdd }: { product: Product, onAdd: (p: Product,
   return (
     <div className="group h-full">
       <Card 
-        className="h-full border-none bg-white/40 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.05)] hover:shadow-[0_20px_48px_rgba(0,0,0,0.1)] transition-all duration-500 rounded-[2rem] overflow-hidden flex flex-col ring-1 ring-black/[0.03] group-hover:ring-primary/20"
+        className="h-full border-none bg-white/40 backdrop-blur-xl shadow-sm hover:shadow-md transition-all duration-500 rounded-[2rem] overflow-hidden flex flex-col ring-1 ring-black/[0.03] group-hover:ring-primary/20"
       >
-        <CardContent className="p-0 flex-1 flex flex-col">
+        <CardContent className="p-0 flex-1 flex flex-col h-full">
           {/* Image Container */}
-          <div className="relative aspect-square w-full p-4 flex items-center justify-center bg-gradient-to-br from-white/80 to-transparent">
+          <div className="relative aspect-[4/3] w-full flex items-center justify-center bg-white overflow-hidden">
             {product.image ? (
-              <div className="relative w-full h-full transform group-hover:scale-110 transition-transform duration-700 ease-out">
+              <div className="relative w-full h-full transition-transform duration-700 ease-out">
                 <Image 
                   src={product.image} 
                   alt={product.name} 
                   fill 
-                  className="object-contain drop-shadow-2xl"
+                  className="object-contain"
                 />
               </div>
             ) : (
@@ -163,9 +163,6 @@ function ProductCard({ product, onAdd }: { product: Product, onAdd: (p: Product,
             )}
             
             <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
-              <Badge variant="secondary" className="bg-black/80 backdrop-blur-md text-white border-none font-bold text-[9px] px-2 py-0.5 rounded-full ring-1 ring-white/20">
-                #{product.id}
-              </Badge>
               {product.stock < 10 && (
                 <Badge variant="destructive" className="text-[9px] px-2 py-0.5 rounded-full font-black animate-pulse border-none shadow-lg">
                   {product.stock === 0 ? "EMPTY" : `${product.stock} LEFT`}
@@ -183,7 +180,7 @@ function ProductCard({ product, onAdd }: { product: Product, onAdd: (p: Product,
           </div>
           
           {/* Content Area */}
-          <div className="p-4 flex flex-col flex-1 gap-2 border-t border-black/[0.03] bg-white/20">
+          <div className="p-3.5 flex flex-col flex-1 gap-1.5 border-t border-black/[0.03] bg-white/20">
             <div className="min-h-[48px]">
               <p className="text-[9px] uppercase tracking-[0.15em] text-primary/60 font-black mb-0.5">{product.category}</p>
               <h3 className="font-bold text-sm leading-tight text-foreground/90 group-hover:text-primary transition-colors line-clamp-2">
@@ -191,36 +188,39 @@ function ProductCard({ product, onAdd }: { product: Product, onAdd: (p: Product,
               </h3>
             </div>
             
-            <div className="mt-auto space-y-3">
+            <div className="mt-auto pt-2">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-xl font-black text-foreground tabular-nums tracking-tighter">${product.price.toFixed(2)}</p>
+                <p className="text-lg font-black text-foreground tabular-nums tracking-tighter">${product.price.toFixed(2)}</p>
                 
-                {/* Compact Qty Control */}
-                <div className="flex items-center bg-black/5 p-1 rounded-xl ring-1 ring-black/5">
-                  <button 
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white hover:shadow-sm transition-all text-muted-foreground hover:text-foreground active:scale-95"
+                <div className="flex items-center gap-2">
+                  {/* Compact Qty Control */}
+                  <div className="flex items-center bg-black/5 p-0.5 rounded-lg ring-1 ring-black/5">
+                    <button 
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm transition-all text-muted-foreground hover:text-foreground active:scale-95"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="w-5 text-center font-black text-[10px] tabular-nums">{quantity}</span>
+                    <button 
+                      onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                      disabled={quantity >= product.stock}
+                      className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm transition-all text-muted-foreground hover:text-foreground active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
+
+                  <Button 
+                    size="icon"
+                    className="h-7 w-7 rounded-lg shadow-sm active:scale-95 bg-primary hover:bg-primary/90 text-primary-foreground"
+                    onClick={handleAdd}
+                    disabled={product.stock === 0}
                   >
-                    <Minus className="w-3.5 h-3.5" />
-                  </button>
-                  <span className="w-6 text-center font-black text-xs tabular-nums">{quantity}</span>
-                  <button 
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white hover:shadow-sm transition-all text-muted-foreground hover:text-foreground active:scale-95"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
+                    <Plus className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
-
-              <Button 
-                className="w-full h-10 rounded-xl font-black text-xs shadow-[0_8px_16px_rgba(var(--primary-rgb),0.2)] hover:shadow-[0_12px_24px_rgba(var(--primary-rgb),0.3)] transition-all duration-300 flex gap-2 active:scale-[0.97] group/btn"
-                onClick={handleAdd}
-                disabled={product.stock === 0}
-              >
-                <Plus className="w-4 h-4 group-hover/btn:rotate-90 transition-transform duration-300" />
-                Add to Cart
-              </Button>
             </div>
           </div>
         </CardContent>

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useCartStore } from "@/store/use-cart-store"
+import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
 import {
   Dialog,
@@ -28,6 +29,7 @@ interface CheckoutModalProps {
 }
 
 export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
+  const queryClient = useQueryClient()
   const { total, items, clearCart, selectedCustomer, receiptTemplate, setReceiptTemplate } = useCartStore()
   const { currentUser, storeId } = useAuthStore()
   const { toast } = useToastStore()
@@ -58,6 +60,8 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
       cashierName: currentUser.email || "Unknown Cashier",
       terminalId: "TERM-01",
       itemsCount: items.length,
+      subtotal: total,
+      tax: tax,
       total: grandTotal,
       method: paymentMethod,
       status: 'completed'
@@ -73,22 +77,62 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
     }))
 
     try {
-      // 1. Save Transaction
+      // 1. Initial Stock Check (Quick local check)
+      const { data: latestStock, error: stockCheckError } = await supabase
+        .from('products')
+        .select('id, name, stock')
+        .in('id', items.map(i => i.id))
+      
+      if (stockCheckError) throw stockCheckError
+
+      const insufficientItems = items.filter(item => {
+        const dbProduct = latestStock?.find(p => p.id === item.id)
+        return !dbProduct || dbProduct.stock < item.quantity
+      })
+
+      if (insufficientItems.length > 0) {
+        const details = insufficientItems.map(i => {
+          const dbProduct = latestStock?.find(p => p.id === i.id)
+          return `${i.name} (Available: ${dbProduct?.stock || 0}, Requested: ${i.quantity})`
+        }).join('\n')
+        
+        throw new Error(`Insufficient stock for the following items:\n${details}`)
+      }
+
+      // 2. Atomic Stock Reduction + Validation (The core concurrency protection)
+      const { error: rpcError } = await supabase.rpc('process_checkout_stock', { 
+        items: items.map(i => ({ productId: i.id, quantity: i.quantity })) 
+      })
+      
+      if (rpcError) {
+        // Handle specific stock error from SQL
+        if (rpcError.message.includes('Insufficient stock')) {
+          throw new Error(rpcError.message)
+        }
+        throw rpcError
+      }
+
+      // 3. Save Transaction
       const { data: txData, error: txError } = await supabase
         .from('transactions')
         .insert([transaction])
         .select()
       
-      if (txError) throw txError
+      if (txError) {
+        // CRITICAL: If transaction fails but stock was reduced, we have an inconsistency.
+        throw txError
+      }
 
-      // 2. Save Transaction Items
+      // 4. Save Transaction Items
       const { error: itemsError } = await supabase
         .from('transaction_items')
         .insert(transactionItems)
       
       if (itemsError) throw itemsError
 
-      // 3. Send Email Receipt if toggled
+      queryClient.invalidateQueries({ queryKey: ["products"] })
+
+      // 5. Send Email Receipt if toggled
       if (sendEmail && selectedCustomer?.email) {
         try {
           await axios.post('/api/send-receipt', {

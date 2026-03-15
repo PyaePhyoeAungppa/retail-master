@@ -31,7 +31,7 @@ export interface TransactionItem {
   id: string;
   transactionId: string;
   productId: string;
-  productName: string;
+  name: string;
   quantity: number;
   price: number;
   subtotal: number;
