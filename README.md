@@ -1,62 +1,38 @@
-# RetailPOS - Modern Point of Sale System
+# Retail Master - Premium Point of Sale System
 
-RetailPOS is a premium, high-performance Point of Sale application designed for modern retail businesses. Built with a focus on speed, aesthetics, and data integrity, it provides a seamless experience for managing sales, inventory, and customers.
+Retail Master is a high-performance, aesthetically stunning Point of Sale (POS) solution designed for modern retail environments. It combines powerful backend synchronization with a fluid, "app-like" user interface to streamline business operations and provide deep actionable insights.
 
-## ✨ Features
+## ✨ Core Features
 
-- **Dynamic POS Interface**: Fast search, category filtering, and a glassmorphic checkout experience.
-- **Inventory Management**: Full CRUD for products and categories with image support and stock tracking.
-- **Customer CRM**: Manage customer profiles, track purchase history, and visits.
-- **Real-time Analytics**: Interactive dashboards with revenue trends and category performance metrics.
-- **Premium UI/UX**: Custom Shadcn confirm dialogs, toast notifications, and smooth micro-animations.
-- **Multi-Tenancy**: Secure data scoping using Supabase Row-Level Security (RLS).
+### 🚀 High-Performance POS
+- **Search & Filter**: Find products instantly with real-time search and category-based navigation.
+- **Fluid Checkout**: A glassmorphic, micro-animated checkout process supporting multiple payment methods (Cash, Card, QR Pay, NFC).
+- **Dynamic Cart**: Real-time total calculation with tax handling and receipt template selection.
 
-## 🚀 Tech Stack
+### 📦 Inventory & Stock Management
+- **Centralized Catalog**: Manage products and categories with a beautiful, grid-based management interface.
+- **Image Integration**: Direct upload and hosting of product images via secure cloud storage.
+- **Smart Stock Tracking**: Automated low-stock alerts and unit tracking to prevent inventory shortages.
 
-- **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
-- **Database & Auth**: [Supabase](https://supabase.com/)
-- **Styling**: Tailwind CSS
-- **Components**: [Shadcn UI](https://ui.shadcn.com/)
-- **State Management**: [Zustand](https://github.com/pmndrs/zustand)
-- **Data Fetching**: [TanStack Query v5](https://tanstack.com/query/latest)
-- **Icons**: Lucide React
+### 👥 Customer Relationship Management (CRM)
+- **Customer Profiles**: Detailed records of customer contact info and store engagement.
+- **Engagement History**: Track purchase totals, visit counts, and transaction history per customer.
+- **Searchable Directory**: Quickly access customer data for personalized service and loyalty tracking.
 
-## 🛠️ Getting Started
+### 📊 Business Intelligence & Analytics
+- **Live Dashboard**: Visual overview of revenue trends, order counts, and average order values.
+- **Performance Charts**: Interactive data visualization for sales trends and payment method distribution.
+- **Category Insights**: Heatmaps of which categories are driving the most sold units.
 
-### Prerequisites
+### 🛡️ Enterprise-Grade Infrastructure
+- **Secure Synchronization**: Powered by Supabase for real-time data persistence and reliability.
+- **Multi-Tenancy**: Built-in data isolation ensuring business data is securely scoped to owner profiles.
+- **Modern Tech Stack**: Leverages Next.js 15, TanStack Query, and Zustand for a robust, lag-free experience.
 
-- Node.js 18+
-- Supabase Project
+## 🎨 Premium Design Experience
+- **Custom UI Components**: Built on Shadcn UI with custom-engineered Confirm Dialogs and Toast Notifications.
+- **Glassmorphism**: Elegant use of backdrop blurs and subtle gradients for a premium "Apple-style" feel.
+- **Responsive & Accessible**: Designed to work perfectly across desktop and tablet interfaces.
 
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/PyaePhyoeAungppa/retail-master.git
-   cd retail-master
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Configure Environment Variables:
-   Create a `.env.local` file in the root directory:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
-
-4. Run the development server:
-   ```bash
-   npm run dev
-   ```
-
-## 🏗️ Deployment
-
-The project is optimized for deployment on the [Vercel Platform](https://vercel.com/new). Make sure to configure the same environment variables in your Vercel project settings.
-
-## 📄 License
-
-This project is private and intended for use by [PyaePhyoeAungppa].
+---
+© 2026 PyaePhyoeAungppa. All rights reserved.
