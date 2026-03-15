@@ -1,0 +1,275 @@
+{
+  "products": [
+    {
+      "id": "1",
+      "name": "Coca Cola 500ml",
+      "price": 1.5,
+      "category": "Beverages",
+      "image": "/images/coca_cola.png",
+      "stock": 48
+    },
+    {
+      "id": "2",
+      "name": "Lay's Classic XL",
+      "price": 2,
+      "category": "Snacks",
+      "image": "/images/lays.png",
+      "stock": 18
+    },
+    {
+      "id": "3",
+      "name": "Apple AirPods Pro",
+      "price": 249,
+      "category": "Electronics",
+      "image": "/images/airpods.png",
+      "stock": 4
+    },
+    {
+      "id": "4",
+      "name": "Organic Milk 1L",
+      "price": 2.5,
+      "category": "Groceries",
+      "image": "/images/milk.png",
+      "stock": 14
+    },
+    {
+      "id": "5",
+      "name": "Red Bull 250ml",
+      "price": 2.2,
+      "category": "Beverages",
+      "image": "/images/red_bull.png",
+      "stock": 30
+    },
+    {
+      "id": "6",
+      "name": "Kind Bar Dark Chocolate",
+      "price": 1.8,
+      "category": "Snacks",
+      "image": "/images/kind_bar.png",
+      "stock": 40
+    },
+    {
+      "id": "7",
+      "name": "Logitech MX Master 3S",
+      "price": 99,
+      "category": "Electronics",
+      "image": "/images/logitech_mouse.png",
+      "stock": 8
+    },
+    {
+      "id": "8",
+      "name": "Fresh Bananas (1kg)",
+      "price": 1.2,
+      "category": "Groceries",
+      "image": "/images/bananas.png",
+      "stock": 25
+    },
+    {
+      "name": "Blueberry Muffin",
+      "price": 3.5,
+      "category": "Snacks",
+      "stock": 24,
+      "image": "https://images.unsplash.com/photo-1558401391-7899b4bd5bbf?auto=format&fit=crop&q=80&w=800",
+      "id": "9"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat-beverages-uuid",
+      "name": "Beverages"
+    },
+    {
+      "id": "cat-snacks-uuid",
+      "name": "Snacks"
+    },
+    {
+      "id": "cat-electronics-uuid",
+      "name": "Electronics"
+    },
+    {
+      "id": "cat-groceries-uuid",
+      "name": "Groceries"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "TX-90123",
+      "date": "2026-03-15T10:45:30Z",
+      "customerId": "walk-in-customer-uuid",
+      "customerName": "Walk In",
+      "cashierId": 1,
+      "cashierName": "admin",
+      "terminalId": "TERM-01",
+      "itemsCount": 2,
+      "subtotal": 3,
+      "tax": 0.3,
+      "total": 3.3,
+      "method": "card",
+      "status": "completed"
+    },
+    {
+      "id": "TX-90122",
+      "date": "2026-03-15T10:30:15.000Z",
+      "customerId": "c0a80121-7ac9-4a39-8472-e1e314f107f0",
+      "customerName": "John Doe",
+      "cashierId": 1,
+      "cashierName": "admin",
+      "terminalId": "TERM-01",
+      "itemsCount": 2,
+      "subtotal": 10.9,
+      "tax": 1.1,
+      "total": 12,
+      "method": "cash",
+      "status": "completed"
+    },
+    {
+      "id": "TX-90121",
+      "date": "2026-03-14T09:55:00Z",
+      "customerId": "walk-in-customer-uuid",
+      "customerName": "Walk In",
+      "cashierId": 1,
+      "cashierName": "admin",
+      "terminalId": "TERM-02",
+      "itemsCount": 1,
+      "subtotal": 249,
+      "tax": 24.9,
+      "total": 273.9,
+      "method": "qr",
+      "status": "completed"
+    },
+    {
+      "id": "TX-1773566823382",
+      "date": "2026-03-15T09:27:03.382Z",
+      "customerId": "c0a80121-7ac9-4a39-8472-e1e314f107f0",
+      "customerName": "John Doe",
+      "cashierId": 1,
+      "cashierName": "admin",
+      "terminalId": "TERM-01",
+      "itemsCount": 3,
+      "subtotal": 252.7,
+      "tax": 25.27,
+      "total": 277.96999999999997,
+      "method": "cash",
+      "status": "completed"
+    }
+  ],
+  "transactionItems": [
+    {
+      "id": "TI-001",
+      "transactionId": "TX-90123",
+      "productId": "1",
+      "productName": "Coca Cola 500ml",
+      "quantity": 2,
+      "price": 1.5,
+      "subtotal": 3
+    },
+    {
+      "id": "TI-002",
+      "transactionId": "TX-90122",
+      "productId": "6",
+      "productName": "Kind Bar Dark Chocolate",
+      "quantity": 5,
+      "price": 1.8,
+      "subtotal": 9
+    },
+    {
+      "id": "TI-003",
+      "transactionId": "TX-90122",
+      "productId": "5",
+      "productName": "Red Bull 250ml",
+      "quantity": 1,
+      "price": 1.9,
+      "subtotal": 1.9
+    },
+    {
+      "id": "TI-004",
+      "transactionId": "TX-90121",
+      "productId": "3",
+      "productName": "Apple AirPods Pro",
+      "quantity": 1,
+      "price": 249,
+      "subtotal": 249
+    },
+    {
+      "id": "TX-1773566823382-3",
+      "transactionId": "TX-1773566823382",
+      "productId": "3",
+      "productName": "Apple AirPods Pro",
+      "quantity": 1,
+      "price": 249,
+      "subtotal": 249
+    },
+    {
+      "id": "TX-1773566823382-4",
+      "transactionId": "TX-1773566823382",
+      "productId": "4",
+      "productName": "Organic Milk 1L",
+      "quantity": 1,
+      "price": 2.5,
+      "subtotal": 2.5
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "1234",
+      "role": "admin"
+    }
+  ],
+  "customers": [
+    {
+      "id": "walk-in-customer-uuid",
+      "name": "Walk In"
+    },
+    {
+      "id": "c0a80121-7ac9-4a39-8472-e1e314f107f0",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "phone": "555-0199"
+    },
+    {
+      "id": "dfb8a141-9bd2-4c28-9844-f17315a109e1",
+      "name": "Jane Smith",
+      "email": "jane@example.com",
+      "phone": "555-0200"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "1",
+      "title": "Low Stock Alert",
+      "message": "Lay's Classic XL is running low (18 items left).",
+      "type": "warning",
+      "date": "2026-03-15T15:20:00Z",
+      "read": false
+    },
+    {
+      "id": "2",
+      "title": "New Promotion",
+      "message": "Double points for VIP members starting tomorrow!",
+      "type": "info",
+      "date": "2026-03-15T14:45:00Z",
+      "read": true
+    },
+    {
+      "id": "3",
+      "title": "System Update",
+      "message": "POS Terminal TERM-02 was successfully updated.",
+      "type": "success",
+      "date": "2026-03-15T12:30:00Z",
+      "read": true
+    }
+  ],
+  "activeShift": {
+    "name": "Morning Shift",
+    "terminal": "Terminal 01",
+    "startTime": "2026-03-15T08:00:00Z"
+  },
+  "settings": {
+    "storeName": "Main Street Boutique",
+    "storeBrand": "Flagship Store",
+    "currency": "$",
+    "taxRate": 0.1
+  }
+}
