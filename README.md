@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RetailPOS - Modern Point of Sale System
 
-## Getting Started
+RetailPOS is a premium, high-performance Point of Sale application designed for modern retail businesses. Built with a focus on speed, aesthetics, and data integrity, it provides a seamless experience for managing sales, inventory, and customers.
 
-First, run the development server:
+## ✨ Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Dynamic POS Interface**: Fast search, category filtering, and a glassmorphic checkout experience.
+- **Inventory Management**: Full CRUD for products and categories with image support and stock tracking.
+- **Customer CRM**: Manage customer profiles, track purchase history, and visits.
+- **Real-time Analytics**: Interactive dashboards with revenue trends and category performance metrics.
+- **Premium UI/UX**: Custom Shadcn confirm dialogs, toast notifications, and smooth micro-animations.
+- **Multi-Tenancy**: Secure data scoping using Supabase Row-Level Security (RLS).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework**: [Next.js 15+](https://nextjs.org/) (App Router)
+- **Database & Auth**: [Supabase](https://supabase.com/)
+- **Styling**: Tailwind CSS
+- **Components**: [Shadcn UI](https://ui.shadcn.com/)
+- **State Management**: [Zustand](https://github.com/pmndrs/zustand)
+- **Data Fetching**: [TanStack Query v5](https://tanstack.com/query/latest)
+- **Icons**: Lucide React
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Getting Started
 
-## Learn More
+### Prerequisites
 
-To learn more about Next.js, take a look at the following resources:
+- Node.js 18+
+- Supabase Project
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Installation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/PyaePhyoeAungppa/retail-master.git
+   cd retail-master
+   ```
 
-## Deploy on Vercel
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Configure Environment Variables:
+   Create a `.env.local` file in the root directory:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+## 🏗️ Deployment
+
+The project is optimized for deployment on the [Vercel Platform](https://vercel.com/new). Make sure to configure the same environment variables in your Vercel project settings.
+
+## 📄 License
+
+This project is private and intended for use by [PyaePhyoeAungppa].
