@@ -21,7 +21,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       router.push("/login")
     }
     if (initialized && currentUser && isLoginPage) {
-      router.push("/")
+      router.push("/dashboard")
     }
   }, [currentUser, initialized, isLoginPage, router])
 
@@ -41,6 +41,15 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   // If we're not logged in, only allow the login page
   if (!currentUser) {
     return isLoginPage ? <main className="flex-1">{children}</main> : null
+  }
+
+  // If we're on the login page but authenticated, show a loader while redirecting
+  if (isLoginPage) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    )
   }
 
   // If we're logged in, show the full app chrome

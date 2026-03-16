@@ -29,8 +29,7 @@ export default function LoginPage() {
 
       if (authError) throw authError
       
-      router.push("/")
-      router.refresh()
+      window.location.href = "/dashboard"
     } catch (err: any) {
       setError(err.message || "Failed to sign in")
     } finally {
@@ -42,6 +41,19 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-accent/5 p-4 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent">
 
       <Card className="w-full max-w-md border-none shadow-[0_32px_128px_rgba(0,0,0,0.08)] rounded-[2.5rem] overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700 p-8">
+        <CardHeader className="p-0 pb-8 text-center space-y-4">
+          <div className="mx-auto w-16 h-16 rounded-[1.5rem] bg-primary flex items-center justify-center shadow-2xl shadow-primary/30 rotate-3">
+            <Store className="w-8 h-8 text-white" />
+          </div>
+          <div className="space-y-1">
+            <h1 className="text-3xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/70">
+              Retail Master
+            </h1>
+            <p className="text-sm font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
+              Premium POS System
+            </p>
+          </div>
+        </CardHeader>
         <CardContent className="p-0">
           <form onSubmit={handleLogin} className="space-y-6">
             {error && (
