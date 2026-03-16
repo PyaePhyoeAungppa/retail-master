@@ -84,14 +84,14 @@ export function ProductGrid() {
 
   return (
     <div className="flex flex-col h-full gap-6 p-6">
-      <div className="flex items-center justify-between gap-4">
-        <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-auto">
-          <TabsList className="bg-muted/50 p-1 rounded-xl">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full sm:w-auto">
+          <TabsList className="bg-muted/50 p-1 rounded-xl w-full sm:w-auto flex overflow-x-auto no-scrollbar justify-start sm:justify-center">
             {categories.map((cat) => (
               <TabsTrigger 
                 key={cat.id} 
                 value={cat.name}
-                className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex-1 sm:flex-none whitespace-nowrap"
               >
                 {cat.name}
               </TabsTrigger>
@@ -99,13 +99,13 @@ export function ProductGrid() {
           </TabsList>
         </Tabs>
         
-        <div className="relative w-72">
+        <div className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
             placeholder="Search products..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-card border-none ring-1 ring-border focus-visible:ring-primary rounded-xl"
+            className="pl-10 bg-card border-none ring-1 ring-border focus-visible:ring-primary rounded-xl h-12"
           />
         </div>
       </div>
@@ -115,7 +115,7 @@ export function ProductGrid() {
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 overflow-y-auto p-4 pb-32 scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 overflow-y-auto p-4 pb-32 scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} onAdd={addItem} />
           ))}
@@ -181,9 +181,9 @@ function ProductCard({ product, onAdd }: { product: Product, onAdd: (p: Product,
           
           {/* Content Area */}
           <div className="p-3.5 flex flex-col flex-1 gap-1.5 border-t border-black/[0.03] bg-white/20">
-            <div className="min-h-[48px]">
-              <p className="text-[9px] uppercase tracking-[0.15em] text-primary/60 font-black mb-0.5">{product.category}</p>
-              <h3 className="font-bold text-sm leading-tight text-foreground/90 group-hover:text-primary transition-colors line-clamp-2">
+            <div className="min-h-[44px]">
+              <p className="text-[8px] uppercase tracking-[0.15em] text-primary/60 font-black mb-0.5">{product.category}</p>
+              <h3 className="font-bold text-xs sm:text-sm leading-tight text-foreground/90 group-hover:text-primary transition-colors line-clamp-2">
                 {cleanName}
               </h3>
             </div>
@@ -194,20 +194,20 @@ function ProductCard({ product, onAdd }: { product: Product, onAdd: (p: Product,
                 
                 <div className="flex items-center gap-2">
                   {/* Compact Qty Control */}
-                  <div className="flex items-center bg-black/5 p-0.5 rounded-lg ring-1 ring-black/5">
+                  <div className="flex items-center bg-black/5 p-0.5 rounded-lg ring-1 ring-black/5 shrink-0">
                     <button 
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm transition-all text-muted-foreground hover:text-foreground active:scale-95"
+                      className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm transition-all text-muted-foreground hover:text-foreground active:scale-95"
                     >
-                      <Minus className="w-3 h-3" />
+                      <Minus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                     </button>
-                    <span className="w-5 text-center font-black text-[10px] tabular-nums">{quantity}</span>
+                    <span className="w-4 sm:w-5 text-center font-black text-[9px] sm:text-[10px] tabular-nums">{quantity}</span>
                     <button 
                       onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
                       disabled={quantity >= product.stock}
-                      className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm transition-all text-muted-foreground hover:text-foreground active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm transition-all text-muted-foreground hover:text-foreground active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
-                      <Plus className="w-3 h-3" />
+                      <Plus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                     </button>
                   </div>
 

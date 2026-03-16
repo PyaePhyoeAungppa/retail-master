@@ -62,11 +62,11 @@ export function TopNav() {
   const unreadCount = notifications?.filter((n: any) => !n.read).length || 0
 
   return (
-    <header className="h-16 border-b bg-card px-8 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-      <div className="flex items-center gap-8">
-        <div className="flex flex-col">
-          <h1 className="text-xl font-black tracking-tighter leading-none">{settings?.name || "Antigravity Boutique"}</h1>
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">{settings?.brand || "Flagship Store"}</p>
+    <header className="h-16 border-b bg-card px-4 lg:px-8 flex items-center justify-between sticky top-0 z-10 shadow-sm shrink-0">
+      <div className="flex items-center gap-4 lg:gap-8 min-w-0">
+        <div className="flex flex-col truncate">
+          <h1 className="text-lg lg:text-xl font-black tracking-tighter leading-none truncate">{settings?.name || "Antigravity Boutique"}</h1>
+          <p className="text-[9px] lg:text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1 truncate">{settings?.brand || "Flagship Store"}</p>
         </div>
 
         <div className="hidden lg:flex items-center gap-4 pl-8 border-l">

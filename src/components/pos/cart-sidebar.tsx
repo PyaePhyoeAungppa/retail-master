@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog"
 import { User as UserIcon, Search, X, Check } from "lucide-react"
 
-export function CartSidebar() {
+export function CartSidebar({ onOpenChange }: { onOpenChange?: (open: boolean) => void }) {
   const { items, removeItem, updateQuantity, clearCart, total, selectedCustomer, setCustomer } = useCartStore()
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
   const [isCustomerSearchOpen, setIsCustomerSearchOpen] = useState(false)
@@ -43,8 +43,18 @@ export function CartSidebar() {
   const grandTotal = total + tax
 
   return (
-    <div className="w-[450px] bg-card flex flex-col h-full overflow-hidden">
+    <div className="w-full lg:w-[450px] lg:max-w-[450px] bg-card flex flex-col h-full overflow-hidden shrink-0 relative">
       <div className="p-4 border-b flex items-center gap-4 bg-muted/20">
+        {onOpenChange && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="lg:hidden rounded-full shrink-0" 
+            onClick={() => onOpenChange(false)}
+          >
+            <X className="w-5 h-5" />
+          </Button>
+        )}
         <button 
           onClick={() => setIsCustomerSearchOpen(true)}
           className="flex items-center gap-3 flex-1 min-w-0 text-left hover:bg-primary/5 p-1 rounded-xl transition-all group"
@@ -197,13 +207,13 @@ export function CartSidebar() {
          </div>
 
          <div className="grid grid-cols-2 gap-3 pt-2">
-            <Button variant="outline" className="h-12 rounded-xl flex gap-2 border-2" onClick={clearCart} disabled={items.length === 0}>
-               <ReceiptText className="w-4 h-4" />
-               Void
+            <Button variant="outline" className="h-12 rounded-xl flex gap-2 border-2 px-2" onClick={clearCart} disabled={items.length === 0}>
+               <ReceiptText className="w-4 h-4 shrink-0" />
+               <span className="truncate">Void</span>
             </Button>
-            <Button className="h-12 rounded-xl flex gap-2 shadow-lg shadow-primary/20" disabled={items.length === 0} onClick={() => setIsCheckoutOpen(true)}>
-               <CreditCard className="w-4 h-4" />
-               Checkout
+            <Button className="h-12 rounded-xl flex gap-2 shadow-lg shadow-primary/20 px-2" disabled={items.length === 0} onClick={() => setIsCheckoutOpen(true)}>
+               <CreditCard className="w-4 h-4 shrink-0" />
+               <span className="truncate">Checkout</span>
             </Button>
          </div>
       </div>
