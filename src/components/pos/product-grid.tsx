@@ -115,7 +115,7 @@ export function ProductGrid() {
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 overflow-y-auto p-4 pb-32 scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 overflow-y-auto p-4 pb-32 scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} onAdd={addItem} />
           ))}
@@ -146,16 +146,13 @@ function ProductCard({ product, onAdd }: { product: Product, onAdd: (p: Product,
       >
         <CardContent className="p-0 flex-1 flex flex-col h-full">
           {/* Image Container */}
-          <div className="relative aspect-[4/3] w-full flex items-center justify-center bg-white overflow-hidden">
+          <div className="relative aspect-[16/10] w-full flex items-center justify-center bg-transparent overflow-hidden">
             {product.image ? (
-              <div className="relative w-full h-full transition-transform duration-700 ease-out">
-                <Image 
-                  src={product.image} 
-                  alt={product.name} 
-                  fill 
-                  className="object-contain"
-                />
-              </div>
+              <div 
+                className="w-full h-full transition-all duration-500 ease-out bg-center bg-no-repeat bg-contain"
+                style={{ backgroundImage: `url(${product.image})` }}
+                aria-label={product.name}
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-primary/10 font-black text-6xl select-none">
                 {product.name.substring(0, 2)}
@@ -180,19 +177,18 @@ function ProductCard({ product, onAdd }: { product: Product, onAdd: (p: Product,
           </div>
           
           {/* Content Area */}
-          <div className="p-3.5 flex flex-col flex-1 gap-1.5 border-t border-black/[0.03] bg-white/20">
-            <div className="min-h-[44px]">
-              <p className="text-[8px] uppercase tracking-[0.15em] text-primary/60 font-black mb-0.5">{product.category}</p>
-              <h3 className="font-bold text-xs sm:text-sm leading-tight text-foreground/90 group-hover:text-primary transition-colors line-clamp-2">
+          <div className="p-2.5 flex flex-col flex-1 gap-1 border-t border-black/[0.03] bg-white/40">
+            <div>
+              <p className="text-[7px] uppercase tracking-[0.2em] text-primary/70 font-bold mb-0.5">{product.category}</p>
+              <h3 className="font-semibold text-xs leading-tight text-foreground/90 group-hover:text-primary transition-colors line-clamp-2">
                 {cleanName}
               </h3>
             </div>
             
-            <div className="mt-auto pt-2">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-lg font-black text-foreground tabular-nums tracking-tighter">${product.price.toFixed(2)}</p>
+            <div className="mt-0.5 flex flex-col gap-1.5">
+                <p className="text-sm font-black text-foreground tabular-nums tracking-tighter">${product.price.toFixed(2)}</p>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between gap-1.5">
                   {/* Compact Qty Control */}
                   <div className="flex items-center bg-black/5 p-0.5 rounded-lg ring-1 ring-black/5 shrink-0">
                     <button 
@@ -222,8 +218,7 @@ function ProductCard({ product, onAdd }: { product: Product, onAdd: (p: Product,
                 </div>
               </div>
             </div>
-          </div>
-        </CardContent>
+          </CardContent>
       </Card>
     </div>
   )

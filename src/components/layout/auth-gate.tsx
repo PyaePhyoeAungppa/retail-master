@@ -54,13 +54,15 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   // If we're logged in, show the full app chrome
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+    <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 order-1 lg:order-2">
         <TopNav />
-        <main className="flex-1 overflow-y-auto bg-accent/10">
+        <main className="flex-1 overflow-y-auto bg-accent/10 pb-20 lg:pb-0">
           {children}
         </main>
+      </div>
+      <div className="order-2 lg:order-1 shrink-0">
+        <Sidebar />
       </div>
       <LockScreen />
     </div>
