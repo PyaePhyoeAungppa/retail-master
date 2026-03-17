@@ -32,19 +32,23 @@ import {
   Package,
   AlertCircle
 } from "lucide-react"
+import { useAuthStore } from "@/store/use-auth-store"
 import { Transaction, Product, TransactionItem } from "@/lib/data"
 import { format, parse, startOfDay, subDays, isWithinInterval } from 'date-fns'
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 export default function DashboardPage() {
+  const { storeId } = useAuthStore()
   const [range, setRange] = useState<'daily' | 'weekly' | 'monthly'>('weekly')
 
   const { data: transactions, isLoading: txLoading } = useQuery<Transaction[]>({
-    queryKey: ['transactions'],
+    queryKey: ['transactions', storeId],
     queryFn: async () => {
+      if (!storeId) return []
       const { data, error } = await supabase.from('transactions')
         .select('*')
+        .eq('store_id', storeId)
         .order('date', { ascending: false })
       if (error) throw error
       return data
@@ -52,18 +56,33 @@ export default function DashboardPage() {
   })
 
   const { data: products, isLoading: prodLoading } = useQuery<Product[]>({
-    queryKey: ['products'],
+    queryKey: ['products', storeId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('*')
+      if (!storeId) return []
+      const { data, error } = await supabase.from('products')
+        .select('*')
+        .eq('store_id', storeId)
       if (error) throw error
       return data
     }
   })
 
   const { data: transactionItems, isLoading: itemsLoading } = useQuery<TransactionItem[]>({
-    queryKey: ['transactionItems'],
+    queryKey: ['transactionItems', storeId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('transaction_items').select('*')
+      if (!storeId) return []
+      // We need to join with transactions to filter by store_id or use a subquery
+      // For now, let's filter by transaction IDs that belong to the store
+      const { data: storeTx } = await supabase.from('transactions')
+        .select('id')
+        .eq('store_id', storeId)
+      
+      const txIds = storeTx?.map(tx => tx.id) || []
+      if (txIds.length === 0) return []
+
+      const { data, error } = await supabase.from('transaction_items')
+        .select('*')
+        .in('transactionId', txIds)
       if (error) throw error
       return data
     }

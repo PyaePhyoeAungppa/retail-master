@@ -119,7 +119,7 @@ export function AddProductModal({ product, open: externalOpen, onOpenChange, tri
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["products"] })
+      queryClient.invalidateQueries({ queryKey: ["products", storeId] })
       toast({
         title: product ? "Product Updated" : "Product Created",
         description: `"${formData.name}" has been ${product ? "updated" : "added to inventory"}.`,

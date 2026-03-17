@@ -10,20 +10,28 @@ import { TopNav } from "./top-nav"
 import { LockScreen } from "./lock-screen"
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
-  const { currentUser, initialized, isProfileLoaded } = useAuthStore()
+  const { currentUser, initialized, isProfileLoaded, storeId } = useAuthStore()
   const pathname = usePathname()
   const router = useRouter()
 
   const isLoginPage = pathname === "/login"
 
   useEffect(() => {
+    console.log("AuthGate State:", { initialized, hasUser: !!currentUser, isProfileLoaded, storeId, pathname })
+    
     if (initialized && !currentUser && !isLoginPage) {
+       console.log("Redirecting to /login")
       router.push("/login")
     }
-    if (initialized && currentUser && isLoginPage) {
+    if (initialized && currentUser && isProfileLoaded && !storeId && pathname !== "/setup") {
+       console.log("Redirecting to /setup")
+      router.push("/setup")
+    }
+    if (initialized && currentUser && isProfileLoaded && storeId && (isLoginPage || pathname === "/setup")) {
+       console.log("Redirecting to /dashboard")
       router.push("/dashboard")
     }
-  }, [currentUser, initialized, isLoginPage, router])
+  }, [currentUser, initialized, isLoginPage, router, storeId, isProfileLoaded, pathname])
 
   if (!initialized || (currentUser && !isProfileLoaded)) {
     return (
@@ -50,6 +58,11 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         <Loader2 className="w-10 h-10 animate-spin text-primary" />
       </div>
     )
+  }
+
+  // If we're on the setup page, show a minimal version without navs
+  if (pathname === "/setup") {
+    return <main className="flex-1 overflow-y-auto bg-accent/5">{children}</main>
   }
 
   // If we're logged in, show the full app chrome

@@ -18,6 +18,7 @@ import {
 
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
+import { useAuthStore } from "@/store/use-auth-store"
 import { Transaction } from "@/lib/data"
 
 const methodIcons: Record<string, any> = {
@@ -28,10 +29,15 @@ const methodIcons: Record<string, any> = {
 }
 
 export function TransactionList() {
+  const { storeId } = useAuthStore()
   const { data: transactions, isLoading } = useQuery<Transaction[]>({
-    queryKey: ['transactions'],
+    queryKey: ['transactions', storeId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('transactions').select('*').order('created_at', { ascending: false })
+      if (!storeId) return []
+      const { data, error } = await supabase.from('transactions')
+        .select('*')
+        .eq('store_id', storeId)
+        .order('created_at', { ascending: false })
       if (error) throw error
       return data
     }

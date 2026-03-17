@@ -7,14 +7,19 @@ import { Download, Filter, Loader2 } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { Product } from "@/lib/data"
+import { useAuthStore } from "@/store/use-auth-store"
 import { AddProductModal } from "@/components/products/add-product-modal"
 import { CategoryManager } from "@/components/products/category-manager"
 
 export default function ProductsPage() {
+  const { storeId } = useAuthStore()
   const { data: products, isLoading } = useQuery<Product[]>({
-    queryKey: ['products'],
+    queryKey: ['products', storeId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('*')
+      if (!storeId) return []
+      const { data, error } = await supabase.from('products')
+        .select('*')
+        .eq('store_id', storeId)
       if (error) throw error
       return data
     }

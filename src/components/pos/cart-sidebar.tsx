@@ -12,6 +12,7 @@ import { CheckoutModal } from "./checkout-modal"
 import Image from "next/image"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
+import { useAuthStore } from "@/store/use-auth-store"
 import { Customer } from "@/lib/data"
 import {
   Dialog,
@@ -21,17 +22,24 @@ import { User as UserIcon, Search, X, Check } from "lucide-react"
 
 export function CartSidebar({ onOpenChange }: { onOpenChange?: (open: boolean) => void }) {
   const { items, removeItem, updateQuantity, clearCart, total, selectedCustomer, setCustomer } = useCartStore()
+  const { storeId } = useAuthStore()
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
   const [isCustomerSearchOpen, setIsCustomerSearchOpen] = useState(false)
   const [customerSearchQuery, setCustomerSearchQuery] = useState("")
 
   const { data: customers } = useQuery<Customer[]>({
-    queryKey: ['customers'],
+    queryKey: ['customers', storeId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('customers').select('*').order('name')
+      if (!storeId) return []
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('store_id', storeId)
+        .order('name')
       if (error) throw error
       return data
-    }
+    },
+    enabled: !!storeId
   })
 
   const filteredCustomers = customers?.filter(c => 

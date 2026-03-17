@@ -100,7 +100,7 @@ export function ProductTable() {
         description: `"${productToDelete.name}" has been removed.`,
         variant: "success" 
       })
-      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ['products', storeId] })
     } catch (error: any) {
       toast({ 
         title: "Deletion Failed", 
