@@ -263,7 +263,7 @@ export default function SetupPage() {
                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Currency</Label>
                     <Select 
                       value={formData.currency} 
-                      onValueChange={(value) => setFormData({ ...formData, currency: value })}
+                      onValueChange={(value) => setFormData({ ...formData, currency: value ?? "" })}
                     >
                       <SelectTrigger className="h-14 rounded-2xl bg-white border-none ring-1 ring-black/5 focus-visible:ring-primary px-5 shadow-sm">
                         <div className="flex items-center gap-2">
