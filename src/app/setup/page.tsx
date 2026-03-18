@@ -9,7 +9,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Store, Loader2, ArrowRight, Sparkles } from "lucide-react"
+import { Store, Loader2, ArrowRight, Sparkles, Coins, Percent } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 const BOUTIQUE_NAMES = [
   "Velvet & Vine",
@@ -40,7 +47,9 @@ export default function SetupPage() {
   const [formData, setFormData] = useState({
     name: "",
     brand: "",
-    address: ""
+    address: "",
+    currency: "USD",
+    tax_rate: "0"
   })
 
   // Pick random placeholders on initial load (stable for the session)
@@ -77,7 +86,9 @@ export default function SetupPage() {
         .insert([{
           name: formData.name,
           address: formData.address,
-          brand: formData.brand
+          brand: formData.brand,
+          currency: formData.currency,
+          tax_rate: parseFloat(formData.tax_rate) / 100
         }])
         .select()
         .single()
@@ -245,6 +256,45 @@ export default function SetupPage() {
                     placeholder="123 Retail Ave, Shopville, ST 12345" 
                     className="h-14 rounded-2xl bg-white border-none ring-1 ring-black/5 focus-visible:ring-primary px-5 shadow-sm" 
                   />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Currency</Label>
+                    <Select 
+                      value={formData.currency} 
+                      onValueChange={(value) => setFormData({ ...formData, currency: value })}
+                    >
+                      <SelectTrigger className="h-14 rounded-2xl bg-white border-none ring-1 ring-black/5 focus-visible:ring-primary px-5 shadow-sm">
+                        <div className="flex items-center gap-2">
+                          <Coins className="w-4 h-4 text-muted-foreground" />
+                          <SelectValue placeholder="Select Currency" />
+                        </div>
+                      </SelectTrigger>
+                      <SelectContent className="rounded-2xl border-none shadow-xl">
+                        <SelectItem value="USD" className="rounded-xl">USD ($)</SelectItem>
+                        <SelectItem value="THB" className="rounded-xl">THB (฿)</SelectItem>
+                        <SelectItem value="MMK" className="rounded-xl">MMK (K)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="tax_rate" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Tax Rate (%)</Label>
+                    <div className="relative">
+                      <Input 
+                        id="tax_rate"
+                        type="number"
+                        step="0.01"
+                        required
+                        value={formData.tax_rate}
+                        onChange={(e) => setFormData({ ...formData, tax_rate: e.target.value })}
+                        placeholder="0.00" 
+                        className="h-14 rounded-2xl bg-white border-none ring-1 ring-black/5 focus-visible:ring-primary px-11 shadow-sm" 
+                      />
+                      <Percent className="w-4 h-4 text-muted-foreground absolute left-5 top-1/2 -translate-y-1/2" />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="pt-4">

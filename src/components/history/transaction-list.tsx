@@ -19,7 +19,7 @@ import {
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { useAuthStore } from "@/store/use-auth-store"
-import { Transaction } from "@/lib/data"
+import { Transaction, Store } from "@/lib/data"
 
 const methodIcons: Record<string, any> = {
   card: CreditCard,
@@ -42,6 +42,22 @@ export function TransactionList() {
       return data
     }
   })
+
+  const { data: store } = useQuery<Store>({
+    queryKey: ['store', storeId],
+    queryFn: async () => {
+      if (!storeId) throw new Error("Store ID required")
+      const { data, error } = await supabase.from('stores')
+        .select('*')
+        .eq('id', storeId)
+        .single()
+      if (error) throw error
+      return data as Store
+    },
+    enabled: !!storeId
+  })
+
+  const currency = store?.currency ?? "$"
 
   if (isLoading) {
     return (
@@ -87,7 +103,7 @@ export function TransactionList() {
                  </div>
 
                  <div className="text-right space-y-1">
-                    <p className="text-2xl font-black text-primary">${tx.total.toFixed(2)}</p>
+                    <p className="text-2xl font-black text-primary">{currency}{tx.total.toFixed(2)}</p>
                     <p className="text-xs text-muted-foreground font-medium">{tx.itemsCount} Items Purchased</p>
                  </div>
 

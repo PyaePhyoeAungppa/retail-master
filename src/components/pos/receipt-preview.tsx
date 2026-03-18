@@ -33,7 +33,9 @@ export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMetho
     }
   })
 
-  const tax = total * 0.1
+  const taxRate = settings?.tax_rate ?? 0.1
+  const currency = settings?.currency ?? "$"
+  const tax = total * taxRate
   const grandTotal = total + tax
   const date = new Date().toLocaleString()
 
@@ -71,9 +73,9 @@ export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMetho
           <div key={item.id} className="flex justify-between text-sm">
             <div className="flex-1">
               <p className="font-bold">{item.name}</p>
-              <p className="text-[10px] text-muted-foreground">{item.quantity} x ${item.price.toFixed(2)}</p>
+              <p className="text-[10px] text-muted-foreground">{item.quantity} x {currency}{item.price.toFixed(2)}</p>
             </div>
-            <span className="font-bold">${(item.quantity * item.price).toFixed(2)}</span>
+            <span className="font-bold">{currency}{(item.quantity * item.price).toFixed(2)}</span>
           </div>
         ))}
       </div>
@@ -83,15 +85,15 @@ export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMetho
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-muted-foreground">Subtotal</span>
-          <span>${total.toFixed(2)}</span>
+          <span>{currency}{total.toFixed(2)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-muted-foreground">Tax (10%)</span>
-          <span>${tax.toFixed(2)}</span>
+          <span className="text-muted-foreground">Tax ({(taxRate * 100).toFixed(0)}%)</span>
+          <span>{currency}{tax.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-lg font-black pt-2 border-t">
           <span>GRAND TOTAL</span>
-          <span className="text-primary">${grandTotal.toFixed(2)}</span>
+          <span className="text-primary">{currency}{grandTotal.toFixed(2)}</span>
         </div>
       </div>
 
@@ -138,15 +140,15 @@ export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMetho
       <div className="space-y-1">
         <div className="flex justify-between">
           <span>SUBTOTAL</span>
-          <span>{total.toFixed(2)}</span>
+          <span>{currency}{total.toFixed(2)}</span>
         </div>
         <div className="flex justify-between">
-          <span>TAX (10%)</span>
-          <span>{tax.toFixed(2)}</span>
+          <span>TAX ({(taxRate * 100).toFixed(0)}%)</span>
+          <span>{currency}{tax.toFixed(2)}</span>
         </div>
         <div className="flex justify-between font-bold text-sm pt-1">
           <span>TOTAL</span>
-          <span>{grandTotal.toFixed(2)}</span>
+          <span>{currency}{grandTotal.toFixed(2)}</span>
         </div>
       </div>
 
@@ -196,7 +198,7 @@ export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMetho
               </div>
               <p className="text-sm font-medium text-white/90">{item.name}</p>
             </div>
-            <p className="text-sm font-black">${(item.quantity * item.price).toFixed(2)}</p>
+            <p className="text-sm font-black">{currency}{(item.quantity * item.price).toFixed(2)}</p>
           </div>
         ))}
       </div>
@@ -204,16 +206,16 @@ export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMetho
       <div className="relative z-10 bg-white/5 rounded-2xl p-6 space-y-3 backdrop-blur-md border border-white/10">
         <div className="flex justify-between text-xs text-white/50 font-medium">
           <span>Subtotal</span>
-          <span>${total.toFixed(2)}</span>
+          <span>{currency}{total.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-xs text-white/50 font-medium">
-          <span>Sales Tax</span>
-          <span>${tax.toFixed(2)}</span>
+          <span>Sales Tax ({(taxRate * 100).toFixed(0)}%)</span>
+          <span>{currency}{tax.toFixed(2)}</span>
         </div>
         <div className="h-px bg-white/10 my-2" />
         <div className="flex justify-between items-baseline">
           <span className="text-sm font-bold text-primary italic uppercase tracking-wider">Total Amount</span>
-          <span className="text-3xl font-black tracking-tighter">${grandTotal.toFixed(2)}</span>
+          <span className="text-3xl font-black tracking-tighter">{currency}{grandTotal.toFixed(2)}</span>
         </div>
       </div>
       

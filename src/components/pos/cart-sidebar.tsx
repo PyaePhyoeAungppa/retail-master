@@ -13,7 +13,7 @@ import Image from "next/image"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { useAuthStore } from "@/store/use-auth-store"
-import { Customer } from "@/lib/data"
+import { Customer, Store } from "@/lib/data"
 import {
   Dialog,
   DialogContent,
@@ -47,7 +47,24 @@ export function CartSidebar({ onOpenChange }: { onOpenChange?: (open: boolean) =
     c.phone?.includes(customerSearchQuery)
   ) || []
 
-  const tax = total * 0.1
+  const { data: store } = useQuery<Store>({
+    queryKey: ['store', storeId],
+    queryFn: async () => {
+      if (!storeId) throw new Error("No store ID")
+      const { data, error } = await supabase
+        .from('stores')
+        .select('*')
+        .eq('id', storeId)
+        .single()
+      if (error) throw error
+      return data
+    },
+    enabled: !!storeId
+  })
+
+  const taxRate = store?.tax_rate ?? 0.1
+  const currency = store?.currency ?? "$"
+  const tax = total * taxRate
   const grandTotal = total + tax
 
   return (
@@ -188,7 +205,7 @@ export function CartSidebar({ onOpenChange }: { onOpenChange?: (open: boolean) =
                         <Plus className="w-2.5 h-2.5" />
                       </button>
                     </div>
-                    <p className="font-bold text-xs">${(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="font-bold text-xs">{currency}{(item.price * item.quantity).toFixed(2)}</p>
                   </div>
                 </div>
               </div>
@@ -201,16 +218,16 @@ export function CartSidebar({ onOpenChange }: { onOpenChange?: (open: boolean) =
          <div className="space-y-2 text-sm">
             <div className="flex justify-between text-muted-foreground">
               <span>Subtotal</span>
-              <span className="font-medium text-foreground">${total.toFixed(2)}</span>
+              <span className="font-medium text-foreground">{currency}{total.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-muted-foreground">
-              <span>Tax (10%)</span>
-              <span className="font-medium text-foreground">${tax.toFixed(2)}</span>
+              <span>Tax ({(taxRate * 100).toFixed(0)}%)</span>
+              <span className="font-medium text-foreground">{currency}{tax.toFixed(2)}</span>
             </div>
             <Separator className="my-2" />
             <div className="flex justify-between items-end">
               <span className="text-lg font-bold">Total Amount</span>
-              <span className="text-2xl font-black text-primary">${grandTotal.toFixed(2)}</span>
+              <span className="text-2xl font-black text-primary">{currency}{grandTotal.toFixed(2)}</span>
             </div>
          </div>
 

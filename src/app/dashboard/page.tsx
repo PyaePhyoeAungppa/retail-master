@@ -33,7 +33,7 @@ import {
   AlertCircle
 } from "lucide-react"
 import { useAuthStore } from "@/store/use-auth-store"
-import { Transaction, Product, TransactionItem } from "@/lib/data"
+import { Transaction, Product, TransactionItem, Store } from "@/lib/data"
 import { format, parse, startOfDay, subDays, isWithinInterval } from 'date-fns'
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
@@ -55,6 +55,22 @@ export default function DashboardPage() {
     }
   })
 
+  const { data: store } = useQuery<Store>({
+    queryKey: ['store', storeId],
+    queryFn: async () => {
+      if (!storeId) throw new Error("Store ID required")
+      const { data, error } = await supabase.from('stores')
+        .select('*')
+        .eq('id', storeId)
+        .single()
+      if (error) throw error
+      return data as Store
+    },
+    enabled: !!storeId
+  })
+
+  const currency = store?.currency ?? "$"
+
   const { data: products, isLoading: prodLoading } = useQuery<Product[]>({
     queryKey: ['products', storeId],
     queryFn: async () => {
@@ -63,7 +79,7 @@ export default function DashboardPage() {
         .select('*')
         .eq('store_id', storeId)
       if (error) throw error
-      return data
+      return data as Product[]
     }
   })
 
@@ -245,7 +261,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
           title="Total Revenue" 
-          value={`$${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} 
+          value={`${currency}${totalRevenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`} 
           icon={DollarSign} 
           trend="+12.5%" 
           trendType="up"
@@ -259,7 +275,7 @@ export default function DashboardPage() {
         />
         <StatCard 
           title="Avg. Order Value" 
-          value={`$${avgOrderValue.toFixed(2)}`} 
+          value={`${currency}${avgOrderValue.toFixed(2)}`} 
           icon={TrendingUp} 
           trend="-2.1%" 
           trendType="down"
@@ -306,11 +322,11 @@ export default function DashboardPage() {
                     axisLine={false} 
                     tickLine={false} 
                     tick={{fill: '#94a3b8', fontSize: 12}}
-                    tickFormatter={(value) => `$${value}`}
+                    tickFormatter={(value) => `${currency}${value}`}
                   />
                   <Tooltip 
                     contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                    formatter={(value: any) => [`$${Number(value).toFixed(2)}`, 'Revenue']}
+                    formatter={(value: any) => [`${currency}${Number(value).toFixed(2)}`, 'Revenue']}
                   />
                   <Area 
                     type="monotone" 

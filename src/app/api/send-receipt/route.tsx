@@ -7,7 +7,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { transactionId, customerEmail, customerName, total, items, method } = body;
+    const { transactionId, customerEmail, customerName, total, items, method, currency, storeName } = body;
 
     console.log(`[API] Attempting to send receipt to ${customerEmail}...`);
 
@@ -22,6 +22,8 @@ export async function POST(req: Request) {
           items={items}
           total={total}
           method={method}
+          currency={currency}
+          storeName={storeName}
           date={new Date().toLocaleDateString()}
         />
       ),

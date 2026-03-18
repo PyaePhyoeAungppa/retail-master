@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
-import { Transaction, TransactionItem } from "@/lib/data"
+import { Transaction, TransactionItem, Store } from "@/lib/data"
+import { useAuthStore } from "@/store/use-auth-store"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -34,7 +35,7 @@ interface CustomerTransactionsProps {
   customerId: string
 }
 
-function TransactionDetails({ transaction, onClose }: { transaction: Transaction, onClose: () => void }) {
+function TransactionDetails({ transaction, onClose, currency, taxRate }: { transaction: Transaction, onClose: () => void, currency: string, taxRate: number }) {
   const { data: items, isLoading } = useQuery<TransactionItem[]>({
     queryKey: ['transaction-items', transaction.id],
     queryFn: async () => {
@@ -78,11 +79,11 @@ function TransactionDetails({ transaction, onClose }: { transaction: Transaction
                     <div className="flex flex-col">
                       <span className="font-bold text-sm tracking-tight">{item.name}</span>
                       <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-tighter">
-                        Unit: ${item.price.toFixed(2)}
+                        Unit: {currency}{item.price.toFixed(2)}
                       </span>
                     </div>
                   </div>
-                  <span className="font-black text-primary text-base">${item.subtotal.toFixed(2)}</span>
+                  <span className="font-black text-primary text-base">{currency}{item.subtotal.toFixed(2)}</span>
                 </div>
               ))}
               {items?.length === 0 && (
@@ -104,17 +105,17 @@ function TransactionDetails({ transaction, onClose }: { transaction: Transaction
             <div className="bg-card p-6 rounded-[2rem] border shadow-xl shadow-slate-200/40 space-y-4">
               <div className="flex justify-between text-sm font-bold">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-black">${(transaction.subtotal || 0).toFixed(2)}</span>
+                <span className="font-black">{currency}{(transaction.subtotal || 0).toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm font-bold">
-                <span className="text-muted-foreground">Tax (10%)</span>
-                <span className="font-black text-orange-600">${(transaction.tax || 0).toFixed(2)}</span>
+                <span className="text-muted-foreground">Tax ({(taxRate * 100).toFixed(0)}%)</span>
+                <span className="font-black text-orange-600">{currency}{(transaction.tax || 0).toFixed(2)}</span>
               </div>
               <Separator className="bg-muted-foreground/10" />
               <div className="flex justify-between items-end">
                 <span className="text-sm font-black uppercase text-muted-foreground mb-1">Total Paid</span>
                 <span className="text-3xl font-black text-primary tracking-tighter shadow-primary/10 drop-shadow-sm">
-                    ${(transaction.total || 0).toFixed(2)}
+                    {currency}{(transaction.total || 0).toFixed(2)}
                 </span>
               </div>
             </div>
@@ -147,6 +148,25 @@ function TransactionDetails({ transaction, onClose }: { transaction: Transaction
 }
 
 export function CustomerTransactions({ customerId }: CustomerTransactionsProps) {
+  const { storeId } = useAuthStore()
+  const { data: store } = useQuery<Store>({
+    queryKey: ['store', storeId],
+    queryFn: async () => {
+      if (!storeId) throw new Error("No store ID")
+      const { data, error } = await supabase
+        .from('stores')
+        .select('*')
+        .eq('id', storeId)
+        .single()
+      if (error) throw error
+      return data
+    },
+    enabled: !!storeId
+  })
+
+  const currency = store?.currency ?? "$"
+  const taxRate = store?.tax_rate ?? 0.1
+
   const [expandedId, setExpandedId] = useState<string | null>(null)
   
   const { data: transactions, isLoading } = useQuery<Transaction[]>({
@@ -214,7 +234,7 @@ export function CustomerTransactions({ customerId }: CustomerTransactionsProps) 
                  </div>
 
                  <div className="text-right space-y-1">
-                    <p className="text-2xl font-black text-primary">${tx.total.toFixed(2)}</p>
+                    <p className="text-2xl font-black text-primary">{currency}{tx.total.toFixed(2)}</p>
                     <p className="text-xs text-muted-foreground font-medium">{tx.itemsCount} Items Purchased</p>
                  </div>
 
@@ -229,6 +249,8 @@ export function CustomerTransactions({ customerId }: CustomerTransactionsProps) 
                 <TransactionDetails 
                   transaction={tx} 
                   onClose={() => setExpandedId(null)} 
+                  currency={currency}
+                  taxRate={taxRate}
                 />
               )}
             </CardContent>

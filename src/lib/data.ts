@@ -52,3 +52,12 @@ export interface Transaction {
   method: 'card' | 'cash' | 'qr' | 'nfc';
   status: 'completed' | 'void';
 }
+
+export interface Store {
+  id: string;
+  name: string;
+  brand?: string;
+  currency: string;
+  tax_rate: number;
+  address?: string;
+}

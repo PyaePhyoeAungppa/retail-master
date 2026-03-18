@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from "react"
-import { Product, Category, Customer } from "@/lib/data"
+import { Product, Category, Customer, Store } from "@/lib/data"
 import { useCartStore } from "@/store/use-cart-store"
 import { useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
@@ -73,6 +73,23 @@ export function ProductGrid() {
     }
   })
 
+  const { data: store } = useQuery<Store>({
+    queryKey: ['store', storeId],
+    queryFn: async () => {
+      if (!storeId) throw new Error("No store ID")
+      const { data, error } = await supabase
+        .from('stores')
+        .select('*')
+        .eq('id', storeId)
+        .single()
+      if (error) throw error
+      return data
+    },
+    enabled: !!storeId
+  })
+
+  const currency = store?.currency ?? "$"
+
   // Add "All" category for filtering
   const categories = categoriesData ? [{ id: 'all', name: 'All' }, ...categoriesData] : [{ id: 'all', name: 'All' }]
 
@@ -117,7 +134,7 @@ export function ProductGrid() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 overflow-y-auto p-4 pb-32 scrollbar-thin scrollbar-thumb-primary/10 scrollbar-track-transparent">
           {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} onAdd={addItem} />
+            <ProductCard key={product.id} product={product} onAdd={addItem} currency={currency} />
           ))}
         </div>
       )}
@@ -125,7 +142,7 @@ export function ProductGrid() {
   )
 }
 
-function ProductCard({ product, onAdd }: { product: Product, onAdd: (p: Product, q: number) => void }) {
+function ProductCard({ product, onAdd, currency }: { product: Product, onAdd: (p: Product, q: number) => void, currency: string }) {
   const [quantity, setQuantity] = useState(1)
 
   const handleAdd = (e: React.MouseEvent) => {
@@ -186,7 +203,7 @@ function ProductCard({ product, onAdd }: { product: Product, onAdd: (p: Product,
             </div>
             
             <div className="mt-0.5 flex flex-col gap-1.5">
-                <p className="text-sm font-black text-foreground tabular-nums tracking-tighter">${product.price.toFixed(2)}</p>
+                <p className="text-sm font-black text-foreground tabular-nums tracking-tighter">{currency}{product.price.toFixed(2)}</p>
                 
                 <div className="flex items-center justify-between gap-1.5">
                   {/* Compact Qty Control */}

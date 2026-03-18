@@ -1,6 +1,6 @@
 "use client"
 
-import { Product } from "@/lib/data"
+import { Product, Store } from "@/lib/data"
 import {
   Table,
   TableBody,
@@ -50,6 +50,23 @@ export function ProductTable() {
       return data as Product[]
     }
   })
+
+  const { data: store } = useQuery<Store>({
+    queryKey: ['store', storeId],
+    queryFn: async () => {
+      if (!storeId) throw new Error("No store ID")
+      const { data, error } = await supabase
+        .from('stores')
+        .select('*')
+        .eq('id', storeId)
+        .single()
+      if (error) throw error
+      return data
+    },
+    enabled: !!storeId
+  })
+
+  const currency = store?.currency ?? "$"
 
   const handleDeletePreview = async (product: { id: string, name: string }) => {
     // Check for existing transactions
@@ -152,7 +169,7 @@ export function ProductTable() {
                   {product.category}
                 </Badge>
               </TableCell>
-              <TableCell className="font-black text-lg py-4">${product.price.toFixed(2)}</TableCell>
+              <TableCell className="font-black text-lg py-4">{currency}{product.price.toFixed(2)}</TableCell>
               <TableCell className="py-4">
                 <div className="flex items-center gap-2">
                    <div className={`w-2.5 h-2.5 rounded-full shadow-sm ${product.stock > 10 ? 'bg-green-500' : 'bg-red-500 animate-pulse'}`} />

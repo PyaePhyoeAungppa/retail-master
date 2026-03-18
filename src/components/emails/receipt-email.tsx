@@ -7,6 +7,8 @@ interface ReceiptEmailProps {
   total: number;
   method: string;
   date: string;
+  currency: string;
+  storeName: string;
 }
 
 export const ReceiptEmail: React.FC<Readonly<ReceiptEmailProps>> = ({
@@ -16,6 +18,8 @@ export const ReceiptEmail: React.FC<Readonly<ReceiptEmailProps>> = ({
   total,
   method,
   date,
+  currency,
+  storeName,
 }) => (
   <div style={{
     fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
@@ -38,7 +42,7 @@ export const ReceiptEmail: React.FC<Readonly<ReceiptEmailProps>> = ({
         textAlign: 'center',
         color: '#ffffff'
       }}>
-        <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '900' }}>Retail Master</h1>
+        <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '900' }}>{storeName}</h1>
         <p style={{ margin: '8px 0 0', opacity: 0.9, fontSize: '14px' }}>Transaction Receipt</p>
       </div>
 
@@ -84,7 +88,7 @@ export const ReceiptEmail: React.FC<Readonly<ReceiptEmailProps>> = ({
               <tr key={index}>
                 <td style={{ paddingTop: '12px', paddingBottom: '12px', borderBottom: index === items.length - 1 ? 'none' : '1px solid #f3f4f6', fontSize: '14px', fontWeight: '600' }}>{item.name}</td>
                 <td style={{ paddingTop: '12px', paddingBottom: '12px', borderBottom: index === items.length - 1 ? 'none' : '1px solid #f3f4f6', fontSize: '14px', textAlign: 'center' }}>{item.quantity}</td>
-                <td style={{ paddingTop: '12px', paddingBottom: '12px', borderBottom: index === items.length - 1 ? 'none' : '1px solid #f3f4f6', fontSize: '14px', fontWeight: '700', textAlign: 'right' }}>${item.price.toFixed(2)}</td>
+                <td style={{ paddingTop: '12px', paddingBottom: '12px', borderBottom: index === items.length - 1 ? 'none' : '1px solid #f3f4f6', fontSize: '14px', fontWeight: '700', textAlign: 'right' }}>{currency}{item.price.toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
@@ -98,7 +102,7 @@ export const ReceiptEmail: React.FC<Readonly<ReceiptEmailProps>> = ({
           textAlign: 'right'
         }}>
           <span style={{ fontSize: '14px', fontWeight: '600', color: '#6b7280', marginRight: '16px' }}>TOTAL PAID</span>
-          <span style={{ fontSize: '24px', fontWeight: '900', color: '#7c3aed' }}>${total.toFixed(2)}</span>
+          <span style={{ fontSize: '24px', fontWeight: '900', color: '#7c3aed' }}>{currency}{total.toFixed(2)}</span>
         </div>
       </div>
 
@@ -110,7 +114,7 @@ export const ReceiptEmail: React.FC<Readonly<ReceiptEmailProps>> = ({
         borderTop: '1px solid #f3f4f6'
       }}>
         <p style={{ margin: 0, fontSize: '12px', color: '#9ca3af' }}>
-          &copy; {new Date().getFullYear()} Retail Master. All rights reserved.
+          &copy; {new Date().getFullYear()} {storeName}. All rights reserved.
         </p>
       </div>
     </div>

@@ -20,7 +20,8 @@ import axios from "axios"
 import { useAuthStore } from "@/store/use-auth-store"
 import { useToastStore } from "@/store/use-toast-store"
 import { supabase } from "@/lib/supabase"
-import { Transaction, TransactionItem } from "@/lib/data"
+import { Transaction, TransactionItem, Store } from "@/lib/data"
+import { useQuery } from "@tanstack/react-query"
 import { ReceiptPreview } from "./receipt-preview"
 
 interface CheckoutModalProps {
@@ -40,7 +41,24 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
   const [transactionId, setTransactionId] = useState("")
   const [sendEmail, setSendEmail] = useState(false)
 
-  const tax = total * 0.1
+  const { data: store } = useQuery<Store>({
+    queryKey: ['store', storeId],
+    queryFn: async () => {
+      if (!storeId) throw new Error("No store ID")
+      const { data, error } = await supabase
+        .from('stores')
+        .select('*')
+        .eq('id', storeId)
+        .single()
+      if (error) throw error
+      return data
+    },
+    enabled: !!storeId
+  })
+
+  const taxRate = store?.tax_rate ?? 0.1
+  const currency = store?.currency ?? "$"
+  const tax = total * taxRate
   const grandTotal = total + tax
 
   const handleCheckout = async () => {
@@ -141,7 +159,9 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
             customerName: selectedCustomer.name,
             total: grandTotal,
             items: items.map(i => ({ name: i.name, quantity: i.quantity, price: i.price })),
-            method: paymentMethod
+            method: paymentMethod,
+            currency: currency,
+            storeName: store?.name || "Retail Master"
           })
         } catch (emailError: any) {
           console.error("Email sending failed:", emailError.response?.data || emailError.message)
@@ -215,7 +235,7 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
                   <Separator />
                   <div className="flex justify-between items-center">
                       <span className="font-bold">Total Paid</span>
-                      <span className="text-xl font-black text-primary">${grandTotal.toFixed(2)}</span>
+                      <span className="text-xl font-black text-primary">{currency}{grandTotal.toFixed(2)}</span>
                   </div>
                </div>
 
@@ -347,7 +367,7 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
                   <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">{items.length} Items</span>
                 </div>
                 <div className="flex justify-between items-baseline">
-                  <span className="text-3xl font-black text-primary tracking-tighter">${grandTotal.toFixed(2)}</span>
+                  <span className="text-3xl font-black text-primary tracking-tighter">{currency}{grandTotal.toFixed(2)}</span>
                   <Badge variant="outline" className="bg-white border-primary/20 text-primary h-5 text-[9px]">TAX INCL.</Badge>
                 </div>
               </div>
