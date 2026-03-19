@@ -16,19 +16,55 @@ export function Providers({ children }: { children: React.ReactNode }) {
     },
   }))
 
-  const { setSession, setStoreId, setProfileLoaded } = useAuthStore()
+  const { setSession, setStoreId, setRole, setAccessibleStores, setProfileLoaded } = useAuthStore()
 
   useEffect(() => {
     const fetchProfile = async (userId: string) => {
-      const { data, error } = await supabase
+      // 1. Fetch Primary Profile & Role
+      const { data: profile } = await supabase
         .from('profiles')
-        .select('store_id')
+        .select('store_id, role')
         .eq('id', userId)
         .single()
       
-      if (!error && data) {
-        setStoreId(data.store_id)
+      if (profile) {
+        setRole(profile.role)
+        if (profile.store_id) setStoreId(profile.store_id)
       }
+
+      // 2. Fetch All Accessible Stores (Junction Table)
+      const { data: storeLinks } = await supabase
+        .from('store_users')
+        .select('store_id, stores(name)')
+        .eq('user_id', userId)
+      
+      if (storeLinks && storeLinks.length > 0) {
+        const stores = storeLinks.map((link: any) => ({
+          id: link.store_id,
+          name: link.stores?.name || 'Unknown Store'
+        }))
+        setAccessibleStores(stores)
+        
+        // If no primary store_id, use the first accessible one
+        if (!profile?.store_id) {
+          setStoreId(stores[0].id)
+        }
+      } else if (profile?.store_id) {
+        // Fallback for legacy data: Fetch the single store's name
+        const { data: mainStore } = await supabase
+          .from('stores')
+          .select('id, name')
+          .eq('id', profile.store_id)
+          .single()
+        
+        if (mainStore) {
+          setAccessibleStores([{ 
+            id: mainStore.id, 
+            name: mainStore.name || 'Store' 
+          }])
+        }
+      }
+
       setProfileLoaded(true)
     }
 

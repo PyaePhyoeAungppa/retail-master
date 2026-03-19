@@ -138,6 +138,22 @@ export default function SetupPage() {
       }
       console.log("Category created successfully")
 
+      // 3.5 Link User to Store (Junction Table for many-to-many)
+      console.log("Step 3.5: Creating many-to-many link in store_users...")
+      const { error: junctionError } = await supabase
+        .from('store_users')
+        .insert([{
+          store_id: store.id,
+          user_id: currentUser.id,
+          role: 'admin'
+        }])
+      
+      if (junctionError) {
+        console.warn("Junction table link warned/failed (might be missing table):", junctionError)
+        // We don't throw here to avoid blocking setup if user hasn't run the SQL yet, 
+        // but ideally the SQL is run first.
+      }
+
       // 4. Update User Profile with Store ID
       console.log("Step 4: Linking store to profile...")
       const { error: finalProfileError } = await supabase
@@ -157,6 +173,8 @@ export default function SetupPage() {
       // 5. Update local store state
       console.log("Step 5: Synchronizing local auth state...")
       setStoreId(store.id)
+      // Update accessible stores list
+      useAuthStore.getState().setAccessibleStores([{ id: store.id, name: formData.name }])
       // Force profile loaded to true if it wasn't already
       useAuthStore.getState().setProfileLoaded(true)
 

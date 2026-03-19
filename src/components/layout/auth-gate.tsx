@@ -10,18 +10,24 @@ import { TopNav } from "./top-nav"
 import { LockScreen } from "./lock-screen"
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
-  const { currentUser, initialized, isProfileLoaded, storeId } = useAuthStore()
+  const { currentUser, initialized, isProfileLoaded, storeId, role } = useAuthStore()
   const pathname = usePathname()
   const router = useRouter()
 
   const isLoginPage = pathname === "/login"
+  const isLandingPage = pathname === "/"
+  const isPublicPage = isLoginPage || isLandingPage
 
   useEffect(() => {
     console.log("AuthGate State:", { initialized, hasUser: !!currentUser, isProfileLoaded, storeId, pathname })
     
-    if (initialized && !currentUser && !isLoginPage) {
+    if (initialized && !currentUser && !isPublicPage) {
        console.log("Redirecting to /login")
       router.push("/login")
+    }
+    if (initialized && currentUser && isLandingPage) {
+       console.log("Redirecting to /dashboard")
+      router.push("/dashboard")
     }
     if (initialized && currentUser && isProfileLoaded && !storeId && pathname !== "/setup") {
        console.log("Redirecting to /setup")
@@ -31,7 +37,20 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
        console.log("Redirecting to /dashboard")
       router.push("/dashboard")
     }
-  }, [currentUser, initialized, isLoginPage, router, storeId, isProfileLoaded, pathname])
+
+    // Role-Based Route Protection
+    if (initialized && currentUser && isProfileLoaded) {
+      if (role === 'cashier' && (pathname?.startsWith('/reports') || pathname?.startsWith('/settings') || pathname?.startsWith('/products') || pathname?.startsWith('/staff'))) {
+        console.log("Access Denied: Cashier attempting to access restricted route")
+        router.push("/") // Redirect Cashiers to POS
+      }
+      
+      if (role === 'staff' && pathname?.startsWith('/staff')) {
+        console.log("Access Denied: Staff attempting to access admin route")
+        router.push("/dashboard")
+      }
+    }
+  }, [currentUser, initialized, isLoginPage, router, storeId, isProfileLoaded, pathname, role])
 
   if (!initialized || (currentUser && !isProfileLoaded)) {
     return (
@@ -46,9 +65,9 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     )
   }
 
-  // If we're not logged in, only allow the login page
+  // If we're not logged in, only allow public pages
   if (!currentUser) {
-    return isLoginPage ? <main className="flex-1">{children}</main> : null
+    return isPublicPage ? <main className="flex-1">{children}</main> : null
   }
 
   // If we're on the login page but authenticated, show a loader while redirecting

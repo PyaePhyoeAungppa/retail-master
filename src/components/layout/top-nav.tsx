@@ -23,28 +23,39 @@ import { Store, Info, AlertTriangle, CheckCircle } from "lucide-react"
 export function TopNav() {
   const [time, setTime] = useState(new Date())
   const [mounted, setMounted] = useState(false)
-  const { currentUser, signOut } = useAuthStore()
+  const { currentUser, signOut, storeId } = useAuthStore()
 
   const { data: shift } = useQuery({
-    queryKey: ['activeShift'],
+    queryKey: ['activeShift', storeId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('active_shifts').select('*').eq('status', 'active').single()
-      if (error) throw error
+      if (!storeId) return null
+      const { data, error } = await supabase
+        .from('active_shifts')
+        .select('*')
+        .eq('status', 'active')
+        .eq('store_id', storeId)
+        .single()
+      if (error && error.code !== 'PGRST116') throw error
       return data
-    }
+    },
+    enabled: !!storeId
   })
 
   const { data: notifications } = useQuery({
-    queryKey: ['notifications'],
+    queryKey: ['notifications', storeId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('notifications').select('*').order('date', { ascending: false })
+      if (!storeId) return []
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('store_id', storeId)
+        .order('date', { ascending: false })
       if (error) throw error
       return data
-    }
+    },
+    enabled: !!storeId
   })
 
-  const { storeId } = useAuthStore()
-  
   const { data: settings } = useQuery({
     queryKey: ['settings', storeId],
     queryFn: async () => {

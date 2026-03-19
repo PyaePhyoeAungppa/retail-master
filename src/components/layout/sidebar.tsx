@@ -3,6 +3,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useAuthStore } from "@/store/use-auth-store"
 import { cn } from "@/lib/utils"
 import { 
   LayoutDashboard, 
@@ -11,7 +12,8 @@ import {
   History, 
   Settings,
   Store,
-  Users
+  Users,
+  BarChart3
 } from "lucide-react"
 
 const menuItems = [
@@ -19,12 +21,26 @@ const menuItems = [
   { name: "POS", href: "/", icon: ShoppingCart },
   { name: "Products", href: "/products", icon: Package },
   { name: "Customers", href: "/customers", icon: Users },
+  { name: "Reports", href: "/reports", icon: BarChart3 },
+  { name: "Staff", href: "/staff", icon: Users },
   { name: "History", href: "/history", icon: History },
   { name: "Settings", href: "/settings", icon: Settings },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { role } = useAuthStore()
+
+  const filteredItems = menuItems.filter(item => {
+    if (role === 'cashier') {
+      // Cashiers only see POS and History
+      return item.href === "/" || item.href === "/history"
+    }
+    if (role === 'staff' && (item.href === "/settings" || item.href === "/reports" || item.href === "/staff")) {
+      return false
+    }
+    return true
+  })
 
   return (
     <div className="flex lg:flex-col h-20 lg:h-screen w-full lg:w-[80px] border-t lg:border-t-0 lg:border-r bg-card text-card-foreground shadow-[0_-4px_20px_rgba(0,0,0,0.05)] lg:shadow-none">
@@ -33,7 +49,7 @@ export function Sidebar() {
       </div>
       
       <nav className="flex-1 flex lg:flex-col items-center justify-around lg:justify-start px-3 lg:space-y-4 lg:mt-6">
-        {menuItems.map((item) => {
+        {filteredItems.map((item) => {
           const isActive = pathname === item.href
           return (
             <Link

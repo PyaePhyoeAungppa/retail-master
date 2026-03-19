@@ -9,12 +9,16 @@ interface AuthState {
   session: Session | null
   initialized: boolean
   storeId: string | null
+  role: string | null
+  accessibleStores: { id: string, name: string }[]
   isProfileLoaded: boolean
   lock: () => void
   unlock: (pin: string) => boolean
   setUser: (user: User | null) => void
   setSession: (session: Session | null) => void
   setStoreId: (id: string | null) => void
+  setRole: (role: string | null) => void
+  setAccessibleStores: (stores: { id: string, name: string }[]) => void
   setProfileLoaded: (loaded: boolean) => void
   signOut: () => Promise<void>
 }
@@ -27,6 +31,8 @@ export const useAuthStore = create<AuthState>()(
       session: null,
       initialized: false,
       storeId: null,
+      role: null,
+      accessibleStores: [],
       isProfileLoaded: false,
       lock: () => set({ isLocked: true }),
       unlock: (inputPin: string) => {
@@ -44,13 +50,18 @@ export const useAuthStore = create<AuthState>()(
         currentUser: session?.user ?? null,
         initialized: true,
         // If logging out, profile is effectively unloaded
-        isProfileLoaded: session ? get().isProfileLoaded : false 
+        isProfileLoaded: session ? get().isProfileLoaded : false,
+        role: session ? get().role : null,
+        storeId: session ? get().storeId : null,
+        accessibleStores: session ? get().accessibleStores : [],
       }),
       setStoreId: (id) => set({ storeId: id }),
+      setRole: (role) => set({ role: role }),
+      setAccessibleStores: (stores) => set({ accessibleStores: stores }),
       setProfileLoaded: (loaded) => set({ isProfileLoaded: loaded }),
       signOut: async () => {
         await supabase.auth.signOut()
-        set({ session: null, currentUser: null, isLocked: false, storeId: null, isProfileLoaded: false })
+        set({ session: null, currentUser: null, isLocked: false, storeId: null, role: null, accessibleStores: [], isProfileLoaded: false })
       }
     }),
     {
