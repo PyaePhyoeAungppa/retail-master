@@ -26,8 +26,9 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       router.push("/login")
     }
     if (initialized && currentUser && isLandingPage) {
-       console.log("Redirecting to /dashboard")
-      router.push("/dashboard")
+      const target = role === 'cashier' ? "/pos" : "/dashboard"
+      console.log(`Redirecting to ${target}`)
+      router.push(target)
     }
     if (initialized && currentUser && isProfileLoaded && !storeId && pathname !== "/setup") {
        console.log("Redirecting to /setup")
@@ -42,7 +43,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     if (initialized && currentUser && isProfileLoaded) {
       if (role === 'cashier' && (pathname?.startsWith('/reports') || pathname?.startsWith('/settings') || pathname?.startsWith('/products') || pathname?.startsWith('/staff'))) {
         console.log("Access Denied: Cashier attempting to access restricted route")
-        router.push("/") // Redirect Cashiers to POS
+        router.push("/pos") // Redirect Cashiers to POS
       }
       
       if (role === 'staff' && pathname?.startsWith('/staff')) {

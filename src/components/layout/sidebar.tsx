@@ -18,7 +18,7 @@ import {
 
 const menuItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "POS", href: "/", icon: ShoppingCart },
+  { name: "POS", href: "/pos", icon: ShoppingCart },
   { name: "Products", href: "/products", icon: Package },
   { name: "Customers", href: "/customers", icon: Users },
   { name: "Reports", href: "/reports", icon: BarChart3 },
@@ -34,7 +34,7 @@ export function Sidebar() {
   const filteredItems = menuItems.filter(item => {
     if (role === 'cashier') {
       // Cashiers only see POS and History
-      return item.href === "/" || item.href === "/history"
+      return item.href === "/pos" || item.href === "/history"
     }
     if (role === 'staff' && (item.href === "/settings" || item.href === "/reports" || item.href === "/staff")) {
       return false
