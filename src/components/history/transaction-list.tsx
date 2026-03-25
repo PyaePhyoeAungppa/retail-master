@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { 
-  ChevronRight, 
   Calendar, 
   User as UserIcon, 
   CreditCard, 
@@ -19,7 +18,9 @@ import {
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { useAuthStore } from "@/store/use-auth-store"
-import { Transaction, Store } from "@/lib/data"
+import { Transaction, Store, TransactionItem } from "@/lib/data"
+import { ReceiptPreview } from "@/components/pos/receipt-preview"
+import { useState } from "react"
 
 const methodIcons: Record<string, any> = {
   card: CreditCard,
@@ -30,6 +31,11 @@ const methodIcons: Record<string, any> = {
 
 export function TransactionList() {
   const { storeId } = useAuthStore()
+  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null)
+  const [txItems, setTxItems] = useState<TransactionItem[]>([])
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false)
+  const [isFetchingItems, setIsFetchingItems] = useState(false)
+
   const { data: transactions, isLoading } = useQuery<Transaction[]>({
     queryKey: ['transactions', storeId],
     queryFn: async () => {
@@ -59,6 +65,26 @@ export function TransactionList() {
 
   const currency = store?.currency ?? "$"
 
+  const handleViewReceipt = async (tx: Transaction) => {
+    setIsFetchingItems(true)
+    setSelectedTx(tx)
+    
+    try {
+      const { data, error } = await supabase
+        .from('transaction_items')
+        .select('*')
+        .eq('transactionId', tx.id)
+      
+      if (error) throw error
+      setTxItems(data || [])
+      setIsPreviewOpen(true)
+    } catch (err) {
+      console.error("Error fetching items:", err)
+    } finally {
+      setIsFetchingItems(false)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -70,10 +96,13 @@ export function TransactionList() {
       </div>
     )
   }
+
   return (
     <div className="space-y-4">
       {(transactions || []).map((tx: any) => {
         const MethodIcon = methodIcons[tx.method] || CreditCard
+        const isCurrentTxFetching = isFetchingItems && selectedTx?.id === tx.id
+
         return (
           <Card key={tx.id} className="group hover:ring-1 hover:ring-primary/20 transition-all border-none shadow-sm overflow-hidden">
             <CardContent className="p-0">
@@ -108,8 +137,17 @@ export function TransactionList() {
                  </div>
 
                  <div className="pl-4 border-l">
-                    <Button variant="ghost" size="icon" className="rounded-xl">
-                       <ChevronRight className="w-5 h-5" />
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="rounded-xl hover:bg-primary/10 hover:text-primary"
+                      onClick={() => handleViewReceipt(tx)}
+                      disabled={isCurrentTxFetching}
+                    >
+                      {isCurrentTxFetching 
+                        ? <Loader2 className="w-5 h-5 animate-spin" />
+                        : <ExternalLink className="w-5 h-5" />
+                      }
                     </Button>
                  </div>
               </div>
@@ -117,6 +155,17 @@ export function TransactionList() {
           </Card>
         )
       })}
+
+      {selectedTx && (
+        <ReceiptPreview 
+          open={isPreviewOpen}
+          onOpenChange={setIsPreviewOpen}
+          transactionId={selectedTx.id}
+          paymentMethod={selectedTx.method}
+          transaction={selectedTx}
+          historicalItems={txItems}
+        />
+      )}
     </div>
   )
 }

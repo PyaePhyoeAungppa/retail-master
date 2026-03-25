@@ -1,7 +1,10 @@
 
 "use client"
 
+import { useRef } from "react"
 import { useCartStore } from "@/store/use-cart-store"
+import { toPng } from "html-to-image"
+import jsPDF from "jspdf"
 import {
   Dialog,
   DialogContent,
@@ -9,35 +12,155 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
-import { Printer, X } from "lucide-react"
+import { Printer, X, MessageCircle, Share2, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
+import { Transaction, TransactionItem } from "@/lib/data"
+import { useAuthStore } from "@/store/use-auth-store"
 
 interface ReceiptPreviewProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   transactionId: string
   paymentMethod: string
+  transaction?: Transaction
+  historicalItems?: TransactionItem[]
 }
 
-export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMethod }: ReceiptPreviewProps) {
-  const { items, total, receiptTemplate, selectedCustomer } = useCartStore()
+export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMethod, transaction, historicalItems }: ReceiptPreviewProps) {
+  const receiptRef = useRef<HTMLDivElement>(null)
+  const { storeId } = useAuthStore()
+  const { items: cartItems, total: cartTotal, receiptTemplate, selectedCustomer: cartCustomer } = useCartStore()
+  
+  // Use historical data if provided, otherwise use current cart
+  const items = historicalItems || cartItems
+  const total = transaction ? transaction.subtotal : cartTotal
+  const selectedCustomer = transaction 
+    ? { name: transaction.customerName, phone: (transaction as any).customerPhone } // Assuming we might have phone in tx metadata or fetch it later
+    : cartCustomer
+
   const { data: settings } = useQuery({
-    queryKey: ['settings'],
+    queryKey: ['settings', storeId],
     queryFn: async () => {
-      const { data, error } = await supabase.from('stores').select('*').single()
+      if (!storeId) return null
+      const { data, error } = await supabase.from('stores').select('*').eq('id', storeId).single()
       if (error) throw error
       return data
-    }
+    },
+    enabled: !!storeId
   })
 
   const taxRate = settings?.tax_rate ?? 0.1
   const currency = settings?.currency ?? "$"
-  const tax = total * taxRate
-  const grandTotal = total + tax
-  const date = new Date().toLocaleString()
+  const tax = transaction ? transaction.tax : (total * taxRate)
+  const grandTotal = transaction ? transaction.total : (total + tax)
+  const date = transaction ? new Date(transaction.date).toLocaleString() : new Date().toLocaleString()
+
+  const generateReceiptText = () => {
+    const storeName = settings?.name || "Retail POS"
+    const itemsText = items.map((item: any) => 
+      `${item.name} x ${item.quantity}: ${currency}${(item.quantity * item.price).toFixed(2)}`
+    ).join('\n')
+
+    return `🧾 RECEIPT - ${storeName}
+Ref: ${transactionId}
+Date: ${date}
+Customer: ${selectedCustomer?.name || "Walk In"}
+
+Items:
+${itemsText}
+
+------------------
+Subtotal: ${currency}${total.toFixed(2)}
+Tax: ${currency}${tax.toFixed(2)}
+TOTAL: ${currency}${grandTotal.toFixed(2)}
+
+Thank you for shopping!`
+  }
+
+  const handleShareWhatsApp = () => {
+    const text = encodeURIComponent(generateReceiptText())
+    const phone = selectedCustomer?.phone?.replace(/\D/g, '') || ""
+    const url = phone ? `https://wa.me/${phone}?text=${text}` : `https://wa.me/?text=${text}`
+    window.open(url, '_blank')
+  }
+
+  const handleShareGeneral = async () => {
+    const text = generateReceiptText()
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Receipt - ${settings?.name || "Retail POS"}`,
+          text: text,
+        })
+      } catch (err) {
+        console.error("Error sharing:", err)
+      }
+    } else {
+      // Fallback: Copy to clipboard
+      try {
+        await navigator.clipboard.writeText(text)
+        alert("Receipt copied to clipboard")
+      } catch (err) {
+        console.error("Error copy:", err)
+      }
+    }
+  }
+
+  const handleShareImage = async () => {
+    if (!receiptRef.current) return
+    
+    try {
+      const dataUrl = await toPng(receiptRef.current, { backgroundColor: '#fff', cacheBust: true })
+      const blob = await (await fetch(dataUrl)).blob()
+      const file = new File([blob], `receipt-${transactionId}.png`, { type: 'image/png' })
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `Receipt - ${transactionId}`,
+        })
+      } else {
+        // Fallback: Just download
+        const link = document.createElement('a')
+        link.download = `receipt-${transactionId}.png`
+        link.href = dataUrl
+        link.click()
+      }
+    } catch (err) {
+      console.error("Error sharing image:", err)
+    }
+  }
+
+  const handleSharePDF = async () => {
+    if (!receiptRef.current) return
+    
+    try {
+      const dataUrl = await toPng(receiptRef.current, { backgroundColor: '#fff' })
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [receiptRef.current.offsetWidth, receiptRef.current.offsetHeight]
+      })
+      pdf.addImage(dataUrl, 'PNG', 0, 0, receiptRef.current.offsetWidth, receiptRef.current.offsetHeight)
+      
+      const pdfBlob = pdf.output('blob')
+      const file = new File([pdfBlob], `receipt-${transactionId}.pdf`, { type: 'application/pdf' })
+
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `Receipt PDF - ${transactionId}`,
+        })
+      } else {
+        pdf.save(`receipt-${transactionId}.pdf`)
+      }
+    } catch (err) {
+      console.error("Error sharing PDF:", err)
+    }
+  }
 
   const renderStandard = () => (
     <div className="bg-white p-8 text-slate-800 font-sans shadow-inner rounded-xl border">
@@ -190,8 +313,8 @@ export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMetho
       </div>
 
       <div className="relative z-10 space-y-4 mb-10">
-        {items.map((item) => (
-          <div key={item.id} className="flex justify-between items-center group">
+        {items.map((item: any) => (
+          <div key={item.id || (item as any).productId} className="flex justify-between items-center group">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-[10px] font-black">
                 {item.quantity}x
@@ -227,43 +350,71 @@ export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMetho
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden rounded-[2.5rem] border-none shadow-2xl">
-        <div className="p-6 border-b bg-card flex items-center justify-between">
+      <DialogContent className="sm:max-w-[480px] p-0 overflow-hidden rounded-[2rem] border-none shadow-2xl max-h-[95vh] flex flex-col">
+        <div className="p-4 border-b bg-card flex items-center justify-between flex-shrink-0">
           <div>
-            <DialogTitle className="text-xl font-black">Receipt Preview</DialogTitle>
-            <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">Style: {receiptTemplate}</p>
+            <DialogTitle className="text-base font-black">Receipt Preview</DialogTitle>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Style: {receiptTemplate}</p>
           </div>
-          <Button variant="ghost" size="icon" className="rounded-full" onClick={() => onOpenChange(false)}>
-            <X className="w-5 h-5" />
+          <Button variant="ghost" size="icon" className="rounded-full h-8 w-8" onClick={() => onOpenChange(false)}>
+            <X className="w-4 h-4" />
           </Button>
         </div>
         
-        <div className="p-8 bg-muted/30 flex justify-center overflow-y-auto max-h-[70vh]">
-          <div className="w-full h-fit animate-in zoom-in-95 duration-300">
+        <div className="px-4 py-3 bg-muted/30 flex justify-center overflow-y-auto flex-1 min-h-0">
+          <div ref={receiptRef} className="w-full h-fit animate-in zoom-in-95 duration-300">
             {receiptTemplate === 'standard' && renderStandard()}
             {receiptTemplate === 'thermal' && renderThermal()}
             {receiptTemplate === 'modern' && renderModern()}
           </div>
         </div>
 
-        <div className="p-6 bg-card border-t flex gap-4">
-          <Button 
-            variant="ghost" 
-            className="flex-1 h-12 rounded-xl font-bold"
-            onClick={() => onOpenChange(false)}
-          >
-            Go Back
-          </Button>
-          <Button 
-            className="flex-1 h-12 rounded-xl font-black flex gap-2 shadow-xl shadow-primary/20"
-            onClick={() => {
-              window.print()
-              onOpenChange(false)
-            }}
-          >
-            <Printer className="w-4 h-4" />
-            Print Now
-          </Button>
+        <div className="p-3 bg-card border-t flex flex-col gap-2 flex-shrink-0">
+          <div className="grid grid-cols-3 gap-2">
+             <Button 
+                variant="outline" 
+                className="h-9 rounded-xl font-bold flex gap-1.5 border-green-200 text-green-700 hover:bg-green-50 text-[10px]"
+                onClick={handleShareWhatsApp}
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                Text
+             </Button>
+             <Button 
+                variant="outline" 
+                className="h-9 rounded-xl font-bold flex gap-1.5 border-blue-200 text-blue-700 hover:bg-blue-50 text-[10px]"
+                onClick={handleShareImage}
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                Image
+             </Button>
+             <Button 
+                variant="outline" 
+                className="h-9 rounded-xl font-bold flex gap-1.5 border-purple-200 text-purple-700 hover:bg-purple-50 text-[10px]"
+                onClick={handleSharePDF}
+              >
+                <Printer className="w-3.5 h-3.5" />
+                PDF
+             </Button>
+          </div>
+          <div className="flex gap-3">
+            <Button 
+              variant="ghost" 
+              className="flex-1 h-9 rounded-xl font-bold text-sm"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              className="flex-1 h-9 rounded-xl font-black flex gap-2 shadow-primary/20 shadow-lg text-sm"
+              onClick={() => {
+                window.print()
+                onOpenChange(false)
+              }}
+            >
+              <Printer className="w-3.5 h-3.5" />
+              Print
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
