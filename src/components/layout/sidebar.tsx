@@ -13,12 +13,14 @@ import {
   Settings,
   Store,
   Users,
-  BarChart3
+  BarChart3,
+  ListTodo
 } from "lucide-react"
 
 const menuItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "POS", href: "/pos", icon: ShoppingCart },
+  { name: "Orders", href: "/orders", icon: ListTodo },
   { name: "Products", href: "/products", icon: Package },
   { name: "Customers", href: "/customers", icon: Users },
   { name: "Reports", href: "/reports", icon: BarChart3 },
@@ -33,8 +35,8 @@ export function Sidebar() {
 
   const filteredItems = menuItems.filter(item => {
     if (role === 'cashier') {
-      // Cashiers only see POS and History
-      return item.href === "/pos" || item.href === "/history"
+      // Cashiers can see POS, Orders and History
+      return item.href === "/pos" || item.href === "/orders" || item.href === "/history"
     }
     if (role === 'staff' && (item.href === "/settings" || item.href === "/reports" || item.href === "/staff")) {
       return false

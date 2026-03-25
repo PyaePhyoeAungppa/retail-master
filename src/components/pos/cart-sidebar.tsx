@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -6,11 +5,11 @@ import { useCartStore } from "@/store/use-cart-store"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
-import { Trash2, Plus, Minus, CreditCard, ShoppingBag, ReceiptText } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { CheckoutModal } from "./checkout-modal"
+import { RecallOrderModal } from "./recall-order-modal"
 import Image from "next/image"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { useAuthStore } from "@/store/use-auth-store"
 import { Customer, Store } from "@/lib/data"
@@ -18,12 +17,17 @@ import {
   Dialog,
   DialogContent,
 } from "@/components/ui/dialog"
-import { User as UserIcon, Search, X, Check } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { Trash2, Plus, Minus, CreditCard, ShoppingBag, ReceiptText, User as UserIcon, Search, X, Check, ListTodo, Save, Loader2 } from "lucide-react"
+import { useToastStore } from "@/store/use-toast-store"
 
 export function CartSidebar({ onOpenChange }: { onOpenChange?: (open: boolean) => void }) {
-  const { items, removeItem, updateQuantity, clearCart, total, selectedCustomer, setCustomer } = useCartStore()
-  const { storeId } = useAuthStore()
+  const { items, removeItem, updateQuantity, clearCart, total, selectedCustomer, setCustomer, orderId } = useCartStore()
+  const { storeId, currentUser } = useAuthStore()
+  const router = useRouter()
+  const queryClient = useQueryClient()
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
+  const [isRecallOpen, setIsRecallOpen] = useState(false)
   const [isCustomerSearchOpen, setIsCustomerSearchOpen] = useState(false)
   const [customerSearchQuery, setCustomerSearchQuery] = useState("")
 
@@ -67,6 +71,80 @@ export function CartSidebar({ onOpenChange }: { onOpenChange?: (open: boolean) =
   const tax = total * taxRate
   const grandTotal = total + tax
 
+  const [isSaving, setIsSaving] = useState(false)
+  const { toast } = useToastStore()
+
+  const handleSaveOrder = async () => {
+    if (!storeId) return
+    setIsSaving(true)
+    
+    // Logic similar to CheckoutModal but for saving as pending
+    const newTxId = orderId || `TX-${Date.now()}`
+    
+    const order = {
+      id: newTxId,
+      store_id: storeId,
+      date: new Date().toISOString(),
+      customerId: selectedCustomer?.id || null,
+      customerName: selectedCustomer?.name || "Walk In",
+      cashierId: currentUser?.id || null,
+      cashierName: currentUser?.email || "POS Terminal",
+      terminalId: "TERM-01",
+      itemsCount: items.length,
+      subtotal: total,
+      tax: tax,
+      total: grandTotal,
+      status: 'pending'
+    }
+
+    const orderItems = items.map(item => ({
+      orderId: newTxId,
+      productId: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      subtotal: item.price * item.quantity
+    }))
+
+    try {
+      // 1. Save Order
+      const { error: txError } = await supabase
+        .from('orders')
+        .upsert([order])
+      
+      if (txError) throw txError
+
+      // 2. Cleanup old items
+      if (orderId) {
+        await supabase.from('order_items').delete().eq('orderId', newTxId)
+      }
+
+      // 3. Save new items
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems)
+      
+      if (itemsError) throw itemsError
+
+      toast({
+        title: "Order Saved",
+        description: `Order ${newTxId} has been saved.`,
+        variant: "success"
+      })
+      queryClient.invalidateQueries({ queryKey: ['pending-orders'] })
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+      clearCart()
+    } catch (error: any) {
+      toast({
+        title: "Save Failed",
+        description: error.message,
+        variant: "destructive"
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="w-full lg:w-[450px] lg:max-w-[450px] bg-card flex flex-col h-full overflow-hidden shrink-0 relative">
       <div className="p-4 border-b flex items-center gap-4 bg-muted/20">
@@ -95,6 +173,19 @@ export function CartSidebar({ onOpenChange }: { onOpenChange?: (open: boolean) =
           </div>
           <Search className="w-4 h-4 text-muted-foreground mr-2" />
         </button>
+        {orderId && (
+          <Badge variant="outline" className="rounded-full px-2 py-1 bg-orange-50 text-orange-600 border-orange-200 shrink-0 font-black text-[10px] animate-pulse">
+            #{orderId.toString().startsWith('TX-') ? orderId.toString().split('-')[1].slice(-4) : orderId.toString().slice(-4)}
+          </Badge>
+        )}
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="rounded-full shrink-0 border-2"
+          onClick={() => setIsRecallOpen(true)}
+        >
+          <ListTodo className="w-4 h-4" />
+        </Button>
         <Badge variant="outline" className="rounded-full px-3 py-1 bg-white shrink-0 font-bold border-2">
           {items.length} Items
         </Badge>
@@ -231,21 +322,31 @@ export function CartSidebar({ onOpenChange }: { onOpenChange?: (open: boolean) =
             </div>
          </div>
 
-         <div className="grid grid-cols-2 gap-3 pt-2">
-            <Button variant="outline" className="h-12 rounded-xl flex gap-2 border-2 px-2" onClick={clearCart} disabled={items.length === 0}>
-               <ReceiptText className="w-4 h-4 shrink-0" />
-               <span className="truncate">Void</span>
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <Button 
+              variant="outline" 
+              className="h-12 rounded-xl flex gap-2 border-2 px-2 text-primary hover:bg-primary/5" 
+              onClick={handleSaveOrder} 
+              disabled={items.length === 0 || isSaving}
+            >
+               {isSaving ? <Loader2 className="w-4 h-4 animate-spin shrink-0" /> : <Save className="w-4 h-4 shrink-0" />}
+               <span className="truncate">{isSaving ? 'Saving...' : 'Save Order'}</span>
             </Button>
             <Button className="h-12 rounded-xl flex gap-2 shadow-lg shadow-primary/20 px-2" disabled={items.length === 0} onClick={() => setIsCheckoutOpen(true)}>
                <CreditCard className="w-4 h-4 shrink-0" />
-               <span className="truncate">Checkout</span>
+               <span className="truncate">{orderId ? 'Collect' : 'Checkout'}</span>
             </Button>
-         </div>
+          </div>
       </div>
 
       <CheckoutModal 
         open={isCheckoutOpen} 
         onOpenChange={setIsCheckoutOpen} 
+      />
+
+      <RecallOrderModal
+        open={isRecallOpen}
+        onOpenChange={setIsRecallOpen}
       />
     </div>
   )

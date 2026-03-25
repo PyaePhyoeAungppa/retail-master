@@ -112,17 +112,21 @@ export default function DashboardPage() {
     const completed = transactions.filter(tx => tx.status === 'completed')
     
     if (range === 'daily') {
-      const today = format(now, 'yyyy-MM-dd')
-      return completed.filter(tx => tx.date.startsWith(today))
+      // Compare local date strings to handle timezone correctly
+      const todayStr = format(now, 'yyyy-MM-dd')
+      return completed.filter(tx => {
+        const txLocalDate = format(new Date(tx.date), 'yyyy-MM-dd')
+        return txLocalDate === todayStr
+      })
     }
     
     if (range === 'weekly') {
-      const sevenDaysAgo = subDays(now, 7)
+      const sevenDaysAgo = startOfDay(subDays(now, 7))
       return completed.filter(tx => new Date(tx.date) >= sevenDaysAgo)
     }
     
     if (range === 'monthly') {
-      const thirtyDaysAgo = subDays(now, 30)
+      const thirtyDaysAgo = startOfDay(subDays(now, 30))
       return completed.filter(tx => new Date(tx.date) >= thirtyDaysAgo)
     }
     
@@ -153,13 +157,15 @@ export default function DashboardPage() {
     const completed = transactions.filter(tx => tx.status === 'completed')
 
     if (range === 'daily') {
-      // Last 24 hours (aggregated by hour)
+      // Last 24 hours (aggregated by hour) using local time
       return Array.from({ length: 24 }, (_, i) => {
         const hour = i
+        const todayStr = format(now, 'yyyy-MM-dd')
         const hourTotal = completed
           .filter(tx => {
             const txDate = new Date(tx.date)
-            return txDate.getHours() === hour && tx.date.startsWith(format(now, 'yyyy-MM-dd'))
+            const txDay = format(txDate, 'yyyy-MM-dd')
+            return txDate.getHours() === hour && txDay === todayStr
           })
           .reduce((sum: number, tx: Transaction) => sum + tx.total, 0)
         return { name: `${hour}:00`, total: hourTotal }

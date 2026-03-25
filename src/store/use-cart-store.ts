@@ -16,6 +16,9 @@ interface CartStore {
   clearCart: () => void;
   calculateTotal: () => void;
   total: number;
+  orderId: string | null;
+  setOrderId: (id: string | null) => void;
+  clearOrder: () => void;
   receiptTemplate: 'standard' | 'thermal' | 'modern';
   setReceiptTemplate: (template: 'standard' | 'thermal' | 'modern') => void;
 }
@@ -71,7 +74,10 @@ export const useCartStore = create<CartStore>((set, get) => ({
     get().calculateTotal();
   },
   setCustomer: (customer) => set({ selectedCustomer: customer }),
-  clearCart: () => set({ items: [], total: 0 }),
+  clearCart: () => set({ items: [], total: 0, orderId: null }),
+  orderId: null,
+  setOrderId: (id) => set({ orderId: id }),
+  clearOrder: () => set({ orderId: null }),
   receiptTemplate: 'standard',
   setReceiptTemplate: (template) => set({ receiptTemplate: template }),
   calculateTotal: () => {

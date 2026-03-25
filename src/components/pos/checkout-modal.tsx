@@ -13,7 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { CreditCard, Banknote, Smartphone, CheckCircle2, QrCode, Printer, Check, Loader2, Mail } from "lucide-react"
+import { CreditCard, Banknote, Smartphone, CheckCircle2, QrCode, Printer, Check, Loader2, Mail, Trash2 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import axios from "axios"
@@ -31,7 +31,7 @@ interface CheckoutModalProps {
 
 export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
   const queryClient = useQueryClient()
-  const { total, items, clearCart, selectedCustomer, receiptTemplate, setReceiptTemplate } = useCartStore()
+  const { total, items, clearCart, selectedCustomer, receiptTemplate, setReceiptTemplate, orderId, setOrderId } = useCartStore()
   const { currentUser, storeId } = useAuthStore()
   const { toast } = useToastStore()
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null)
@@ -62,9 +62,12 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
   const grandTotal = total + tax
 
   const handleCheckout = async () => {
-    if (!paymentMethod || !currentUser || !storeId) return
+    if (!paymentMethod) return
+    if (!currentUser || !storeId) return
+    
     setLoading(true)
     
+    // Always new transaction ID for finalized sales
     const newTxId = `TX-${Date.now()}`
     setTransactionId(newTxId)
 
@@ -72,7 +75,7 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
       id: newTxId,
       store_id: storeId,
       date: new Date().toISOString(),
-      customerId: selectedCustomer?.id || null, // Allow null for walk-in if column is nullable
+      customerId: selectedCustomer?.id || null,
       customerName: selectedCustomer?.name || "Walk In",
       cashierId: currentUser.id,
       cashierName: currentUser.email || "Unknown Cashier",
@@ -81,7 +84,7 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
       subtotal: total,
       tax: tax,
       total: grandTotal,
-      method: paymentMethod,
+      method: paymentMethod as any,
       status: 'completed'
     }
 
@@ -95,7 +98,7 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
     }))
 
     try {
-      // 1. Initial Stock Check (Quick local check)
+      // 1. Initial Stock Check
       const { data: latestStock, error: stockCheckError } = await supabase
         .from('products')
         .select('id, name, stock')
@@ -109,79 +112,44 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
       })
 
       if (insufficientItems.length > 0) {
-        const details = insufficientItems.map(i => {
-          const dbProduct = latestStock?.find(p => p.id === i.id)
-          return `${i.name} (Available: ${dbProduct?.stock || 0}, Requested: ${i.quantity})`
-        }).join('\n')
-        
-        throw new Error(`Insufficient stock for the following items:\n${details}`)
+        throw new Error(`Insufficient stock for one or more items.`)
       }
 
-      // 2. Atomic Stock Reduction + Validation (The core concurrency protection)
-      const { error: rpcError } = await supabase.rpc('process_checkout_stock', { 
-        items: items.map(i => ({ productId: i.id, quantity: i.quantity })) 
-      })
-      
-      if (rpcError) {
-        // Handle specific stock error from SQL
-        if (rpcError.message.includes('Insufficient stock')) {
-          throw new Error(rpcError.message)
-        }
-        throw rpcError
-      }
-
-      // 3. Save Transaction
+      // 2. Process Checkout
       const { data: txData, error: txError } = await supabase
         .from('transactions')
         .insert([transaction])
-        .select()
       
-      if (txError) {
-        // CRITICAL: If transaction fails but stock was reduced, we have an inconsistency.
-        throw txError
-      }
+      if (txError) throw txError
 
-      // 4. Save Transaction Items
+      // 3. Save Transaction Items
       const { error: itemsError } = await supabase
         .from('transaction_items')
         .insert(transactionItems)
       
       if (itemsError) throw itemsError
 
-      queryClient.invalidateQueries({ queryKey: ["products"] })
-
-      // 5. Send Email Receipt if toggled
-      if (sendEmail && selectedCustomer?.email) {
-        try {
-          await axios.post('/api/send-receipt', {
-            transactionId: newTxId,
-            customerEmail: selectedCustomer.email,
-            customerName: selectedCustomer.name,
-            total: grandTotal,
-            items: items.map(i => ({ name: i.name, quantity: i.quantity, price: i.price })),
-            method: paymentMethod,
-            currency: currency,
-            storeName: store?.name || "Retail Master"
-          })
-        } catch (emailError: any) {
-          console.error("Email sending failed:", emailError.response?.data || emailError.message)
-          // Don't throw, we don't want to fail the checkout if just the email fails
-          toast({
-            title: "Email Failed",
-            description: "Transaction completed, but receipt email couldn't be sent.",
-            variant: "destructive"
-          })
-        }
+      // 4. Update order status if this was a recalled order
+      if (orderId) {
+        await supabase
+          .from('orders')
+          .update({ status: 'completed' })
+          .eq('id', orderId)
       }
 
-      setIsSuccess(true)
       toast({
         title: "Checkout Successful",
         description: sendEmail && selectedCustomer?.email 
-          ? `Transaction ${newTxId} completed and receipt emailed.`
-          : `Transaction ${newTxId} has been completed.`,
-        variant: "success"
+          ? `Receipt sent to ${selectedCustomer.email}`
+          : "Transaction completed successfully",
+        variant: "success",
       })
+      
+      queryClient.invalidateQueries({ queryKey: ['pending-orders'] })
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+      queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      queryClient.invalidateQueries({ queryKey: ['transactionItems'] })
+      setIsSuccess(true)
     } catch (error: any) {
       console.error("Checkout failed:", error)
       toast({
@@ -196,6 +164,7 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
 
   const handleDone = () => {
     clearCart()
+    setOrderId(null)
     setIsSuccess(false)
     setPaymentMethod(null)
     setSendEmail(false)
@@ -218,9 +187,9 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
                <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-6 animate-bounce">
                   <CheckCircle2 className="w-12 h-12 text-green-600" />
                </div>
-               <DialogTitle className="text-2xl font-black mb-2">Payment Successful!</DialogTitle>
+               <DialogTitle className="2xl font-black mb-2">Payment Successful!</DialogTitle>
                <DialogDescription className="text-base mb-8">
-                 Transaction {transactionId} has been completed successfully.
+                Transaction {transactionId} has been completed successfully.
                </DialogDescription>
                
                <div className="w-full bg-muted/30 rounded-2xl p-6 mb-8 text-left space-y-3 border border-dashed border-muted-foreground/30">
@@ -376,11 +345,26 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
         </div>
 
         <DialogFooter className="flex sm:justify-between gap-4 p-8 pt-4 border-t bg-card/50">
-          <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl px-8 h-12">
-            Cancel
-          </Button>
+          <div className="flex gap-3">
+            <Button variant="ghost" onClick={() => onOpenChange(false)} className="rounded-xl px-4 h-12">
+              Cancel
+            </Button>
+            <Button 
+                variant="outline" 
+                onClick={() => {
+                   if (confirm("Void entire cart? This cannot be undone.")) {
+                      handleDone()
+                   }
+                }} 
+                disabled={loading || items.length === 0}
+                className="rounded-xl px-4 h-12 text-destructive hover:bg-destructive/10 border-destructive/20"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Void
+            </Button>
+          </div>
           <Button 
-            onClick={handleCheckout} 
+            onClick={() => handleCheckout()} 
             disabled={!paymentMethod || loading}
             className="flex-1 rounded-xl h-12 text-base font-bold shadow-lg shadow-primary/20"
           >

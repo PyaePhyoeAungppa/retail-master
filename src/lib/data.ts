@@ -50,7 +50,7 @@ export interface Transaction {
   tax: number;
   total: number;
   method: 'card' | 'cash' | 'qr' | 'nfc';
-  status: 'completed' | 'void';
+  status: 'completed' | 'void' | 'pending';
 }
 
 export interface Store {
@@ -60,4 +60,31 @@ export interface Store {
   currency: string;
   tax_rate: number;
   address?: string;
+}
+export interface Order {
+  id: string
+  store_id: string
+  date: string
+  total: number
+  customerId: string | null
+  customerName: string
+  cashierId: string | null
+  cashierName: string
+  terminalId: string
+  itemsCount: number
+  created_at?: string
+  subtotal: number
+  tax: number
+  status: 'pending' | 'completed' | 'void'
+}
+
+export interface OrderItem {
+  id?: number
+  orderId: string
+  productId: string
+  name: string
+  price: number
+  quantity: number
+  subtotal: number
+  created_at?: string
 }
