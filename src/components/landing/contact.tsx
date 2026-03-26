@@ -4,12 +4,14 @@ import { Mail, MessageSquare, Send } from "lucide-react"
 
 export function LandingContact() {
   return (
-    <section id="contact" className="py-24">
+    <section id="contact" className="py-28">
       <div className="container px-6 mx-auto">
-        <div className="bg-primary rounded-[3rem] overflow-hidden relative p-8 lg:p-16 shadow-2xl shadow-primary/20">
-          {/* Decorative Circles */}
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-black/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+        <div className="bg-primary rounded-[3rem] overflow-hidden relative p-10 lg:p-16 shadow-2xl shadow-primary/25">
+          {/* Animated decorative orbs */}
+          <div className="animate-float absolute top-0 right-0 w-[500px] h-[500px] bg-white/8 rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+          <div className="animate-float-slow absolute bottom-0 left-0 w-[350px] h-[350px] bg-black/8 rounded-full translate-y-1/2 -translate-x-1/3 pointer-events-none" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,white/3_1px,transparent_1px),linear-gradient(to_bottom,white/3_1px,transparent_1px)] bg-[size:48px_48px] pointer-events-none opacity-30" />
+
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 relative z-10">
             <div className="max-w-xl">
