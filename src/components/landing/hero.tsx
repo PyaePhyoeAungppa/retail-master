@@ -37,9 +37,9 @@ export function LandingHero() {
         <div className="absolute -top-32 -right-32 w-[400px] h-[400px] sm:w-[600px] sm:h-[600px] rounded-full bg-purple-400/8 blur-[120px]" />
         {/* Floating dots — hidden on mobile to reduce clutter */}
         <div className="hidden sm:block animate-float absolute top-1/3 left-[8%] w-3 h-3 rounded-full bg-primary/30" />
-        <div className="hidden sm:block animate-float-slow absolute top-1/4 right-[12%] w-2 h-2 rounded-full bg-purple-400/40" style={{animationDelay:"1s"}} />
-        <div className="hidden sm:block animate-float absolute bottom-1/3 left-[15%] w-4 h-4 rounded-full bg-indigo-400/20" style={{animationDelay:"2s"}} />
-        <div className="hidden sm:block animate-float-slow absolute bottom-1/4 right-[8%] w-2 h-2 rounded-full bg-primary/25" style={{animationDelay:"0.5s"}} />
+        <div className="hidden sm:block animate-float-slow absolute top-1/4 right-[12%] w-2 h-2 rounded-full bg-purple-400/40" style={{ animationDelay: "1s" }} />
+        <div className="hidden sm:block animate-float absolute bottom-1/3 left-[15%] w-4 h-4 rounded-full bg-indigo-400/20" style={{ animationDelay: "2s" }} />
+        <div className="hidden sm:block animate-float-slow absolute bottom-1/4 right-[8%] w-2 h-2 rounded-full bg-primary/25" style={{ animationDelay: "0.5s" }} />
         {/* Grid overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.4)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.4)_1px,transparent_1px)] bg-[size:48px_48px] sm:bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,black_40%,transparent_100%)]" />
       </div>
@@ -64,10 +64,6 @@ export function LandingHero() {
             <br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-violet-500 to-purple-600 animate-gradient-x">
               Online Retailers
-            </span>
-            <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-br from-foreground via-foreground/90 to-foreground/60">
-              Without the Storefront.
             </span>
           </h1>
 
@@ -139,13 +135,13 @@ export function LandingHero() {
                 </div>
               </div>
 
-                {/* Mobile-simplified dashboard view */}
+              {/* Mobile-simplified dashboard view */}
               <div className="bg-slate-50 p-3 sm:p-5">
                 {/* Stat cards — 2 cols on mobile, 4 on desktop */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-3 sm:mb-4">
                   {[
                     { label: "Online Rev", val: "$8,420", color: "text-indigo-600", bg: "bg-indigo-50", bar: "bg-indigo-500 w-[85%]" },
-                    { label: "Links Shared",  val: "342",    color: "text-emerald-600", bg: "bg-emerald-50", bar: "bg-emerald-500 w-3/4" },
+                    { label: "Links Shared", val: "342", color: "text-emerald-600", bg: "bg-emerald-50", bar: "bg-emerald-500 w-3/4" },
                     { label: "Customers", val: "1,204", color: "text-purple-600", bg: "bg-purple-50", bar: "bg-purple-500 w-2/3" },
                     { label: "Pending Carts", val: "18", color: "text-orange-600", bg: "bg-orange-50", bar: "bg-orange-400 w-1/3" },
                   ].map((stat, i) => (
@@ -162,18 +158,18 @@ export function LandingHero() {
                   <div className="col-span-2 bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
                     <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Revenue Trend — 7 Days</div>
                     <div className="flex items-end gap-1 h-20">
-                      {[40,65,45,75,55,90,70,85,60,95,80,100].map((h,i)=>(
-                        <div key={i} className="flex-1 rounded-t" style={{height:`${h}%`, backgroundColor: i===11 ? "#6366f1" : i>=9 ? "#a5b4fc" : "#e0e7ff"}} />
+                      {[40, 65, 45, 75, 55, 90, 70, 85, 60, 95, 80, 100].map((h, i) => (
+                        <div key={i} className="flex-1 rounded-t" style={{ height: `${h}%`, backgroundColor: i === 11 ? "#6366f1" : i >= 9 ? "#a5b4fc" : "#e0e7ff" }} />
                       ))}
                     </div>
                   </div>
                   <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex flex-col justify-between">
                     <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Payments</div>
                     <div className="flex flex-col gap-2.5">
-                      {[{l:"Cash",w:"60%",c:"bg-indigo-500"},{l:"Card",w:"25%",c:"bg-purple-500"},{l:"QR/NFC",w:"15%",c:"bg-emerald-500"}].map((p,i)=>(
+                      {[{ l: "Cash", w: "60%", c: "bg-indigo-500" }, { l: "Card", w: "25%", c: "bg-purple-500" }, { l: "QR/NFC", w: "15%", c: "bg-emerald-500" }].map((p, i) => (
                         <div key={i}>
                           <div className="text-[8px] text-slate-400 font-bold mb-1 flex justify-between"><span>{p.l}</span><span>{p.w}</span></div>
-                          <div className="h-1.5 bg-slate-100 rounded-full"><div className={`h-full ${p.c} rounded-full`} style={{width:p.w}} /></div>
+                          <div className="h-1.5 bg-slate-100 rounded-full"><div className={`h-full ${p.c} rounded-full`} style={{ width: p.w }} /></div>
                         </div>
                       ))}
                     </div>
