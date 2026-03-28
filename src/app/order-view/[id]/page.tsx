@@ -24,14 +24,22 @@ export default function OrderViewPage() {
         setLoading(true)
         
         // 1. ONLY fetch from orders (pending)
-        // If it's not here, or status is not pending, it's considered "sold/finalized"
         const { data: orderData, error: orderErr } = await supabase
           .from('orders')
           .select('*')
           .eq('id', id)
           .maybeSingle()
         
-        if (!orderData || orderData.status !== 'pending') {
+        if (orderErr) throw orderErr
+
+        // If no data is found, it's either an invalid ID or RLS is blocking public access
+        if (!orderData) {
+          throw new Error("Order not found. If this is a pending order, please check that your Supabase 'orders' table has a public Read policy.")
+        }
+
+        // Case-insensitive status check
+        const status = orderData.status?.toLowerCase()
+        if (status !== 'pending') {
           setIsSold(true)
           throw new Error("This order link has expired or the order has already been processed.")
         }
@@ -82,9 +90,11 @@ export default function OrderViewPage() {
         <div className="w-20 h-20 bg-orange-100 text-orange-600 rounded-3xl flex items-center justify-center mb-8 shadow-xl shadow-orange-500/10">
           <Package className="w-10 h-10" />
         </div>
-        <h1 className="text-2xl font-black mb-2 tracking-tight">Order Finalized</h1>
+        <h1 className="text-2xl font-black mb-2 tracking-tight">
+          {isSold ? "Order Finalized" : "Order Not Found"}
+        </h1>
         <p className="text-muted-foreground max-w-xs mb-10 text-sm leading-relaxed">
-          This order has been processed and and is no longer available for public viewing. Please contact the retailer for a final receipt.
+          {error || "This order may have been processed or the link is invalid. Please contact the retailer for assistance."}
         </p>
         <div className="space-y-4">
            <img src="/logo.png" alt="Retail Master" className="h-6 mx-auto opacity-30 invert hover:opacity-100 transition-opacity" onError={(e) => (e.currentTarget.style.display = 'none')} />
