@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { supabase } from "@/lib/supabase"
-import { ShoppingBag, Calendar, User, Loader2, Package, CheckCircle2, QrCode } from "lucide-react"
+import { ShoppingBag, Calendar, User, Loader2, Package, CheckCircle2, QrCode, CreditCard, Copy, Check } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table"
 import { Separator } from "@/components/ui/separator"
@@ -17,6 +17,8 @@ export default function OrderViewPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isSold, setIsSold] = useState(false)
+  const [paymentAccounts, setPaymentAccounts] = useState<any[]>([])
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchData() {
@@ -63,6 +65,14 @@ export default function OrderViewPage() {
           .single()
         
         setStore(storeData)
+
+        // 4. Fetch Payment Accounts
+        const { data: accountsData } = await supabase
+          .from('store_payment_accounts')
+          .select('*')
+          .eq('store_id', orderData.store_id)
+        
+        setPaymentAccounts(accountsData || [])
 
       } catch (err: any) {
         console.error(err)
@@ -115,13 +125,25 @@ export default function OrderViewPage() {
         
         <CardContent className="p-8 pt-10 text-center space-y-8">
           {/* Brand & Store Info */}
-          <div className="space-y-3">
+          <div className="space-y-2">
              <div className="flex flex-col items-center gap-1">
-                <h3 className="text-[12px] font-black uppercase tracking-[0.4em] text-primary mb-2">Retail Master</h3>
-                <h1 className="text-2xl font-black text-black leading-none">{store?.name || "The Store"}</h1>
-                {store?.address && <p className="text-[10px] text-muted-foreground max-w-[200px] mx-auto mt-2 leading-relaxed">{store.address}</p>}
+                <h1 className="text-2xl font-black text-black leading-none uppercase tracking-tight">{store?.name || "The Store"}</h1>
+                {store?.brand && (
+                  <p className="text-[11px] font-bold text-primary uppercase tracking-[0.2em] mt-1 italic">
+                    {store.brand}
+                  </p>
+                )}
+                {store?.address && (
+                  <p className="text-[10px] text-muted-foreground max-w-[250px] mx-auto mt-2 leading-relaxed font-medium">
+                    {store.address}
+                  </p>
+                )}
              </div>
-             <p className="text-[10px] font-black uppercase bg-primary text-primary-foreground inline-block px-3 py-1 mt-2">Digital Order</p>
+             <div className="pt-4 flex justify-center">
+                <p className="text-[10px] font-black uppercase bg-black text-white inline-block px-4 py-1.5 tracking-[0.1em]">
+                  Digital Order Summary
+                </p>
+             </div>
           </div>
 
           <Separator className="border-dashed border-black/10" />
@@ -197,12 +219,50 @@ export default function OrderViewPage() {
              </div>
           </div>
 
-          <div className="pt-10 flex flex-col items-center gap-6">
-             <div className="flex flex-col items-center opacity-30 grayscale saturate-0">
-                <QrCode className="w-16 h-16 mb-2" />
-                <p className="text-[8px] font-black uppercase tracking-[0.2em]">Verify Order Original</p>
-             </div>
-             
+          {!isSold && paymentAccounts.length > 0 && (
+            <div className="space-y-4 pt-6 mt-6 border-t border-black/5">
+               <div className="flex items-center gap-2">
+                  <div className="h-[1px] flex-1 bg-black/10" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Payment Instructions</span>
+                  <div className="h-[1px] flex-1 bg-black/10" />
+               </div>
+               <div className="space-y-3">
+                  {paymentAccounts.map((acc) => (
+                    <div key={acc.id} className="bg-muted/30 p-4 rounded-2xl border border-dashed border-black/10 flex items-center justify-between group">
+                       <div className="text-left space-y-0.5">
+                          <p className="text-[10px] font-black uppercase text-primary leading-tight">{acc.payment_name}</p>
+                          <p className="text-sm font-black text-black tabular-nums">{acc.account_number}</p>
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase truncate max-w-[150px]">{acc.account_name}</p>
+                       </div>
+                       <button 
+                         onClick={() => {
+                            navigator.clipboard.writeText(acc.account_number)
+                            setCopiedId(acc.id)
+                            setTimeout(() => setCopiedId(null), 2000)
+                         }}
+                         className={`w-9 h-9 rounded-xl flex items-center justify-center border shadow-sm transition-all active:scale-95 ${
+                            copiedId === acc.id 
+                            ? "bg-green-500 text-white border-green-600" 
+                            : "bg-white hover:bg-primary hover:text-white"
+                         }`}
+                         title="Copy Account Number"
+                       >
+                          {copiedId === acc.id ? (
+                            <Check className="w-4 h-4" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
+                       </button>
+                    </div>
+                  ))}
+               </div>
+               <p className="text-[9px] text-muted-foreground italic max-w-[280px] mx-auto leading-relaxed">
+                 Please send the exact total amount and provide proof of payment to the store.
+               </p>
+            </div>
+          )}
+
+          <div className="pt-6 flex flex-col items-center gap-4">
              <div className="space-y-2">
                 <p className="text-[10px] font-black text-black uppercase leading-relaxed tracking-widest italic">
                   Thank You For Shopping With Us!

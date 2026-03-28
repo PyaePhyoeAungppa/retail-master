@@ -62,6 +62,14 @@ export interface Store {
   tax_rate: number;
   address?: string;
 }
+
+export interface StorePaymentAccount {
+  id: string;
+  store_id: string;
+  payment_name: string;
+  account_name: string;
+  account_number: string;
+}
 export interface Order {
   id: string
   store_id: string
