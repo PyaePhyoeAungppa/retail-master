@@ -7,18 +7,15 @@ import {
 import { useEffect, useRef, useState } from "react"
 
 const features = [
-  { title: "Lightning-Fast POS Terminal",     description: "Optimized checkout with barcode scanning, product search, cart management, and support for Cash, Card, QR, and NFC payments.", icon: Zap,          color: "bg-amber-500",   text: "text-amber-600",   bg: "bg-amber-50",   border: "border-amber-100" },
-  { title: "Inventory Management",            description: "Real-time stock tracking across categories with automated low-stock alerts and bulk product management.",                          icon: Package,       color: "bg-blue-500",    text: "text-blue-600",    bg: "bg-blue-50",    border: "border-blue-100" },
-  { title: "Customer CRM",                    description: "Build rich customer profiles, track complete purchase histories, and manage loyalty programs directly from the terminal.",         icon: Users2,        color: "bg-indigo-500",  text: "text-indigo-600",  bg: "bg-indigo-50",  border: "border-indigo-100" },
-  { title: "Advanced Analytics Dashboard",    description: "Visualize revenue trends, completed orders, average order value, payment distribution, and category performance with live charts.", icon: BarChart3,     color: "bg-emerald-500", text: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
-  { title: "Report Centre",                   description: "Generate Sale Summaries, itemized Sale Details, Top Items, and Category Reports — then export to Excel or PDF in one click.",    icon: FileText,      color: "bg-purple-500",  text: "text-purple-600",  bg: "bg-purple-50",  border: "border-purple-100" },
-  { title: "Staff & Role Management",         description: "Assign Admin or Cashier roles, control access permissions per user, and gain full visibility into staff activity.",               icon: UserCog,       color: "bg-rose-500",    text: "text-rose-600",    bg: "bg-rose-50",    border: "border-rose-100" },
-  { title: "Transaction History",             description: "Search and filter all past sales by date or customer. View full transaction details and regenerate receipts for any past order.", icon: History,       color: "bg-cyan-500",    text: "text-cyan-600",    bg: "bg-cyan-50",    border: "border-cyan-100" },
-  { title: "Receipt Sharing",                 description: "Share digital receipts instantly via WhatsApp or Messenger as high-quality images or PDF attachments — no printer required.",    icon: Share2,        color: "bg-green-500",   text: "text-green-600",   bg: "bg-green-50",   border: "border-green-100" },
-  { title: "Shift Management",                description: "Open and close shifts with full cash drawer tracking, reconciliation reports, and shift-level sales summaries.",                  icon: ClipboardCheck, color: "bg-orange-500", text: "text-orange-600",  bg: "bg-orange-50",  border: "border-orange-100" },
-  { title: "Multi-Store Support",             description: "Manage multiple store locations from one account. Switch between stores, compare performance, and maintain global inventory.",     icon: Layers,        color: "bg-violet-500",  text: "text-violet-600",  bg: "bg-violet-50",  border: "border-violet-100" },
-  { title: "Dynamic Currency & Tax",          description: "Configure currency symbols and tax rates per store. All receipts, carts, and reports automatically reflect your local settings.", icon: Coins,         color: "bg-yellow-500",  text: "text-yellow-700",  bg: "bg-yellow-50",  border: "border-yellow-100" },
-  { title: "Configurable App Settings",       description: "Customize store branding, tagline, address, display theme, and notification alerts — no code changes required.",                   icon: Settings2,     color: "bg-slate-500",   text: "text-slate-600",   bg: "bg-slate-50",   border: "border-slate-100" },
+  { title: "Smart Stock Management",         description: "Track inventory variations precisely, or toggle 'Track Stock' off for made-to-order items and dropshipping products.", icon: Package,          color: "bg-blue-500",    text: "text-blue-600",    bg: "bg-blue-50",    border: "border-blue-100" },
+  { title: "Order & Cart Management",        description: "Draft orders, save pending carts, and add custom discounts or shipping fees before finalizing the sale.",                          icon: Zap,           color: "bg-amber-500",   text: "text-amber-600",   bg: "bg-amber-50",   border: "border-amber-100" },
+  { title: "Digital Receipt Sharing",        description: "Generate self-expiring web links, high-res images, or PDF receipts. Share instantly via WhatsApp, Messenger, or Email.",         icon: Share2,        color: "bg-green-500",   text: "text-green-600",   bg: "bg-green-50",   border: "border-green-100" },
+  { title: "Payment Account Setup",          description: "Add your KPay, WavePay, or Bank details. These instructions automatically appear on your customer's digital checkout page.", icon: Coins,         color: "bg-emerald-500", text: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
+  { title: "Multiple Store Setup",           description: "Manage several online brands from one account. Separate your inventory, receipts, and settings per brand.",    icon: Layers,        color: "bg-purple-500",  text: "text-purple-600",  bg: "bg-purple-50",  border: "border-purple-100" },
+  { title: "Multi-User & Permissions",       description: "Invite your staff or virtual assistants. Assign custom roles to restrict access to sensitive revenue data.",               icon: UserCog,       color: "bg-rose-500",    text: "text-rose-600",    bg: "bg-rose-50",    border: "border-rose-100" },
+  { title: "Customer Relationship",          description: "Build rich profiles. Track total spend, view past orders, and assign default customers to speed up repeat checkouts.", icon: Users2,        color: "bg-indigo-500",  text: "text-indigo-600",  bg: "bg-indigo-50",  border: "border-indigo-100" },
+  { title: "Dashboard & Analytics",          description: "Visualize revenue trends, track top-selling items, and monitor low-stock alerts through an intuitive real-time dashboard.",    icon: BarChart3,        color: "bg-cyan-500",   text: "text-cyan-600",   bg: "bg-cyan-50",   border: "border-cyan-100" },
+  { title: "Detailed Sale Reports",          description: "Generate itemized sales summaries and category reports. Export your financial data to Excel or PDF in one click.",                  icon: FileText, color: "bg-orange-500", text: "text-orange-600",  bg: "bg-orange-50",  border: "border-orange-100" },
 ]
 
 function useReveal(threshold = 0.1) {
@@ -54,10 +51,10 @@ export function LandingFeatures() {
           </div>
           <h2 className="text-4xl lg:text-5xl font-black tracking-tighter mb-4 leading-tight">
             Everything you need to{" "}
-            <span className="text-primary">scale your retail business.</span>
+            <span className="text-primary">run your online store.</span>
           </h2>
           <p className="text-lg text-muted-foreground font-medium leading-relaxed">
-            Retail Master combines 12 purpose-built modules into one cohesive platform — no third-party integrations needed.
+            Replace chaotic spreadsheets and messy direct messages with one unified dashboard designed for modern digital sellers.
           </p>
         </div>
 

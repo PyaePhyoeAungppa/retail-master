@@ -53,25 +53,27 @@ export function LandingHero() {
               <span className="animate-pulse-ring absolute inline-flex h-full w-full rounded-full bg-primary/60" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
             </span>
-            The Next-Gen Retail Platform
+            For Digital & Social Commerce
           </div>
 
           {/* Headline — smaller on mobile */}
           <h1 className="animate-fade-up delay-100 text-4xl sm:text-5xl lg:text-7xl font-black tracking-tighter mb-5 sm:mb-6 leading-[1.1]">
             <span className="bg-clip-text text-transparent bg-gradient-to-br from-foreground via-foreground/90 to-foreground/60">
-              The POS System Built for
+              The Complete Platform for
             </span>
             <br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-violet-500 to-purple-600 animate-gradient-x">
-              Modern Retail
+              Online Retailers
+            </span>
+            <br />
+            <span className="bg-clip-text text-transparent bg-gradient-to-br from-foreground via-foreground/90 to-foreground/60">
+              Without the Storefront.
             </span>
           </h1>
 
           {/* Sub-headline */}
-          <p className="animate-fade-up delay-200 text-base sm:text-lg lg:text-xl text-muted-foreground font-medium mb-8 sm:mb-10 max-w-xl sm:max-w-2xl leading-relaxed px-2">
-            Lightning-fast checkout, real-time analytics, smart inventory,
-            receipt sharing, and full staff & customer management —
-            all in one premium platform.
+          <p className="animate-fade-up delay-200 text-base sm:text-lg lg:text-xl text-muted-foreground font-medium mb-8 sm:mb-10 max-w-xl sm:max-w-2xl leading-relaxed px-2 mx-auto">
+            Manage inventory, process orders, track customers, and share beautiful, self-expiring digital receipts directly to Messenger, Instagram, or Email — all from your digital dashboard.
           </p>
 
           {/* CTAs — fully stacked on mobile, row on sm+ */}
@@ -100,9 +102,9 @@ export function LandingHero() {
           {/* Trust badges */}
           <div className="animate-fade-up delay-400 flex flex-wrap justify-center gap-4 sm:gap-6 mt-6 sm:mt-8 text-xs sm:text-sm font-bold text-muted-foreground">
             {[
-              { icon: BarChart3, text: "Real-time Analytics" },
-              { icon: Receipt, text: "Receipt Sharing" },
-              { icon: Zap, text: "Multi-Payment" },
+              { icon: Receipt, text: "Self-Expiring Web Receipts" },
+              { icon: Zap, text: "Seamless Order Sharing" },
+              { icon: BarChart3, text: "Multi-Store Analytics" },
             ].map(({ icon: Icon, text }, i) => (
               <div key={i} className="flex items-center gap-1.5 sm:gap-2">
                 <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary flex-shrink-0" />
@@ -137,15 +139,15 @@ export function LandingHero() {
                 </div>
               </div>
 
-              {/* Mobile-simplified dashboard view */}
+                {/* Mobile-simplified dashboard view */}
               <div className="bg-slate-50 p-3 sm:p-5">
                 {/* Stat cards — 2 cols on mobile, 4 on desktop */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-3 sm:mb-4">
                   {[
-                    { label: "Revenue", val: "$4,821", color: "text-indigo-600", bg: "bg-indigo-50", bar: "bg-indigo-500 w-3/4" },
-                    { label: "Orders",  val: "134",    color: "text-emerald-600", bg: "bg-emerald-50", bar: "bg-emerald-500 w-2/3" },
-                    { label: "Avg Order", val: "$35.98", color: "text-purple-600", bg: "bg-purple-50", bar: "bg-purple-500 w-1/2" },
-                    { label: "Low Stock", val: "3 items", color: "text-red-600", bg: "bg-red-50", bar: "bg-red-400 w-1/4" },
+                    { label: "Online Rev", val: "$8,420", color: "text-indigo-600", bg: "bg-indigo-50", bar: "bg-indigo-500 w-[85%]" },
+                    { label: "Links Shared",  val: "342",    color: "text-emerald-600", bg: "bg-emerald-50", bar: "bg-emerald-500 w-3/4" },
+                    { label: "Customers", val: "1,204", color: "text-purple-600", bg: "bg-purple-50", bar: "bg-purple-500 w-2/3" },
+                    { label: "Pending Carts", val: "18", color: "text-orange-600", bg: "bg-orange-50", bar: "bg-orange-400 w-1/3" },
                   ].map((stat, i) => (
                     <div key={i} className="bg-white rounded-xl sm:rounded-2xl p-2.5 sm:p-3 shadow-sm border border-slate-100">
                       <div className={`text-[8px] sm:text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md sm:rounded-lg w-fit mb-1 sm:mb-1.5 ${stat.bg} ${stat.color}`}>{stat.label}</div>
@@ -180,17 +182,17 @@ export function LandingHero() {
 
                 {/* Alerts */}
                 <div className="bg-white rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-sm border border-slate-100 flex gap-2 flex-wrap">
-                  <span className="inline-flex items-center gap-1.5 bg-red-50 text-red-700 text-[8px] sm:text-[9px] font-bold px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full border border-red-100">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
-                    Low Stock: Espresso Beans
+                  <span className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 text-[8px] sm:text-[9px] font-bold px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full border border-indigo-100">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 flex-shrink-0" />
+                    Receipt sent to John D.
                   </span>
                   <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[8px] sm:text-[9px] font-bold px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full border border-emerald-100">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />
-                    Shift Started — John D.
+                    Order #TX-882 Paid via KPay
                   </span>
-                  <span className="hidden sm:inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 text-[9px] font-bold px-2.5 py-1.5 rounded-full border border-indigo-100">
-                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 flex-shrink-0" />
-                    New sale: $48.50 via QR
+                  <span className="hidden sm:inline-flex items-center gap-1.5 bg-orange-50 text-orange-700 text-[9px] font-bold px-2.5 py-1.5 rounded-full border border-orange-100">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
+                    Pending Web Order: $120.00
                   </span>
                 </div>
               </div>
