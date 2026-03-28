@@ -25,54 +25,70 @@ export default function OrderViewPage() {
       try {
         setLoading(true)
         
-        // 1. ONLY fetch from orders (pending)
-        const { data: orderData, error: orderErr } = await supabase
+        // 1. Try to find the order or transaction to get the store_id
+        let storeId = null
+        let isFinalized = false
+
+        // First check pending orders
+        const { data: orderData } = await supabase
           .from('orders')
           .select('*')
           .eq('id', id)
           .maybeSingle()
         
-        if (orderErr) throw orderErr
-
-        // If no data is found, it's either an invalid ID or RLS is blocking public access
-        if (!orderData) {
-          throw new Error("Order not found. If this is a pending order, please check that your Supabase 'orders' table has a public Read policy.")
+        if (orderData) {
+          storeId = orderData.store_id
+          const status = orderData.status?.toLowerCase()
+          if (status !== 'pending') {
+            isFinalized = true
+          } else {
+            setOrder(orderData)
+          }
+        } else {
+          // If not in pending, check completed transactions
+          const { data: txData } = await supabase
+            .from('transactions')
+            .select('store_id')
+            .eq('id', id)
+            .maybeSingle()
+          
+          if (txData) {
+            storeId = txData.store_id
+            isFinalized = true
+          }
         }
 
-        // Case-insensitive status check
-        const status = orderData.status?.toLowerCase()
-        if (status !== 'pending') {
-          setIsSold(true)
-          throw new Error("This order link has expired or the order has already been processed.")
+        // 2. Fetch Store Details if we found a storeId
+        if (storeId) {
+          const { data: storeData } = await supabase
+            .from('stores')
+            .select('*')
+            .eq('id', storeId)
+            .single()
+          setStore(storeData)
+
+          if (isFinalized) {
+            setIsSold(true)
+            throw new Error("This order has been processed and and is no longer available for public viewing. Please contact the retailer for a final receipt.")
+          }
+
+          // 3. Fetch Items only if it's pending and we have the order
+          if (orderData && !isFinalized) {
+            const { data: itemsData } = await supabase
+              .from('order_items')
+              .select('*')
+              .eq('orderId', id)
+            setItems(itemsData || [])
+
+            const { data: accountsData } = await supabase
+              .from('store_payment_accounts')
+              .select('*')
+              .eq('store_id', storeId)
+            setPaymentAccounts(accountsData || [])
+          }
+        } else {
+          throw new Error("Order not found. Please verify the link or contact your retailer.")
         }
-
-        setOrder(orderData)
-
-        // 2. Fetch Items
-        const { data: itemsData, error: itemsErr } = await supabase
-          .from('order_items')
-          .select('*')
-          .eq('orderId', id)
-        
-        if (itemsErr) throw itemsErr
-        setItems(itemsData || [])
-
-        // 3. Fetch Store Details
-        const { data: storeData } = await supabase
-          .from('stores')
-          .select('*')
-          .eq('id', orderData.store_id)
-          .single()
-        
-        setStore(storeData)
-
-        // 4. Fetch Payment Accounts
-        const { data: accountsData } = await supabase
-          .from('store_payment_accounts')
-          .select('*')
-          .eq('store_id', orderData.store_id)
-        
-        setPaymentAccounts(accountsData || [])
 
       } catch (err: any) {
         console.error(err)
@@ -100,15 +116,23 @@ export default function OrderViewPage() {
         <div className="w-20 h-20 bg-orange-100 text-orange-600 rounded-3xl flex items-center justify-center mb-8 shadow-xl shadow-orange-500/10">
           <Package className="w-10 h-10" />
         </div>
+        <div className="flex flex-col items-center gap-1 mb-6">
+           <h1 className="text-xl font-black text-black uppercase tracking-tight">{store?.name || "The Store"}</h1>
+           {store?.address && <p className="text-[10px] text-muted-foreground font-medium">{store.address}</p>}
+        </div>
+        
+        <div className="w-20 h-20 bg-orange-100 text-orange-600 rounded-3xl flex items-center justify-center mb-8 shadow-xl shadow-orange-500/10">
+          <Package className="w-10 h-10" />
+        </div>
         <h1 className="text-2xl font-black mb-2 tracking-tight">
           {isSold ? "Order Finalized" : "Order Not Found"}
         </h1>
         <p className="text-muted-foreground max-w-xs mb-10 text-sm leading-relaxed">
           {error || "This order may have been processed or the link is invalid. Please contact the retailer for assistance."}
         </p>
-        <div className="space-y-4">
+        <div className="space-y-4 pt-10 border-t border-black/5 w-full">
            <img src="/logo.png" alt="Retail Master" className="h-6 mx-auto opacity-30 invert hover:opacity-100 transition-opacity" onError={(e) => (e.currentTarget.style.display = 'none')} />
-           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40">Retail Master Digital Terminal</p>
+           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 text-center">Retail Master Digital Terminal</p>
         </div>
       </div>
     )
