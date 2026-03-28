@@ -34,8 +34,8 @@ export const useCartStore = create<CartStore>((set, get) => ({
     let newItems;
     if (existingItem) {
       const newQuantity = existingItem.quantity + quantity;
-      if (newQuantity > product.stock) {
-        // Limit to available stock
+      if (product.trackStock !== false && newQuantity > product.stock) {
+        // Limit to available stock only if tracking is enabled
         newItems = items.map((item) =>
           item.id === product.id
             ? { ...item, quantity: product.stock }
@@ -49,7 +49,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
         );
       }
     } else {
-      const securedQuantity = Math.min(quantity, product.stock);
+      const securedQuantity = product.trackStock !== false ? Math.min(quantity, product.stock) : quantity;
       newItems = [...items, { ...product, quantity: securedQuantity }];
     }
     
@@ -67,7 +67,12 @@ export const useCartStore = create<CartStore>((set, get) => ({
     set({
       items: items.map((item) =>
         item.id === productId
-          ? { ...item, quantity: Math.min(item.stock, Math.max(1, item.quantity + delta)) }
+          ? { 
+              ...item, 
+              quantity: item.trackStock !== false 
+                ? Math.min(item.stock, Math.max(1, item.quantity + delta))
+                : Math.max(1, item.quantity + delta)
+            }
           : item
       ),
     });

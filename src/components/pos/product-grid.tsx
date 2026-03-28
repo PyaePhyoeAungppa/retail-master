@@ -177,7 +177,7 @@ function ProductCard({ product, onAdd, currency }: { product: Product, onAdd: (p
             )}
             
             <div className="absolute top-3 right-3 flex flex-col gap-1.5 items-end">
-              {product.stock < 10 && (
+              {product.trackStock !== false && product.stock < 10 && (
                 <Badge variant="destructive" className="text-[9px] px-2 py-0.5 rounded-full font-black animate-pulse border-none shadow-lg">
                   {product.stock === 0 ? "EMPTY" : `${product.stock} LEFT`}
                 </Badge>
@@ -212,12 +212,14 @@ function ProductCard({ product, onAdd, currency }: { product: Product, onAdd: (p
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm transition-all text-muted-foreground hover:text-foreground active:scale-95"
                     >
-                      <Minus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                      <ul className="w-2.5 h-2.5 sm:w-3 sm:h-3">
+                        <Minus className="w-full h-full" />
+                      </ul>
                     </button>
                     <span className="w-4 sm:w-5 text-center font-black text-[9px] sm:text-[10px] tabular-nums">{quantity}</span>
                     <button 
-                      onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                      disabled={quantity >= product.stock}
+                      onClick={() => setQuantity(product.trackStock !== false ? Math.min(product.stock, quantity + 1) : quantity + 1)}
+                      disabled={product.trackStock !== false && quantity >= product.stock}
                       className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm transition-all text-muted-foreground hover:text-foreground active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <Plus className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
@@ -228,7 +230,7 @@ function ProductCard({ product, onAdd, currency }: { product: Product, onAdd: (p
                     size="icon"
                     className="h-7 w-7 rounded-lg shadow-sm active:scale-95 bg-primary hover:bg-primary/90 text-primary-foreground"
                     onClick={handleAdd}
-                    disabled={product.stock === 0}
+                    disabled={product.trackStock !== false && product.stock === 0}
                   >
                     <Plus className="w-4 h-4" />
                   </Button>

@@ -98,22 +98,12 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
     }))
 
     try {
-      // 1. Initial Stock Check
-      const { data: latestStock, error: stockCheckError } = await supabase
-        .from('products')
-        .select('id, name, stock')
-        .in('id', items.map(i => i.id))
-      
-      if (stockCheckError) throw stockCheckError
-
-      const insufficientItems = items.filter(item => {
-        const dbProduct = latestStock?.find(p => p.id === item.id)
-        return !dbProduct || dbProduct.stock < item.quantity
+      // 1. Deduct Stock via Atomic RPC (includes stock check)
+      const { error: rpcError } = await supabase.rpc('process_order_stock', { 
+        order_items: transactionItems 
       })
-
-      if (insufficientItems.length > 0) {
-        throw new Error(`Insufficient stock for one or more items.`)
-      }
+      
+      if (rpcError) throw new Error(rpcError.message)
 
       // 2. Process Checkout
       const { data: txData, error: txError } = await supabase
@@ -128,7 +118,7 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
         .insert(transactionItems)
       
       if (itemsError) throw itemsError
-
+      
       // 4. Update order status if this was a recalled order
       if (orderId) {
         await supabase
@@ -145,6 +135,7 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
         variant: "success",
       })
       
+      queryClient.invalidateQueries({ queryKey: ['products', storeId] })
       queryClient.invalidateQueries({ queryKey: ['pending-orders'] })
       queryClient.invalidateQueries({ queryKey: ['orders'] })
       queryClient.invalidateQueries({ queryKey: ['transactions'] })

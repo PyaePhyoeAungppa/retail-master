@@ -172,8 +172,17 @@ export function ProductTable() {
               <TableCell className="font-black text-lg py-4">{currency}{product.price.toFixed(2)}</TableCell>
               <TableCell className="py-4">
                 <div className="flex items-center gap-2">
-                   <div className={`w-2.5 h-2.5 rounded-full shadow-sm ${product.stock > 10 ? 'bg-green-500' : 'bg-red-500 animate-pulse'}`} />
-                   <span className="font-black text-sm">{product.stock} <span className="text-muted-foreground font-medium text-xs ml-0.5">Available</span></span>
+                   {product.trackStock !== false ? (
+                     <>
+                       <div className={`w-2.5 h-2.5 rounded-full shadow-sm ${product.stock > 10 ? 'bg-green-500' : 'bg-red-500 animate-pulse'}`} />
+                       <span className="font-black text-sm">{product.stock} <span className="text-muted-foreground font-medium text-xs ml-0.5">Available</span></span>
+                     </>
+                   ) : (
+                     <div className="flex items-center gap-2 text-muted-foreground italic">
+                        <Package className="w-3.5 h-3.5" />
+                        <span className="text-xs font-bold uppercase tracking-widest">Non-Tracked</span>
+                     </div>
+                   )}
                 </div>
               </TableCell>
               <TableCell className="text-right py-4">

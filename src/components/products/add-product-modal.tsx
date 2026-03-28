@@ -54,7 +54,8 @@ export function AddProductModal({ product, open: externalOpen, onOpenChange, tri
     price: "",
     category: "",
     stock: "",
-    image: ""
+    image: "",
+    trackStock: true
   })
 
   const [categorySearch, setCategorySearch] = useState("")
@@ -68,7 +69,8 @@ export function AddProductModal({ product, open: externalOpen, onOpenChange, tri
         price: product.price.toString(),
         category: product.category,
         stock: product.stock.toString(),
-        image: product.image || ""
+        image: product.image || "",
+        trackStock: product.trackStock ?? true
       })
     } else {
       setFormData({
@@ -76,7 +78,8 @@ export function AddProductModal({ product, open: externalOpen, onOpenChange, tri
         price: "",
         category: "",
         stock: "",
-        image: ""
+        image: "",
+        trackStock: true
       })
     }
   }, [product, isOpen])
@@ -132,7 +135,8 @@ export function AddProductModal({ product, open: externalOpen, onOpenChange, tri
           price: "",
           category: "",
           stock: "",
-          image: ""
+          image: "",
+          trackStock: true
         })
       }
       setSelectedFile(null)
@@ -185,6 +189,7 @@ export function AddProductModal({ product, open: externalOpen, onOpenChange, tri
         price: parseFloat(formData.price),
         category: formData.category,
         stock: parseInt(formData.stock),
+        trackStock: formData.trackStock,
         image: imageUrl || undefined,
         ...(product ? {} : { id: crypto.randomUUID() }) // Only add ID for new products
       })
@@ -295,6 +300,28 @@ export function AddProductModal({ product, open: externalOpen, onOpenChange, tri
                     )}
                   </div>
                 </div>
+
+                {mode !== 'stock' && (
+                  <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10 flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-xs font-black tracking-tight">Track Inventory</Label>
+                      <p className="text-[10px] text-muted-foreground font-medium">Automatic stock deduction on sale</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, trackStock: !formData.trackStock })}
+                      className={cn(
+                        "w-12 h-6 rounded-full p-1 transition-all duration-300",
+                        formData.trackStock ? "bg-primary" : "bg-muted"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-4 h-4 rounded-full bg-white transition-transform duration-300 shadow-sm",
+                        formData.trackStock ? "translate-x-6" : "translate-x-0"
+                      )} />
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Right Column: Category & Image */}
