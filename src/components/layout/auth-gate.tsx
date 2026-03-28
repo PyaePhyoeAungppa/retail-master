@@ -16,7 +16,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   const isLoginPage = pathname === "/login"
   const isLandingPage = pathname === "/"
-  const isPublicPage = isLoginPage || isLandingPage
+  const isOrderView = pathname?.startsWith("/order-view")
+  const isPublicPage = isLoginPage || isLandingPage || isOrderView
 
   useEffect(() => {
     console.log("AuthGate State:", { initialized, hasUser: !!currentUser, isProfileLoaded, storeId, pathname })
@@ -80,8 +81,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     )
   }
 
-  // If we're on the setup page, show a minimal version without navs
-  if (pathname === "/setup") {
+  // If we're on the setup page or order-view, show a minimal version without navs
+  if (pathname === "/setup" || isOrderView) {
     return <main className="flex-1 overflow-y-auto bg-accent/5">{children}</main>
   }
 

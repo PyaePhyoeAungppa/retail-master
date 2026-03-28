@@ -22,7 +22,18 @@ import { Trash2, Plus, Minus, CreditCard, ShoppingBag, ReceiptText, User as User
 import { useToastStore } from "@/store/use-toast-store"
 
 export function CartSidebar({ onOpenChange }: { onOpenChange?: (open: boolean) => void }) {
-  const { items, removeItem, updateQuantity, clearCart, total, selectedCustomer, setCustomer, orderId } = useCartStore()
+  const { 
+    items, 
+    removeItem, 
+    updateQuantity, 
+    clearCart, 
+    total, 
+    selectedCustomer, 
+    setCustomer, 
+    orderId,
+    includeTax,
+    setIncludeTax
+  } = useCartStore()
   const { storeId, currentUser } = useAuthStore()
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -68,7 +79,7 @@ export function CartSidebar({ onOpenChange }: { onOpenChange?: (open: boolean) =
 
   const taxRate = store?.tax_rate ?? 0.1
   const currency = store?.currency ?? "$"
-  const tax = total * taxRate
+  const tax = includeTax ? (total * taxRate) : 0
   const grandTotal = total + tax
 
   const [isSaving, setIsSaving] = useState(false)
@@ -307,14 +318,24 @@ export function CartSidebar({ onOpenChange }: { onOpenChange?: (open: boolean) =
 
       <div className="p-6 bg-muted/20 border-t space-y-4">
          <div className="space-y-2 text-sm">
-            <div className="flex justify-between text-muted-foreground">
+            <div className="flex justify-between text-muted-foreground font-medium">
               <span>Subtotal</span>
-              <span className="font-medium text-foreground">{currency}{total.toFixed(2)}</span>
+              <span className="text-foreground">{currency}{total.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-muted-foreground">
-              <span>Tax ({(taxRate * 100).toFixed(0)}%)</span>
-              <span className="font-medium text-foreground">{currency}{tax.toFixed(2)}</span>
-            </div>
+            <button 
+              onClick={() => setIncludeTax(!includeTax)}
+              className={`w-full flex justify-between items-center py-1 transition-all rounded-lg px-2 -mx-2 hover:bg-primary/5 group ${!includeTax ? 'opacity-50' : ''}`}
+            >
+              <span className="flex items-center gap-2 text-muted-foreground group-hover:text-primary transition-colors">
+                Tax ({(taxRate * 100).toFixed(0)}%)
+                <Badge variant="outline" className={`text-[9px] h-4 px-1 uppercase font-black transition-colors ${includeTax ? 'bg-primary/10 text-primary border-primary/20' : 'bg-muted text-muted-foreground border-muted'}`}>
+                  {includeTax ? 'Incl' : 'Excl'}
+                </Badge>
+              </span>
+              <span className={`font-bold transition-all ${includeTax ? 'text-foreground' : 'text-muted-foreground line-through'}`}>
+                {currency}{tax.toFixed(2)}
+              </span>
+            </button>
             <Separator className="my-2" />
             <div className="flex justify-between items-end">
               <span className="text-lg font-bold">Total Amount</span>

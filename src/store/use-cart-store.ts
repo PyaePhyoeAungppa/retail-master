@@ -21,6 +21,8 @@ interface CartStore {
   clearOrder: () => void;
   receiptTemplate: 'standard' | 'thermal' | 'modern';
   setReceiptTemplate: (template: 'standard' | 'thermal' | 'modern') => void;
+  includeTax: boolean;
+  setIncludeTax: (include: boolean) => void;
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
@@ -85,6 +87,8 @@ export const useCartStore = create<CartStore>((set, get) => ({
   clearOrder: () => set({ orderId: null }),
   receiptTemplate: 'standard',
   setReceiptTemplate: (template) => set({ receiptTemplate: template }),
+  includeTax: true,
+  setIncludeTax: (include) => set({ includeTax: include }),
   calculateTotal: () => {
     const items = get().items;
     const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);

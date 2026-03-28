@@ -4,11 +4,11 @@
 import { useState } from "react"
 import { Product, Category, Customer, Store } from "@/lib/data"
 import { useCartStore } from "@/store/use-cart-store"
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search, Plus, Minus, Loader2 } from "lucide-react"
+import { Search, Plus, Minus, Loader2, ChevronLeft, ChevronRight } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useQuery } from "@tanstack/react-query"
@@ -22,6 +22,20 @@ export function ProductGrid() {
   const { storeId } = useAuthStore()
   const addItem = useCartStore((state) => state.addItem)
   const { setCustomer, selectedCustomer } = useCartStore()
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const [showLeftArrow, setShowLeftArrow] = useState(false)
+  const [showRightArrow, setShowRightArrow] = useState(false)
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = 300
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      })
+    }
+  }
 
   // Auto-set default customer on load
   useEffect(() => {
@@ -93,6 +107,30 @@ export function ProductGrid() {
   // Add "All" category for filtering
   const categories = categoriesData ? [{ id: 'all', name: 'All' }, ...categoriesData] : [{ id: 'all', name: 'All' }]
 
+  useEffect(() => {
+    const checkScroll = () => {
+      if (scrollContainerRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current
+        setShowLeftArrow(scrollLeft > 10)
+        setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10)
+      }
+    }
+    
+    const current = scrollContainerRef.current
+    if (current) {
+      current.addEventListener('scroll', checkScroll)
+      window.addEventListener('resize', checkScroll)
+      // Initial check
+      checkScroll()
+    }
+    return () => {
+      if (current) {
+        current.removeEventListener('scroll', checkScroll)
+        window.removeEventListener('resize', checkScroll)
+      }
+    }
+  }, [categoriesData])
+
   const filteredProducts = (products || []).filter((product) => {
     const matchesCategory = activeCategory === "All" || product.category === activeCategory
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -102,19 +140,42 @@ export function ProductGrid() {
   return (
     <div className="flex flex-col h-full gap-6 p-6">
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-        <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full sm:w-auto">
-          <TabsList className="bg-muted/50 p-1 rounded-xl w-full sm:w-auto flex overflow-x-auto no-scrollbar justify-start sm:justify-center">
-            {categories.map((cat) => (
-              <TabsTrigger 
-                key={cat.id} 
-                value={cat.name}
-                className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex-1 sm:flex-none whitespace-nowrap"
+        <div className="flex items-center gap-2 flex-1 min-w-0 lg:max-w-[70%]">
+          <button 
+            onClick={() => scroll('left')}
+            disabled={!showLeftArrow}
+            className="shrink-0 w-10 h-10 rounded-xl bg-white/50 backdrop-blur-md shadow-sm border flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all duration-300 disabled:opacity-20 disabled:cursor-not-allowed"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          <div className="relative flex-1 overflow-hidden rounded-xl bg-muted/50 p-1">
+            <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full">
+              <TabsList 
+                ref={scrollContainerRef}
+                className="bg-transparent h-10 flex overflow-x-auto no-scrollbar justify-start items-center gap-1 scroll-smooth"
               >
-                {cat.name}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+                {categories.map((cat) => (
+                  <TabsTrigger 
+                    key={cat.id} 
+                    value={cat.name}
+                    className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm flex-none whitespace-nowrap px-4 h-8 font-bold tracking-tight min-w-[100px] transition-all"
+                  >
+                    {cat.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
+
+          <button 
+            onClick={() => scroll('right')}
+            disabled={!showRightArrow}
+            className="shrink-0 w-10 h-10 rounded-xl bg-white/50 backdrop-blur-md shadow-sm border flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all duration-300 disabled:opacity-20 disabled:cursor-not-allowed"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
         
         <div className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

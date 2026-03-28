@@ -13,7 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { CreditCard, Banknote, Smartphone, CheckCircle2, QrCode, Printer, Check, Loader2, Mail, Trash2 } from "lucide-react"
+import { CreditCard, Banknote, Smartphone, CheckCircle2, QrCode, Printer, Check, Loader2, Mail, Trash2, Share2, Percent } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import axios from "axios"
@@ -31,7 +31,18 @@ interface CheckoutModalProps {
 
 export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
   const queryClient = useQueryClient()
-  const { total, items, clearCart, selectedCustomer, receiptTemplate, setReceiptTemplate, orderId, setOrderId } = useCartStore()
+  const { 
+    total, 
+    items, 
+    clearCart, 
+    selectedCustomer, 
+    receiptTemplate, 
+    setReceiptTemplate, 
+    orderId, 
+    setOrderId,
+    includeTax,
+    setIncludeTax
+  } = useCartStore()
   const { currentUser, storeId } = useAuthStore()
   const { toast } = useToastStore()
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null)
@@ -58,7 +69,7 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
 
   const taxRate = store?.tax_rate ?? 0.1
   const currency = store?.currency ?? "$"
-  const tax = total * taxRate
+  const tax = includeTax ? (total * taxRate) : 0
   const grandTotal = total + tax
 
   const handleCheckout = async () => {
@@ -208,6 +219,18 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
                       <Printer className="w-4 h-4" />
                       Print Receipt
                   </Button>
+                  <Button 
+                    className="w-full h-12 rounded-xl flex gap-2" 
+                    variant="ghost"
+                    onClick={() => {
+                        const link = `${window.location.origin}/order-view/${transactionId}`
+                        navigator.clipboard.writeText(link)
+                        toast({ title: "Link Copied!", description: "Order link copied to clipboard.", variant: "success" })
+                    }}
+                  >
+                      <Share2 className="w-4 h-4" />
+                      Share Order Link
+                  </Button>
                   <Button className="w-full h-12 rounded-xl" onClick={handleDone}>
                       Next Order
                   </Button>
@@ -320,6 +343,39 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
                 </div>
               </div>
 
+              {/* Tax Inclusion Toggle */}
+              <div 
+                className={cn(
+                  "flex items-center justify-between p-4 rounded-2xl border-2 border-dashed transition-all cursor-pointer",
+                  includeTax ? "border-primary bg-primary/5" : "border-muted hover:border-primary/30"
+                )}
+                onClick={() => setIncludeTax(!includeTax)}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={cn(
+                    "w-9 h-9 rounded-xl flex items-center justify-center",
+                    includeTax ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  )}>
+                    <Percent className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-xs">Calculate Tax ({taxRate * 100}%)</p>
+                    <p className="text-[9px] text-muted-foreground font-medium">
+                      {includeTax ? "Tax is added to total" : "Tax is excluded"}
+                    </p>
+                  </div>
+                </div>
+                <div className={cn(
+                  "w-10 h-5 rounded-full p-1 transition-colors",
+                  includeTax ? "bg-primary" : "bg-muted"
+                )}>
+                  <div className={cn(
+                    "w-3 h-3 rounded-full bg-white transition-transform",
+                    includeTax ? "translate-x-5" : "translate-x-0"
+                  )} />
+                </div>
+              </div>
+
               {/* Compact Summary */}
               <div className="bg-primary/5 rounded-2xl p-5 border border-primary/10">
                 <div className="flex justify-between items-center mb-1">
@@ -328,7 +384,9 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
                 </div>
                 <div className="flex justify-between items-baseline">
                   <span className="text-3xl font-black text-primary tracking-tighter">{currency}{grandTotal.toFixed(2)}</span>
-                  <Badge variant="outline" className="bg-white border-primary/20 text-primary h-5 text-[9px]">TAX INCL.</Badge>
+                  <Badge variant="outline" className={cn("bg-white h-5 text-[9px]", includeTax ? "border-primary/20 text-primary" : "border-muted text-muted-foreground italic")}>
+                    {includeTax ? "TAX INCL." : "TAX EXCL."}
+                  </Badge>
                 </div>
               </div>
             </div>
