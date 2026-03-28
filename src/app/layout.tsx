@@ -9,11 +9,11 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "Retail Master — Modern Point of Sale System",
+    default: "Retail Master — Modern Platform for Online Retailers",
     template: "%s | Retail Master",
   },
   description:
-    "Retail Master is an all-in-one POS platform for modern retailers. Manage sales, inventory, staff, customers, and analytics from a single, beautiful interface.",
+    "Retail Master is an all-in-one platform for modern online retailers and social commerce. Manage sales, inventory, customers, and digital receipts from a single interface.",
   keywords: [
     "POS system",
     "point of sale",
@@ -28,15 +28,15 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Retail Master" }],
   creator: "Retail Master",
-  metadataBase: new URL("https://pos.retailmaster.io"),
+  metadataBase: new URL("https://retailmaster.store"),
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://pos.retailmaster.io",
+    url: "https://retailmaster.store",
     siteName: "Retail Master",
-    title: "Retail Master — Modern Point of Sale System",
+    title: "Retail Master — Platform for Online Retailers",
     description:
-      "The all-in-one POS platform for modern retailers. Sales, inventory, staff, customers, and deep analytics — beautifully unified.",
+      "The all-in-one platform for modern online retailers. Sales, inventory, staff, customers, and digital receipts — beautifully unified.",
     images: [
       {
         url: "/og-image.png",

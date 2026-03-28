@@ -1,6 +1,7 @@
 "use client"
 
 import { Store, Package, Zap, TrendingUp } from "lucide-react"
+import { MockPOSPreview } from "./mock-pos"
 import { useEffect, useRef, useState } from "react"
 
 const steps = [
@@ -115,6 +116,21 @@ export function LandingHowItWorks() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="mt-24 max-w-5xl mx-auto flex flex-col items-center">
+          <div className="inline-block text-[10px] font-black text-primary uppercase tracking-widest bg-primary/10 border border-primary/20 px-3 py-1 rounded-full mb-6">
+            Live Preview
+          </div>
+          <h3 className="text-2xl sm:text-3xl font-black tracking-tight mb-12 text-center">
+            Your Checkout Process, Simplified.
+          </h3>
+          <div className="w-full hidden md:block">
+            <MockPOSPreview />
+          </div>
+          <p className="mt-8 text-sm font-medium text-muted-foreground text-center max-w-lg">
+            A beautiful, intuitive interface means zero training time for you or your staff. Just tap, charge, and share the receipt.
+          </p>
         </div>
       </div>
     </section>

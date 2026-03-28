@@ -133,7 +133,7 @@ export function LandingHero() {
                 <div className="flex-1 flex justify-center min-w-0">
                   <div className="inline-flex items-center gap-1.5 px-2 sm:px-4 py-1 sm:py-1.5 rounded-lg bg-background/70 border border-border text-[8px] sm:text-[10px] font-bold text-muted-foreground uppercase tracking-wider truncate">
                     <Terminal className="w-2.5 h-2.5 sm:w-3 sm:h-3 flex-shrink-0" />
-                    <span className="hidden xs:inline">pos.retailmaster.io</span>
+                    <span className="hidden xs:inline">retailmaster.store</span>
                     <span className="xs:hidden">dashboard</span>
                   </div>
                 </div>
