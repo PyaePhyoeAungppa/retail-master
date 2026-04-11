@@ -172,7 +172,7 @@ export function LandingFooter() {
             <div className="mt-8 p-4 rounded-2xl bg-muted/60 border border-border">
               <p className="text-xs font-black text-foreground mb-0.5">Need Help?</p>
               <address className="not-italic text-xs text-muted-foreground font-medium">
-                <a href="mailto:hello@retailmaster.io" className="hover:text-primary transition-colors">hello@retailmaster.io</a>
+                <a href="mailto:hello@retailmaster.store" className="hover:text-primary transition-colors">hello@retailmaster.store</a>
               </address>
               <p className="text-xs text-muted-foreground mt-1 font-medium">24/7 support available</p>
             </div>

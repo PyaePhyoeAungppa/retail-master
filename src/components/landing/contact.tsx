@@ -62,7 +62,7 @@ export function LandingContact() {
           <div className="absolute bottom-0 left-0 w-[350px] h-[350px] bg-black/10 rounded-full translate-y-1/2 -translate-x-1/3 pointer-events-none" />
           <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:48px_48px] pointer-events-none" />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 relative z-10 p-10 lg:p-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 relative z-10 p-5 sm:p-10 lg:p-16">
 
             {/* Left: Info */}
             <div className="max-w-xl flex flex-col justify-center">
@@ -83,7 +83,7 @@ export function LandingContact() {
                   </div>
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Email Us</p>
-                    <p className="font-black">hello@retailmaster.io</p>
+                    <p className="font-black">hello@retailmaster.store</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 text-white">
@@ -99,7 +99,7 @@ export function LandingContact() {
             </div>
 
             {/* Right: Form */}
-            <div className="bg-white rounded-3xl p-8 lg:p-10 shadow-2xl">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl w-full">
 
               {status === "success" ? (
                 <div className="flex flex-col items-center justify-center text-center h-full min-h-[400px] gap-5">

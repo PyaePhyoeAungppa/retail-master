@@ -50,7 +50,7 @@ export function Sidebar() {
         <Store className="w-8 h-8" />
       </div>
       
-      <nav className="flex-1 flex lg:flex-col items-center justify-around lg:justify-start px-3 lg:space-y-4 lg:mt-6">
+      <nav className="flex-1 flex lg:flex-col items-center justify-start lg:justify-start overflow-x-auto lg:overflow-visible no-scrollbar gap-2 px-3 pt-2 lg:pt-0 lg:space-y-4 lg:mt-6">
         {filteredItems.map((item) => {
           const isActive = pathname === item.href
           return (
@@ -58,7 +58,7 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center justify-center w-12 h-12 lg:w-full lg:aspect-square rounded-2xl transition-all duration-300 group relative",
+                "flex shrink-0 items-center justify-center w-14 h-14 lg:w-full lg:aspect-square rounded-2xl transition-all duration-300 group relative",
                 isActive 
                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" 
                   : "hover:bg-accent text-muted-foreground hover:text-foreground"
