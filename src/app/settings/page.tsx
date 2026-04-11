@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { Moon, Sun, Monitor, Bell, Shield, Store, Loader2, Save, CreditCard, Plus, Trash2, TerminalSquare, XCircle, Clock } from "lucide-react"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Bell, Shield, Store, Loader2, Save, CreditCard, Plus, Trash2, TerminalSquare, XCircle, Clock, User, AlertTriangle, Monitor, Info } from "lucide-react"
 
 export default function SettingsPage() {
   const { storeId, role } = useAuthStore()
@@ -155,12 +156,23 @@ export default function SettingsPage() {
 
   const closeShiftMutation = useMutation({
     mutationFn: async (shiftId: string) => {
-      const { error } = await supabase.from('active_shifts').update({ status: 'closed', end_time: new Date().toISOString() }).eq('id', shiftId)
+      // 1. First, get the shift name as a fallback for closing linked sessions
+      const shiftToClose = activeShifts?.find(s => s.id === shiftId);
+      
+      // 2. We try to close by ID or Parent ID (The "Correct" way)
+      // If parent_shift_id doesn't exist, we'll try to match by name as a fallback
+      const { error } = await supabase
+        .from('active_shifts')
+        .update({ status: 'closed', end_time: new Date().toISOString() })
+        .or(`id.eq.${shiftId},parent_shift_id.eq.${shiftId},name.eq."${shiftToClose?.name}"`)
+        .eq('store_id', storeId)
+        .eq('status', 'active')
+        
       if (error) throw error
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['active_shifts', storeId] })
-      toast({ title: "Assignment Ended", variant: "success" })
+      toast({ title: "Shift Ended & Terminals Released", variant: "success" })
     }
   })
 
@@ -173,6 +185,8 @@ export default function SettingsPage() {
   })
 
   const [masterShiftName, setMasterShiftName] = useState("Morning Shift")
+  const [confirmCloseId, setConfirmCloseId] = useState<string | null>(null)
+  const [hasLinkedSessions, setHasLinkedSessions] = useState(false)
 
   const { data: staff, isLoading: isLoadingStaff } = useQuery({
     queryKey: ['staff', storeId],
@@ -230,6 +244,12 @@ export default function SettingsPage() {
 
   const masterShifts = activeShifts?.filter((s: any) => !s.terminal_id) || []
   const sessionAssignments = activeShifts?.filter((s: any) => s.terminal_id) || []
+  
+  // SESSIONS WITHOUT AN OPEN MASTER SHIFT (Safety Net)
+  const orphanedSessions = sessionAssignments.filter((s: any) => 
+    !s.parent_shift_id || !masterShifts.some(m => m.id === s.parent_shift_id)
+  )
+
 
   const mutation = useMutation({
     mutationFn: async (updatedData: any) => {
@@ -609,11 +629,11 @@ export default function SettingsPage() {
                           size="sm" 
                           className="h-8 rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50 font-black text-[9px] uppercase tracking-widest"
                           onClick={() => {
-                             if (linkedSessions.length > 0 && !confirm("There are active staff linked to this shift. Closing it will end their sessions too. Proceed?")) return;
-                             closeShiftMutation.mutate(master.id)
+                             setConfirmCloseId(master.id)
+                             setHasLinkedSessions(linkedSessions.length > 0)
                           }}
                         >
-                          End Shift Content
+                          End Shift & Release All
                         </Button>
                       </div>
                       
@@ -653,6 +673,47 @@ export default function SettingsPage() {
                     </div>
                   )
                 })}
+
+                {/* Orphaned / Unlinked Sessions Recovery */}
+                {orphanedSessions.length > 0 && (
+                  <div className="mt-8 pt-8 border-t border-dashed">
+                    <div className="flex items-center gap-3 mb-4 opacity-60">
+                       <AlertTriangle className="w-5 h-5 text-amber-500" />
+                       <h4 className="font-black text-sm uppercase tracking-widest text-amber-600">Unlinked Active Sessions</h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {orphanedSessions.map((session: any) => {
+                        const assignedStaff = staff?.find((s: any) => s.user_id === session.cashier_id);
+                        return (
+                          <div key={session.id} className="flex items-center justify-between p-4 rounded-2xl bg-amber-50/30 border border-amber-200/50 relative overflow-hidden group">
+                            <div className="flex items-center gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-amber-500 border border-amber-100 shadow-sm">
+                                <TerminalSquare className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <p className="font-bold text-xs">{assignedStaff?.profiles?.full_name || "Self-Started"}</p>
+                                <p className="text-[9px] font-bold text-amber-600/70 uppercase tracking-widest">
+                                  Terminal: {session.terminal} (Stuck)
+                                </p>
+                              </div>
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 px-3 rounded-lg text-amber-700 hover:bg-amber-100 font-bold text-[9px] uppercase tracking-widest"
+                              onClick={() => closeShiftMutation.mutate(session.id)}
+                            >
+                              Release Terminal
+                            </Button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                    <p className="mt-3 text-[9px] font-medium text-muted-foreground italic px-2">
+                       These sessions are active but not linked to a master shift. "Release" them to make the terminals available again.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {isLoadingShifts || isLoadingStaff ? (
@@ -666,71 +727,73 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-
-        <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
-          <CardHeader className="bg-muted/30">
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Monitor className="w-5 h-5 text-primary" />
-              Interface Preference
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-8 space-y-6">
-             <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                   <p className="font-bold">Display Theme</p>
-                   <p className="text-sm text-muted-foreground">Change the appearance of the POS interface.</p>
-                </div>
-                <div className="flex bg-muted p-1 rounded-xl">
-                   <Button variant="ghost" className="rounded-lg h-9 w-9 p-0 bg-white shadow-sm">
-                      <Sun className="w-4 h-4" />
-                   </Button>
-                   <Button variant="ghost" className="rounded-lg h-9 w-9 p-0 text-muted-foreground">
-                      <Moon className="w-4 h-4" />
-                   </Button>
-                   <Button variant="ghost" className="rounded-lg h-9 w-9 p-0 text-muted-foreground">
-                      <Monitor className="w-4 h-4" />
-                   </Button>
-                </div>
-             </div>
-             <Separator />
-             <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                   <p className="font-bold">Notifications</p>
-                   <p className="text-sm text-muted-foreground">Manage sound and visual alerts for transactions.</p>
-                </div>
-                <Button variant="outline" className="rounded-xl">Configure Alerts</Button>
-             </div>
-          </CardContent>
-        </Card>
       </div>
 
-      <div className="flex justify-end gap-3 pt-4">
-         <Button 
-          variant="ghost" 
-          className="rounded-xl h-12 px-6 font-bold"
-          onClick={() => store && setFormData({
-            name: store.name || "",
-            brand: store.brand || "",
-            address: store.address || ""
-          })}
-         >
-          Discard Changes
-         </Button>
-         <Button 
-          className="rounded-xl h-12 px-10 font-black shadow-xl shadow-primary/20 flex gap-2 active:scale-95 transition-all"
-          onClick={handleSave}
-          disabled={mutation.isPending}
-         >
-          {mutation.isPending ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <>
-              <Save className="w-5 h-5" />
-              Save Configuration
-            </>
-          )}
-         </Button>
-      </div>
+      {/* Custom Confirmation Dialog */}
+      <Dialog open={!!confirmCloseId} onOpenChange={(open) => !open && setConfirmCloseId(null)}>
+        <DialogContent className="rounded-[2.5rem] p-8 gap-6 max-w-sm border-none shadow-2xl">
+          <div className="flex flex-col items-center text-center gap-6">
+            <div className="w-16 h-16 rounded-3xl bg-amber-50 text-amber-500 flex items-center justify-center shadow-inner ring-1 ring-amber-100">
+               <Info className="w-8 h-8" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-black tracking-tight leading-none">End Shift Session?</h3>
+              <p className="text-muted-foreground font-medium text-sm leading-relaxed px-4">
+                {hasLinkedSessions 
+                  ? "There are active staff linked to this shift. Closing it will automatically end their sessions and release their terminals."
+                  : "Are you sure you want to end this store shift? This will finalize all current sales activity."
+                }
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Button 
+              className="w-full rounded-2xl h-12 font-black uppercase tracking-widest text-[10px] bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/20"
+              onClick={() => {
+                if (confirmCloseId) closeShiftMutation.mutate(confirmCloseId)
+                setConfirmCloseId(null)
+              }}
+            >
+              End Shift & Terminate Sessions
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full rounded-2xl h-12 font-bold text-muted-foreground"
+              onClick={() => setConfirmCloseId(null)}
+            >
+              Go Back
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+    <div className="flex justify-end gap-3 pt-4">
+      <Button 
+        variant="ghost" 
+        className="rounded-xl h-12 px-6 font-bold"
+        onClick={() => store && setFormData({
+          name: store.name || "",
+          brand: store.brand || "",
+          address: store.address || ""
+        })}
+      >
+        Discard Changes
+      </Button>
+      <Button 
+        className="rounded-xl h-12 px-10 font-black shadow-xl shadow-primary/20 flex gap-2 active:scale-95 transition-all"
+        onClick={handleSave}
+        disabled={mutation.isPending}
+      >
+        {mutation.isPending ? (
+          <Loader2 className="w-5 h-5 animate-spin" />
+        ) : (
+          <>
+            <Save className="w-5 h-5" />
+            Save Configuration
+          </>
+        )}
+      </Button>
     </div>
+  </div>
   )
 }
