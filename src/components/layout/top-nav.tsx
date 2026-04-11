@@ -21,8 +21,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Store, Info, AlertTriangle, CheckCircle } from "lucide-react"
 
 export function TopNav() {
-  const [time, setTime] = useState(new Date())
-  const [mounted, setMounted] = useState(false)
   const { currentUser, signOut, storeId } = useAuthStore()
 
   const { data: shift } = useQuery({
@@ -71,12 +69,6 @@ export function TopNav() {
     enabled: !!storeId
   })
 
-  useEffect(() => {
-    setMounted(true)
-    const timer = setInterval(() => setTime(new Date()), 1000)
-    return () => clearInterval(timer)
-  }, [])
-
   const initials = currentUser?.email?.substring(0, 2).toUpperCase() || "AD"
   const unreadCount = notifications?.filter((n: any) => !n.read).length || 0
 
@@ -102,12 +94,6 @@ export function TopNav() {
       </div>
 
       <div className="flex items-center gap-6">
-        <div className="flex items-center gap-2 text-muted-foreground font-medium bg-muted/30 px-4 py-2 rounded-xl border">
-          <Clock className="w-4 h-4 text-primary" />
-          <span className="text-sm font-bold font-mono">
-            {mounted ? time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : "00:00:00"}
-          </span>
-        </div>
         
         <div className="flex items-center gap-3">
 
