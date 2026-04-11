@@ -217,11 +217,26 @@ export default function ReportsPage() {
          const end = shift.end_time ? new Date(shift.end_time).getTime() : new Date().getTime()
          return txDate >= start && txDate <= end
       })
-      const total = shiftTxs.reduce((sum, tx) => sum + Number(tx.total), 0)
+      
+      const completedTxs = shiftTxs.filter(tx => tx.status === 'completed')
+      const total = completedTxs.reduce((sum, tx) => sum + Number(tx.total), 0)
+      
+      const cashTotal = completedTxs.filter(tx => tx.method === 'cash').reduce((sum, tx) => sum + Number(tx.total), 0)
+      const cardTotal = completedTxs.filter(tx => tx.method === 'card').reduce((sum, tx) => sum + Number(tx.total), 0)
+      const qrTotal = completedTxs.filter(tx => tx.method === 'qr').reduce((sum, tx) => sum + Number(tx.total), 0)
+      
+      const itemCount = completedTxs.reduce((sum, tx) => sum + Number(tx.itemsCount || 0), 0)
+      const refundedCount = shiftTxs.filter(tx => tx.status === 'refunded' || tx.status === 'voided').length
+
       return {
          ...shift,
          total,
-         txCount: shiftTxs.length
+         txCount: completedTxs.length,
+         cashTotal,
+         cardTotal,
+         qrTotal,
+         itemCount,
+         refundedCount
       }
     })
   }, [shifts, transactions])
@@ -681,15 +696,40 @@ export default function ReportsPage() {
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-8 text-right min-w-[240px]">
-                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Total Sales</p>
-                            <p className="text-3xl font-black text-primary">{currency}{shift.total.toFixed(2)}</p>
-                         </div>
-                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Transactions</p>
-                            <p className="text-3xl font-black">{shift.txCount}</p>
-                         </div>
+                      <div className="flex flex-col gap-6 w-full lg:w-auto">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-12 min-w-full lg:min-w-[400px]">
+                           <div>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Total Sales</p>
+                              <p className="text-3xl font-black text-primary">{currency}{shift.total.toFixed(2)}</p>
+                           </div>
+                           <div>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Transactions</p>
+                              <p className="text-3xl font-black">{shift.txCount}</p>
+                           </div>
+                           <div>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Items Sold</p>
+                              <p className="text-3xl font-black text-emerald-500">{shift.itemCount}</p>
+                           </div>
+                           <div>
+                              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Refunds/Voids</p>
+                              <p className="text-3xl font-black text-rose-500">{shift.refundedCount}</p>
+                           </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-4 p-4 bg-muted/40 rounded-2xl border">
+                           <div className="text-center border-r border-border/50">
+                              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">Cash</p>
+                              <p className="text-sm font-bold text-foreground">{currency}{shift.cashTotal.toFixed(2)}</p>
+                           </div>
+                           <div className="text-center border-r border-border/50">
+                              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">Card</p>
+                              <p className="text-sm font-bold text-foreground">{currency}{shift.cardTotal.toFixed(2)}</p>
+                           </div>
+                           <div className="text-center">
+                              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">QR Payment</p>
+                              <p className="text-sm font-bold text-foreground">{currency}{shift.qrTotal.toFixed(2)}</p>
+                           </div>
+                        </div>
                       </div>
                     </div>
                   </Card>

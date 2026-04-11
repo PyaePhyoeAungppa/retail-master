@@ -27,18 +27,23 @@ export function TopNav() {
   const { toast } = useToastStore()
 
   const { data: shift } = useQuery({
-    queryKey: ['activeShift', shiftId],
+    queryKey: ['activeShift', storeId, shiftId],
     queryFn: async () => {
-      if (!shiftId) return null
-      const { data, error } = await supabase
-        .from('active_shifts')
-        .select('*')
-        .eq('id', shiftId)
-        .single()
+      if (!storeId) return null
+
+      let query = supabase.from('active_shifts').select('*')
+      
+      if (shiftId) {
+        query = query.eq('id', shiftId)
+      } else {
+        query = query.eq('status', 'active').eq('store_id', storeId)
+      }
+
+      const { data, error } = await query.single()
       if (error && error.code !== 'PGRST116') throw error
       return data
     },
-    enabled: !!shiftId
+    enabled: !!storeId
   })
 
   const { data: notifications } = useQuery({
@@ -74,25 +79,6 @@ export function TopNav() {
   const initials = currentUser?.email?.substring(0, 2).toUpperCase() || "AD"
   const unreadCount = notifications?.filter((n: any) => !n.read).length || 0
 
-  const endShiftMutation = useMutation({
-    mutationFn: async (shiftId: string) => {
-      const { error } = await supabase
-        .from('active_shifts')
-        .update({ status: 'closed', end_time: new Date().toISOString() })
-        .eq('id', shiftId)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['activeShift'] })
-      queryClient.invalidateQueries({ queryKey: ['shifts'] })
-      setSessionContext(null, null)
-      toast({ title: "Shift ended successfully", variant: "success" })
-    },
-    onError: (error: any) => {
-      toast({ title: error.message || "Failed to end shift", variant: "destructive" })
-    }
-  })
-
   return (
     <header className="h-16 border-b bg-card px-4 lg:px-8 flex items-center justify-between sticky top-0 z-10 shadow-sm shrink-0">
       <div className="flex items-center gap-4 lg:gap-8 min-w-0">
@@ -109,17 +95,6 @@ export function TopNav() {
               <Badge variant="secondary" className="rounded-lg py-0 px-1.5 text-[10px] font-black uppercase">
                 {shift?.terminal || "Term 01"}
               </Badge>
-              {shift && role !== 'admin' && (
-                <button
-                  onClick={() => endShiftMutation.mutate(shift.id)}
-                  disabled={endShiftMutation.isPending}
-                  className="ml-2 px-2 h-6 rounded-md bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 transition-colors shrink-0 text-[10px] font-black uppercase tracking-widest gap-1"
-                  title="End Shift"
-                >
-                  {endShiftMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin"/> : null}
-                  End Shift
-                </button>
-              )}
             </div>
           </div>
         </div>
