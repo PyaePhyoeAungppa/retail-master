@@ -7,6 +7,15 @@ import { LandingNav } from "@/components/landing/nav"
 import { LandingTargetAudience } from "@/components/landing/target-audience"
 import { LandingPricing } from "@/components/landing/pricing"
 import { LandingFinalCTA } from "@/components/landing/final-cta"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Retail Master | Point of Sale (POS) System for Online Sellers",
+  description: "Boost your business with Retail Master, the all-in-one Point of Sale (POS) platform designed to simplify inventory, sales, and CRM for social commerce and online retailers.",
+  alternates: {
+    canonical: "https://retailmaster.store",
+  }
+}
 
 export default function LandingPage() {
   return (

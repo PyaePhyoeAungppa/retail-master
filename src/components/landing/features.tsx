@@ -18,8 +18,8 @@ export function LandingFeatures() {
             Feature Deep Dive
           </div>
           <h2 className="text-4xl lg:text-6xl font-black tracking-tighter mb-5 leading-[0.95]">
-            Built for the way{" "}
-            <span className="text-primary/60">you actually sell.</span>
+            A Retail POS built for{" "}
+            <span className="text-primary/60">how you actually sell.</span>
           </h2>
           <p className="text-lg text-muted-foreground font-medium leading-relaxed max-w-2xl mx-auto">
             Every feature is designed around the real workflow of online retailers — no bloat, no jargon, just tools that make your day faster.
