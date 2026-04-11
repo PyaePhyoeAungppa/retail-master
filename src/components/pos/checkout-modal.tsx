@@ -43,7 +43,7 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
     includeTax,
     setIncludeTax
   } = useCartStore()
-  const { currentUser, storeId } = useAuthStore()
+  const { currentUser, storeId, shiftId, terminalId } = useAuthStore()
   const { toast } = useToastStore()
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null)
   const [isSuccess, setIsSuccess] = useState(false)
