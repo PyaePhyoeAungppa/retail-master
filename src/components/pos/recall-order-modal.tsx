@@ -18,6 +18,7 @@ import { useAuthStore } from "@/store/use-auth-store"
 import { Transaction, Order } from "@/lib/data"
 import { useCartStore } from "@/store/use-cart-store"
 import { useToastStore } from "@/store/use-toast-store"
+import { useCurrency } from "@/hooks/use-currency"
 
 interface RecallOrderModalProps {
   open: boolean
@@ -26,6 +27,7 @@ interface RecallOrderModalProps {
 
 export function RecallOrderModal({ open, onOpenChange }: RecallOrderModalProps) {
   const { storeId } = useAuthStore()
+  const currency = useCurrency()
   const { setOrderId, setCustomer, addItem, clearCart } = useCartStore()
   const { toast } = useToastStore()
   const [searchQuery, setSearchQuery] = useState("")
@@ -167,7 +169,7 @@ export function RecallOrderModal({ open, onOpenChange }: RecallOrderModalProps) 
 
                    <div className="text-right flex items-center gap-4">
                       <div className="space-y-0.5">
-                         <p className="text-xl font-black text-primary">${order.total.toFixed(2)}</p>
+                         <p className="text-xl font-black text-primary">{currency}{order.total.toFixed(2)}</p>
                          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{order.itemsCount} Items</p>
                       </div>
                       <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />

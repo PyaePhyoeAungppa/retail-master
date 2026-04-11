@@ -4,6 +4,7 @@ import { useState, useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { useAuthStore } from "@/store/use-auth-store"
+import { useCurrency } from "@/hooks/use-currency"
 import { 
   BarChart3, 
   Download, 
@@ -20,7 +21,8 @@ import {
   ChevronRight,
   Filter,
   ArrowLeft,
-  Building
+  Building,
+  Clock
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -40,10 +42,11 @@ import {
   Pie
 } from "recharts"
 
-type ReportType = 'gallery' | 'summary' | 'details' | 'top-items' | 'top-categories'
+type ReportType = 'gallery' | 'summary' | 'details' | 'top-items' | 'top-categories' | 'shift-sales'
 
 export default function ReportsPage() {
   const { storeId: authStoreId, role, currentUser, accessibleStores } = useAuthStore()
+  const currency = useCurrency()
   const [selectedStoreId, setSelectedStoreId] = useState(authStoreId)
   const [activeReport, setActiveReport] = useState<ReportType>('gallery')
   const [dateRange, setDateRange] = useState<'7d' | '30d' | 'all' | 'custom'>('7d')
@@ -108,6 +111,24 @@ export default function ReportsPage() {
       return data
     },
     enabled: !!selectedStoreId && (activeReport === 'top-items' || activeReport === 'top-categories' || activeReport === 'details' || activeReport === 'summary')
+  })
+
+  // Shifts Data Fetch (For Shift Sales)
+  const { data: shifts } = useQuery({
+    queryKey: ['reports-shifts', selectedStoreId, dateRange, customStart, customEnd],
+    queryFn: async () => {
+      if (!selectedStoreId) return []
+      let query = supabase.from('active_shifts').select('*').eq('store_id', selectedStoreId)
+      
+      if (dateRange === '7d') query = query.gte('start_time', format(subDays(new Date(), 7), 'yyyy-MM-dd'))
+      else if (dateRange === '30d') query = query.gte('start_time', format(subDays(new Date(), 30), 'yyyy-MM-dd'))
+      else if (dateRange === 'custom') query = query.gte('start_time', customStart).lte('start_time', `${customEnd}T23:59:59`)
+      
+      const { data, error } = await query.order('start_time', { ascending: false })
+      if (error) throw error
+      return data
+    },
+    enabled: !!selectedStoreId && activeReport === 'shift-sales'
   })
 
   // Analytics Computations
@@ -187,6 +208,24 @@ export default function ReportsPage() {
     return Array.from(map.values()).sort((a, b) => b.rev - a.rev)
   }, [transactionItems])
 
+  const shiftSalesData = useMemo(() => {
+    if (!shifts || !transactions) return []
+    return shifts.map((shift: any) => {
+      const shiftTxs = transactions.filter(tx => {
+         const txDate = new Date(tx.date).getTime()
+         const start = new Date(shift.start_time).getTime()
+         const end = shift.end_time ? new Date(shift.end_time).getTime() : new Date().getTime()
+         return txDate >= start && txDate <= end
+      })
+      const total = shiftTxs.reduce((sum, tx) => sum + Number(tx.total), 0)
+      return {
+         ...shift,
+         total,
+         txCount: shiftTxs.length
+      }
+    })
+  }, [shifts, transactions])
+
   // Chart Colors
   const COLORS = ['#6366f1', '#a855f7', '#ec4899', '#f43f5e', '#f97316', '#eab308']
 
@@ -205,6 +244,7 @@ export default function ReportsPage() {
             { id: 'details', title: 'Sale Details', desc: 'Itemized transaction lists and customer data.', icon: Search, color: 'text-purple-500', bg: 'bg-purple-50' },
             { id: 'top-items', title: 'Top Sale Items', desc: 'Best performing products by revenue and volume.', icon: Package, color: 'text-emerald-500', bg: 'bg-emerald-50' },
             { id: 'top-categories', title: 'Category Report', desc: 'Revenue distribution across product categories.', icon: Layers, color: 'text-orange-500', bg: 'bg-orange-50' },
+            { id: 'shift-sales', title: 'Shift Sales', desc: 'Revenue broken down by individual operation shifts.', icon: Clock, color: 'text-rose-500', bg: 'bg-rose-50' },
           ].map((r) => (
             <Card 
               key={r.id} 
@@ -249,6 +289,7 @@ export default function ReportsPage() {
               {activeReport === 'details' && (role === 'customer' ? 'My Orders' : 'Sale Details')}
               {activeReport === 'top-items' && (role === 'customer' ? 'My Top Products' : 'Top Sale Items')}
               {activeReport === 'top-categories' && (role === 'customer' ? 'Category Spending' : 'Category Report')}
+              {activeReport === 'shift-sales' && 'Shift Sales Tracker'}
             </h1>
             <p className="text-muted-foreground font-medium">
               {role === 'customer' ? 'Your personal purchase history and insights.' : `Intelligence data for ${currentStoreName}.`}
@@ -336,10 +377,10 @@ export default function ReportsPage() {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                   {[
-                    { label: 'Grand Total', val: `$${summaryStats.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-50' },
-                    { label: 'Net Sales', val: `$${summaryStats.net.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: TrendingUp, color: 'text-blue-500', bg: 'bg-blue-50' },
-                    { label: 'Tax Total', val: `$${summaryStats.tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: Filter, color: 'text-orange-500', bg: 'bg-orange-50' },
-                    { label: 'Avg Order', val: `$${summaryStats.aov.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: TrendingUp, color: 'text-purple-500', bg: 'bg-purple-50' },
+                    { label: 'Grand Total', val: `${currency}${summaryStats.total.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+                    { label: 'Net Sales', val: `${currency}${summaryStats.net.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: TrendingUp, color: 'text-blue-500', bg: 'bg-blue-50' },
+                    { label: 'Tax Total', val: `${currency}${summaryStats.tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: Filter, color: 'text-orange-500', bg: 'bg-orange-50' },
+                    { label: 'Avg Order', val: `${currency}${summaryStats.aov.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, icon: TrendingUp, color: 'text-purple-500', bg: 'bg-purple-50' },
                     { label: 'Units Sold', val: summaryStats.units, icon: Package, color: 'text-pink-500', bg: 'bg-pink-50' },
                   ].map((s, i) => (
                     <Card key={i} className="border-none shadow-xl shadow-slate-200/50 rounded-[2rem] hover:shadow-2xl transition-all duration-300">
@@ -365,7 +406,7 @@ export default function ReportsPage() {
                          {insights.topCustomer ? (
                            <div className="space-y-1">
                              <h4 className="text-2xl font-black tracking-tight">{insights.topCustomer.name}</h4>
-                             <p className="text-sm font-bold text-primary">${insights.topCustomer.val.toFixed(2)} Life Value</p>
+                             <p className="text-sm font-bold text-primary">{currency}{insights.topCustomer.val.toFixed(2)} Life Value</p>
                            </div>
                          ) : (
                            <p className="font-bold text-slate-500">No registered customers yet</p>
@@ -474,7 +515,7 @@ export default function ReportsPage() {
                                    <span className="font-medium text-muted-foreground">
                                      <span className="font-black text-foreground">{item.quantity}x</span> {item.name}
                                    </span>
-                                   <span className="font-bold text-slate-400">${item.price?.toFixed(2)}</span>
+                                   <span className="font-bold text-slate-400">{currency}{item.price?.toFixed(2)}</span>
                                  </div>
                                ))}
                                {items.length === 0 && !itemsLoading && (
@@ -485,7 +526,7 @@ export default function ReportsPage() {
                                )}
                              </div>
                            </td>
-                           <td className="px-8 py-6 align-top text-right font-black text-sm text-primary">${tx.total.toFixed(2)}</td>
+                           <td className="px-8 py-6 align-top text-right font-black text-sm text-primary">{currency}{tx.total.toFixed(2)}</td>
                          </tr>
                        )
                      })}
@@ -523,7 +564,7 @@ export default function ReportsPage() {
                             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{item.qty} units sold</p>
                           </div>
                         </div>
-                        <p className="font-black text-primary">${item.rev.toFixed(2)}</p>
+                        <p className="font-black text-primary">{currency}{item.rev.toFixed(2)}</p>
                       </div>
                     ))}
                   </div>
@@ -594,7 +635,7 @@ export default function ReportsPage() {
                             <span className="font-black text-sm uppercase tracking-tight">{cat.name}</span>
                           </div>
                           <div className="text-right">
-                            <p className="font-black text-lg">${cat.rev.toFixed(2)}</p>
+                            <p className="font-black text-lg">{currency}{cat.rev.toFixed(2)}</p>
                             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Revenue Weight</p>
                           </div>
                         </div>
@@ -604,6 +645,57 @@ export default function ReportsPage() {
                 </>
               )}
            </div>
+        )}
+
+        {activeReport === 'shift-sales' && (
+          <div className="space-y-6">
+             {shiftSalesData?.length === 0 ? (
+               <Card className="col-span-full border-none shadow-xl shadow-slate-200/50 rounded-[2.5rem] p-20 flex flex-col items-center justify-center animate-in zoom-in-95 duration-500">
+                 <Clock className="w-16 h-16 text-muted-foreground opacity-20 mb-4" />
+                 <h3 className="text-xl font-black tracking-tight text-muted-foreground">No Shifts Recorded</h3>
+                 <p className="text-sm text-muted-foreground/60 font-medium">There are no shift sessions in this time period.</p>
+               </Card>
+             ) : (
+                shiftSalesData.map((shift, idx) => (
+                  <Card key={shift.id || idx} className="border-none shadow-lg shadow-slate-200/50 rounded-[2.5rem] p-8">
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                      <div className="flex items-center gap-6">
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${shift.status === 'active' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
+                           <Clock className="w-8 h-8" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-3 mb-1">
+                             <h3 className="text-xl font-black">{shift.name}</h3>
+                             {shift.status === 'active' ? (
+                               <Badge className="bg-emerald-500 hover:bg-emerald-600 font-black uppercase text-[9px] tracking-widest">Active</Badge>
+                             ) : (
+                               <Badge variant="secondary" className="font-black uppercase text-[9px] tracking-widest">Closed</Badge>
+                             )}
+                          </div>
+                          <p className="text-sm text-muted-foreground font-bold">
+                             {format(new Date(shift.start_time), 'MMM dd, HH:mm')} - {shift.end_time ? format(new Date(shift.end_time), 'HH:mm') : 'Present'}
+                          </p>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mt-1">
+                             Terminal: {shift.terminal || shift.terminal_id}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-8 text-right min-w-[240px]">
+                         <div>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Total Sales</p>
+                            <p className="text-3xl font-black text-primary">{currency}{shift.total.toFixed(2)}</p>
+                         </div>
+                         <div>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Transactions</p>
+                            <p className="text-3xl font-black">{shift.txCount}</p>
+                         </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))
+             )}
+          </div>
         )}
       </div>
     </div>

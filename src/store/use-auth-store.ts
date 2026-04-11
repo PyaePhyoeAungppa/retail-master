@@ -17,6 +17,9 @@ interface AuthState {
   setRole: (role: string | null) => void
   setAccessibleStores: (stores: { id: string, name: string }[]) => void
   setProfileLoaded: (loaded: boolean) => void
+  shiftId: string | null
+  terminalId: string | null
+  setSessionContext: (shiftId: string | null, terminalId: string | null) => void
   signOut: () => Promise<void>
 }
 
@@ -30,6 +33,8 @@ export const useAuthStore = create<AuthState>()(
       role: null,
       accessibleStores: [],
       isProfileLoaded: false,
+      shiftId: null,
+      terminalId: null,
       setUser: (user) => set({ currentUser: user, initialized: true }),
       setSession: (session) => set({ 
         session, 
@@ -40,14 +45,17 @@ export const useAuthStore = create<AuthState>()(
         role: session ? get().role : null,
         storeId: session ? get().storeId : null,
         accessibleStores: session ? get().accessibleStores : [],
+        shiftId: session ? get().shiftId : null,
+        terminalId: session ? get().terminalId : null,
       }),
       setStoreId: (id) => set({ storeId: id }),
       setRole: (role) => set({ role: role }),
       setAccessibleStores: (stores) => set({ accessibleStores: stores }),
       setProfileLoaded: (loaded) => set({ isProfileLoaded: loaded }),
+      setSessionContext: (shiftId, terminalId) => set({ shiftId, terminalId }),
       signOut: async () => {
         await supabase.auth.signOut()
-        set({ session: null, currentUser: null, storeId: null, role: null, accessibleStores: [], isProfileLoaded: false })
+        set({ session: null, currentUser: null, storeId: null, role: null, accessibleStores: [], isProfileLoaded: false, shiftId: null, terminalId: null })
       }
     }),
     {

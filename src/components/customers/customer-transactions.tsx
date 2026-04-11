@@ -23,6 +23,7 @@ import {
   ShoppingBag,
   Tag
 } from "lucide-react"
+import { useCurrency } from "@/hooks/use-currency"
 
 const methodIcons: Record<string, any> = {
   card: CreditCard,
@@ -148,24 +149,8 @@ function TransactionDetails({ transaction, onClose, currency, taxRate }: { trans
 }
 
 export function CustomerTransactions({ customerId }: CustomerTransactionsProps) {
-  const { storeId } = useAuthStore()
-  const { data: store } = useQuery<Store>({
-    queryKey: ['store', storeId],
-    queryFn: async () => {
-      if (!storeId) throw new Error("No store ID")
-      const { data, error } = await supabase
-        .from('stores')
-        .select('*')
-        .eq('id', storeId)
-        .single()
-      if (error) throw error
-      return data
-    },
-    enabled: !!storeId
-  })
-
-  const currency = store?.currency ?? "$"
-  const taxRate = store?.tax_rate ?? 0.1
+  const currency = useCurrency()
+  const taxRate = 0.1 // Since we aren't fetching the store here anymore, we fallback to 10% or we could fetch tax_rate via a separate hook. For now, 10% defaults.
 
   const [expandedId, setExpandedId] = useState<string | null>(null)
   

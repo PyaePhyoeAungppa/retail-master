@@ -31,7 +31,7 @@ interface ReceiptPreviewProps {
 
 export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMethod, transaction, historicalItems }: ReceiptPreviewProps) {
   const receiptRef = useRef<HTMLDivElement>(null)
-  const { storeId } = useAuthStore()
+  const { storeId, currentUser } = useAuthStore()
   const { items: cartItems, total: cartTotal, receiptTemplate, selectedCustomer: cartCustomer } = useCartStore()
   
   // Use historical data if provided, otherwise use current cart
@@ -40,6 +40,8 @@ export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMetho
   const selectedCustomer = transaction 
     ? { name: transaction.customerName, phone: (transaction as any).customerPhone } // Assuming we might have phone in tx metadata or fetch it later
     : cartCustomer
+    
+  const cashierName = transaction ? (transaction as any).cashierName : (currentUser?.email?.split('@')[0] || "Cashier")
 
   const { data: settings } = useQuery({
     queryKey: ['settings', storeId],
@@ -56,7 +58,8 @@ export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMetho
   const currency = settings?.currency ?? "$"
   const tax = transaction ? transaction.tax : (total * taxRate)
   const grandTotal = transaction ? transaction.total : (total + tax)
-  const date = transaction ? new Date(transaction.date).toLocaleString() : new Date().toLocaleString()
+  const txDate = transaction ? new Date(transaction.date) : new Date()
+  const date = txDate.toLocaleString()
 
   const generateReceiptText = () => {
     const storeName = settings?.name || "Retail POS"
@@ -185,7 +188,7 @@ Thank you for shopping!`
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">Cashier:</span>
-          <span className="font-medium">Admin</span>
+          <span className="font-medium">{cashierName}</span>
         </div>
       </div>
 
@@ -238,10 +241,11 @@ Thank you for shopping!`
       <p className="mb-2">----------------------------</p>
       
       <div className="space-y-0.5 mb-2">
-        <p>DATE: {new Date().toLocaleDateString()}</p>
-        <p>TIME: {new Date().toLocaleTimeString()}</p>
+        <p>DATE: {txDate.toLocaleDateString()}</p>
+        <p>TIME: {txDate.toLocaleTimeString()}</p>
         <p>TXN : {transactionId.split('-').pop()}</p>
         <p>CUST: {selectedCustomer?.name.toUpperCase() || "WALK IN"}</p>
+        <p>CASHIER: {cashierName.toUpperCase()}</p>
       </div>
 
       <p className="mb-2">----------------------------</p>
@@ -297,7 +301,7 @@ Thank you for shopping!`
         </div>
         <div className="text-right">
           <p className="text-xs font-black uppercase text-white/40 tracking-widest">Date</p>
-          <p className="text-sm font-bold">{new Date().toLocaleDateString()}</p>
+          <p className="text-sm font-bold">{txDate.toLocaleString()}</p>
         </div>
       </div>
 
@@ -307,8 +311,8 @@ Thank you for shopping!`
           <p className="text-sm font-bold">{selectedCustomer?.name || "Walk In"}</p>
         </div>
         <div className="text-right">
-          <p className="text-[10px] font-black uppercase text-white/30 tracking-widest mb-1">Method</p>
-          <p className="text-sm font-bold capitalize">{paymentMethod}</p>
+          <p className="text-[10px] font-black uppercase text-white/30 tracking-widest mb-1">Cashier & Method</p>
+          <p className="text-sm font-bold capitalize">{cashierName} • {paymentMethod}</p>
         </div>
       </div>
 

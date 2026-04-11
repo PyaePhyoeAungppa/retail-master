@@ -3,11 +3,12 @@
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, Bell, User, Clock } from "lucide-react"
+import { Search, Bell, User, Clock, LogOut, Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useAuthStore } from "@/store/use-auth-store"
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useToastStore } from "@/store/use-toast-store"
 import { supabase } from "@/lib/supabase"
 import { 
   Dialog,
@@ -21,22 +22,23 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Store, Info, AlertTriangle, CheckCircle } from "lucide-react"
 
 export function TopNav() {
-  const { currentUser, signOut, storeId } = useAuthStore()
+  const { currentUser, signOut, storeId, role, shiftId, setSessionContext } = useAuthStore()
+  const queryClient = useQueryClient()
+  const { toast } = useToastStore()
 
   const { data: shift } = useQuery({
-    queryKey: ['activeShift', storeId],
+    queryKey: ['activeShift', shiftId],
     queryFn: async () => {
-      if (!storeId) return null
+      if (!shiftId) return null
       const { data, error } = await supabase
         .from('active_shifts')
         .select('*')
-        .eq('status', 'active')
-        .eq('store_id', storeId)
+        .eq('id', shiftId)
         .single()
       if (error && error.code !== 'PGRST116') throw error
       return data
     },
-    enabled: !!storeId
+    enabled: !!shiftId
   })
 
   const { data: notifications } = useQuery({
@@ -72,6 +74,25 @@ export function TopNav() {
   const initials = currentUser?.email?.substring(0, 2).toUpperCase() || "AD"
   const unreadCount = notifications?.filter((n: any) => !n.read).length || 0
 
+  const endShiftMutation = useMutation({
+    mutationFn: async (shiftId: string) => {
+      const { error } = await supabase
+        .from('active_shifts')
+        .update({ status: 'closed', end_time: new Date().toISOString() })
+        .eq('id', shiftId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['activeShift'] })
+      queryClient.invalidateQueries({ queryKey: ['shifts'] })
+      setSessionContext(null, null)
+      toast({ title: "Shift ended successfully", variant: "success" })
+    },
+    onError: (error: any) => {
+      toast({ title: error.message || "Failed to end shift", variant: "destructive" })
+    }
+  })
+
   return (
     <header className="h-16 border-b bg-card px-4 lg:px-8 flex items-center justify-between sticky top-0 z-10 shadow-sm shrink-0">
       <div className="flex items-center gap-4 lg:gap-8 min-w-0">
@@ -88,6 +109,17 @@ export function TopNav() {
               <Badge variant="secondary" className="rounded-lg py-0 px-1.5 text-[10px] font-black uppercase">
                 {shift?.terminal || "Term 01"}
               </Badge>
+              {shift && role !== 'admin' && (
+                <button
+                  onClick={() => endShiftMutation.mutate(shift.id)}
+                  disabled={endShiftMutation.isPending}
+                  className="ml-2 px-2 h-6 rounded-md bg-red-100 text-red-600 flex items-center justify-center hover:bg-red-200 transition-colors shrink-0 text-[10px] font-black uppercase tracking-widest gap-1"
+                  title="End Shift"
+                >
+                  {endShiftMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin"/> : null}
+                  End Shift
+                </button>
+              )}
             </div>
           </div>
         </div>

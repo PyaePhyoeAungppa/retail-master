@@ -35,6 +35,7 @@ import {
 import { useAuthStore } from "@/store/use-auth-store"
 import { Transaction, Product, TransactionItem, Store } from "@/lib/data"
 import { format, parse, startOfDay, subDays, isWithinInterval } from 'date-fns'
+import { useCurrency } from "@/hooks/use-currency"
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
@@ -55,21 +56,7 @@ export default function DashboardPage() {
     }
   })
 
-  const { data: store } = useQuery<Store>({
-    queryKey: ['store', storeId],
-    queryFn: async () => {
-      if (!storeId) throw new Error("Store ID required")
-      const { data, error } = await supabase.from('stores')
-        .select('*')
-        .eq('id', storeId)
-        .single()
-      if (error) throw error
-      return data as Store
-    },
-    enabled: !!storeId
-  })
-
-  const currency = store?.currency ?? "$"
+  const currency = useCurrency()
 
   const { data: products, isLoading: prodLoading } = useQuery<Product[]>({
     queryKey: ['products', storeId],

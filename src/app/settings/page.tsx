@@ -11,10 +11,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { Moon, Sun, Monitor, Bell, Shield, Store, Loader2, Save, CreditCard, Plus, Trash2 } from "lucide-react"
+import { Moon, Sun, Monitor, Bell, Shield, Store, Loader2, Save, CreditCard, Plus, Trash2, TerminalSquare, XCircle, Clock } from "lucide-react"
 
 export default function SettingsPage() {
-  const { storeId } = useAuthStore()
+  const { storeId, role } = useAuthStore()
+  const isAdmin = role === 'admin' || role === 'owner' || role === 'superadmin'
   const { toast } = useToastStore()
   const queryClient = useQueryClient()
   const [formData, setFormData] = useState({
@@ -47,6 +48,9 @@ export default function SettingsPage() {
       })
     }
   }, [store])
+
+  // Terminals & Shifts State & Logic
+  const [newTerminal, setNewTerminal] = useState({ name: "", code: "" })
 
   // Payment Accounts State & Logic
   const [newAccount, setNewAccount] = useState({
@@ -98,6 +102,64 @@ export default function SettingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['store-payment-accounts', storeId] })
       toast({ title: "Account Removed", variant: "success" })
+    }
+  })
+
+  // Terminals & Shifts Queries
+  const { data: terminals, isLoading: isLoadingTerminals } = useQuery({
+    queryKey: ['terminals', storeId],
+    queryFn: async () => {
+      if (!storeId) return []
+      const { data, error } = await supabase.from('terminals').select('*').eq('store_id', storeId).order('created_at', { ascending: true })
+      if (error) throw error
+      return data
+    },
+    enabled: !!storeId
+  })
+
+  const { data: activeShifts, isLoading: isLoadingShifts } = useQuery({
+    queryKey: ['active_shifts', storeId],
+    queryFn: async () => {
+      if (!storeId) return []
+      const { data, error } = await supabase.from('active_shifts').select('*').eq('store_id', storeId).eq('status', 'active').order('start_time', { ascending: false })
+      if (error) throw error
+      return data
+    },
+    enabled: !!storeId
+  })
+
+  // Terminals & Shifts Mutations
+  const addTerminalMutation = useMutation({
+    mutationFn: async (terminal: { name: string; code: string }) => {
+      const { error } = await supabase.from('terminals').insert([{ ...terminal, store_id: storeId }])
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['terminals', storeId] })
+      setNewTerminal({ name: "", code: "" })
+      toast({ title: "Terminal Added", variant: "success" })
+    }
+  })
+
+  const deleteTerminalMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('terminals').delete().eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['terminals', storeId] })
+      toast({ title: "Terminal Removed", variant: "success" })
+    }
+  })
+
+  const closeShiftMutation = useMutation({
+    mutationFn: async (shiftId: string) => {
+      const { error } = await supabase.from('active_shifts').update({ status: 'closed', end_time: new Date().toISOString() }).eq('id', shiftId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['active_shifts', storeId] })
+      toast({ title: "Shift Closed", variant: "success" })
     }
   })
 
@@ -275,6 +337,141 @@ export default function SettingsPage() {
                      )}
                   </div>
                )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Terminals & Shifts Card */}
+        <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
+          <CardHeader className="bg-muted/30">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <TerminalSquare className="w-5 h-5 text-primary" />
+              Terminals & Shifts
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8 space-y-8">
+            {/* Terminals Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Store Terminals</p>
+                {!isAdmin && <p className="text-[10px] text-muted-foreground italic mr-1">Read-only (Admin required to edit)</p>}
+              </div>
+              
+              {isAdmin && (
+                <div className="bg-primary/5 p-6 rounded-2xl space-y-4 border border-primary/10 mb-4">
+                  <p className="text-xs font-black uppercase tracking-widest text-primary/60">Add Terminal</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label className="text-[10px] font-black uppercase">Terminal Name</Label>
+                      <Input 
+                        placeholder="e.g. Counter 01" 
+                        value={newTerminal.name}
+                        onChange={(e) => setNewTerminal({...newTerminal, name: e.target.value})}
+                        className="bg-white border-none ring-1 ring-black/5 h-10 px-3"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] font-black uppercase">Terminal Code</Label>
+                      <Input 
+                        placeholder="e.g. TERM-01" 
+                        value={newTerminal.code}
+                        onChange={(e) => setNewTerminal({...newTerminal, code: e.target.value})}
+                        className="bg-white border-none ring-1 ring-black/5 h-10 px-3"
+                      />
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => addTerminalMutation.mutate(newTerminal)}
+                    disabled={!newTerminal.name || !newTerminal.code || addTerminalMutation.isPending}
+                    className="w-full md:w-auto px-8 rounded-xl h-10"
+                  >
+                    {addTerminalMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                    Add Terminal
+                  </Button>
+                </div>
+              )}
+
+              {isLoadingTerminals ? (
+                <div className="py-4 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground/30" /></div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {terminals?.map((term: any) => (
+                    <div key={term.id} className="flex items-center justify-between p-4 rounded-2xl bg-muted/30 border group hover:border-primary/30 transition-all">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-primary shadow-sm">
+                          <Monitor className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm tracking-tight">{term.name}</p>
+                          <p className="text-[10px] font-bold text-muted-foreground tabular-nums">Code: {term.code}</p>
+                        </div>
+                      </div>
+                      {isAdmin && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="text-muted-foreground hover:text-destructive h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => deleteTerminalMutation.mutate(term.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  {(!terminals || terminals.length === 0) && (
+                    <div className="col-span-full py-6 text-center bg-muted/20 rounded-2xl border border-dashed text-muted-foreground">
+                      <p className="text-sm font-medium">No terminals registered.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            {/* Active Shifts Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Active Shifts</p>
+                {!isAdmin && <p className="text-[10px] text-muted-foreground italic mr-1">Read-only</p>}
+              </div>
+
+              {isLoadingShifts ? (
+                <div className="py-4 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground/30" /></div>
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  {activeShifts?.map((shift: any) => (
+                    <div key={shift.id} className="flex items-center justify-between p-4 rounded-2xl bg-muted/30 border border-green-500/20 shadow-sm relative overflow-hidden">
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500" />
+                      <div className="flex items-center gap-4 pl-2">
+                        <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center text-green-700 shadow-sm">
+                          <Clock className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm tracking-tight">{shift.name}</p>
+                          <p className="text-[10px] font-bold text-muted-foreground tabular-nums">Terminal: {shift.terminal} • Opened: {new Date(shift.start_time).toLocaleTimeString()}</p>
+                        </div>
+                      </div>
+                      {isAdmin && (
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          className="rounded-lg font-bold text-[10px] uppercase tracking-widest px-4 h-8"
+                          onClick={() => closeShiftMutation.mutate(shift.id)}
+                          disabled={closeShiftMutation.isPending}
+                        >
+                          {closeShiftMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <>Close Shift <XCircle className="w-3 h-3 ml-1" /></>}
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  {(!activeShifts || activeShifts.length === 0) && (
+                    <div className="col-span-full py-6 text-center bg-muted/20 rounded-2xl border border-dashed text-muted-foreground">
+                      <p className="text-sm font-medium">No active shifts right now.</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

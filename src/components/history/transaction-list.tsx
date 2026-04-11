@@ -21,6 +21,7 @@ import { useAuthStore } from "@/store/use-auth-store"
 import { Transaction, Store, TransactionItem } from "@/lib/data"
 import { ReceiptPreview } from "@/components/pos/receipt-preview"
 import { useState } from "react"
+import { useCurrency } from "@/hooks/use-currency"
 
 const methodIcons: Record<string, any> = {
   card: CreditCard,
@@ -49,21 +50,7 @@ export function TransactionList() {
     }
   })
 
-  const { data: store } = useQuery<Store>({
-    queryKey: ['store', storeId],
-    queryFn: async () => {
-      if (!storeId) throw new Error("Store ID required")
-      const { data, error } = await supabase.from('stores')
-        .select('*')
-        .eq('id', storeId)
-        .single()
-      if (error) throw error
-      return data as Store
-    },
-    enabled: !!storeId
-  })
-
-  const currency = store?.currency ?? "$"
+  const currency = useCurrency()
 
   const handleViewReceipt = async (tx: Transaction) => {
     setIsFetchingItems(true)

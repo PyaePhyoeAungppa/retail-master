@@ -4,6 +4,7 @@ import { ShoppingCart } from "lucide-react"
 import { useCartStore } from "@/store/use-cart-store"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { useCurrency } from "@/hooks/use-currency"
 
 interface FloatingCartButtonProps {
   onClick: () => void
@@ -12,6 +13,7 @@ interface FloatingCartButtonProps {
 
 export function FloatingCartButton({ onClick, className }: FloatingCartButtonProps) {
   const { items, total } = useCartStore()
+  const currency = useCurrency()
   const itemCount = items.reduce((acc, item) => acc + item.quantity, 0)
 
   if (itemCount === 0) return null
@@ -32,7 +34,7 @@ export function FloatingCartButton({ onClick, className }: FloatingCartButtonPro
       </div>
       <div className="flex flex-col items-start leading-none h-full justify-center border-l border-white/20 pl-4">
         <span className="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">View Cart</span>
-        <span className="text-lg font-black tracking-tighter">${total.toFixed(2)}</span>
+        <span className="text-lg font-black tracking-tighter">{currency}{total.toFixed(2)}</span>
       </div>
     </Button>
   )

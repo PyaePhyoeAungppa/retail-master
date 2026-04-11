@@ -13,8 +13,7 @@ import { TerminalSelector } from "@/components/pos/terminal-selector";
 
 export default function POSPage() {
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const { storeId, role } = useAuthStore();
-  const [activeTerminalId, setActiveTerminalId] = useState<string | null>(null);
+  const { storeId, role, shiftId, terminalId } = useAuthStore();
 
   const { data: shift, isLoading } = useQuery({
     queryKey: ['activeShift', storeId],
@@ -23,8 +22,7 @@ export default function POSPage() {
       const { data, error } = await supabase
         .from('active_shifts')
         .select('*')
-        .eq('status', 'active')
-        .eq('store_id', storeId)
+        .eq('id', shiftId)
         .single()
       if (error && error.code !== 'PGRST116') throw error
       return data
@@ -33,10 +31,9 @@ export default function POSPage() {
   })
 
   // Show terminal selector if:
-  // 1. Role is cashier (or we want to enforce it for everyone)
-  // 2. No active shift is found
-  // 3. User hasn't just selected one
-  const showSelector = !isLoading && !shift && !activeTerminalId && role === 'cashier'
+  // 1. Role is cashier
+  // 2. No session configured
+  const showSelector = !isLoading && role === 'cashier' && (!shiftId || !terminalId);
 
   return (
     <div className="flex h-full overflow-hidden relative">
@@ -60,7 +57,7 @@ export default function POSPage() {
       <FloatingCartButton onClick={() => setIsCartOpen(true)} />
 
       {showSelector && (
-        <TerminalSelector onSelect={(id) => setActiveTerminalId(id)} />
+        <TerminalSelector />
       )}
     </div>
   );
