@@ -115,7 +115,7 @@ export function LandingContact() {
                 <>
                   <div className="mb-7">
                     <h3 className="text-2xl font-black tracking-tight text-slate-900">Book a Free Demo</h3>
-                    <p className="text-slate-500 text-sm font-medium mt-1">Fill in the form — we'll do the rest.</p>
+                    <p className="text-slate-500 text-sm font-medium mt-1">Share your requirements to begin your 1-month trial.</p>
                   </div>
 
                   <form className="space-y-4" onSubmit={handleSubmit}>
