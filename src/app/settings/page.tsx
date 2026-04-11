@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { Badge } from "@/components/ui/badge"
 import { Moon, Sun, Monitor, Bell, Shield, Store, Loader2, Save, CreditCard, Plus, Trash2, TerminalSquare, XCircle, Clock } from "lucide-react"
 
 export default function SettingsPage() {
@@ -167,8 +168,11 @@ export default function SettingsPage() {
   const [assignmentData, setAssignmentData] = useState({
     userId: "",
     terminalId: "",
+    masterShiftId: "",
     shiftName: "Morning Shift"
   })
+
+  const [masterShiftName, setMasterShiftName] = useState("Morning Shift")
 
   const { data: staff, isLoading: isLoadingStaff } = useQuery({
     queryKey: ['staff', storeId],
@@ -185,13 +189,14 @@ export default function SettingsPage() {
   const assignStaffMutation = useMutation({
     mutationFn: async (data: any) => {
       const terminal = terminals?.find(t => t.id === data.terminalId)
-      const selectedStaff = cashiers.find((s: any) => s.user_id === data.userId)
+      const masterShift = activeShifts?.find(s => s.id === data.masterShiftId)
       
       const { error } = await supabase.from('active_shifts').insert([{
         store_id: storeId,
         terminal_id: data.terminalId,
-        cashier_id: data.userId, // ASSUMPTION: This column exists or will be added
-        name: data.shiftName,
+        cashier_id: data.userId,
+        parent_shift_id: data.masterShiftId, // LINK TO MASTER SHIFT
+        name: masterShift?.name || data.shiftName,
         terminal: terminal?.name || 'Unknown',
         status: 'active'
       }])
@@ -206,6 +211,25 @@ export default function SettingsPage() {
       toast({ title: "Assignment Failed", description: err.message, variant: "destructive" })
     }
   })
+
+  const openMasterShiftMutation = useMutation({
+    mutationFn: async (name: string) => {
+      const { error } = await supabase.from('active_shifts').insert([{
+        store_id: storeId,
+        terminal_id: null, // MASTER SHIFT HAS NO TERMINAL
+        name: name,
+        status: 'active'
+      }])
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['active_shifts', storeId] })
+      toast({ title: "Master Shift Opened", variant: "success" })
+    }
+  })
+
+  const masterShifts = activeShifts?.filter((s: any) => !s.terminal_id) || []
+  const sessionAssignments = activeShifts?.filter((s: any) => s.terminal_id) || []
 
   const mutation = useMutation({
     mutationFn: async (updatedData: any) => {
@@ -474,103 +498,170 @@ export default function SettingsPage() {
             <Separator />
 
             {/* Staff Assignments Section */}
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Live Staff Assignments</p>
-                {isAdmin && <Badge className="bg-primary/10 text-primary border-none text-[9px]">Manager Control</Badge>}
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Shift & Staff Management</p>
+                {isAdmin && <Badge className="bg-primary/10 text-primary border-none text-[9px]">Administrative Mode</Badge>}
               </div>
 
               {isAdmin && (
-                <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 space-y-4 shadow-inner">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Select Cashier</Label>
-                      <select 
-                        value={assignmentData.userId}
-                        onChange={(e) => setAssignmentData({...assignmentData, userId: e.target.value})}
-                        className="w-full h-11 rounded-xl bg-white border-none ring-1 ring-black/5 px-4 font-bold text-sm shadow-sm"
-                      >
-                        <option value="">Choose Staff...</option>
-                        {cashiers.map((s: any) => (
-                          <option key={s.user_id} value={s.user_id}>{s.profiles.full_name}</option>
-                        ))}
-                      </select>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Master Shift Creation */}
+                  <div className="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-200 shadow-inner space-y-4">
+                    <div className="flex items-center gap-3 mb-2">
+                       <div className="w-10 h-10 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
+                          <Clock className="w-5 h-5" />
+                       </div>
+                       <h3 className="font-black tracking-tight">1. Open Store Shift</h3>
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Select Terminal</Label>
+                      <Label className="text-[10px] font-black uppercase tracking-widest ml-1">New Shift Name</Label>
+                      <div className="flex gap-2">
+                        <Input 
+                          value={masterShiftName}
+                          onChange={(e) => setMasterShiftName(e.target.value)}
+                          className="bg-white border-none ring-1 ring-black/5 h-11 rounded-xl font-bold"
+                          placeholder="e.g. Afternoon Shift"
+                        />
+                        <Button 
+                          onClick={() => openMasterShiftMutation.mutate(masterShiftName)}
+                          disabled={!masterShiftName || openMasterShiftMutation.isPending}
+                          className="rounded-xl h-11 px-6 shadow-md"
+                        >
+                          {openMasterShiftMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Open"}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Staff Assignment */}
+                  <div className="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-200 shadow-inner space-y-4">
+                    <div className="flex items-center gap-3 mb-2">
+                       <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                          <User className="w-5 h-5" />
+                       </div>
+                       <h3 className="font-black tracking-tight">2. Assign Staff to Terminal</h3>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Active Shift</Label>
+                        <select 
+                          value={assignmentData.masterShiftId}
+                          onChange={(e) => setAssignmentData({...assignmentData, masterShiftId: e.target.value})}
+                          className="w-full h-11 rounded-xl bg-white border-none ring-1 ring-black/5 px-4 font-bold text-sm shadow-sm"
+                        >
+                          <option value="">Select Shift...</option>
+                          {masterShifts.map((s: any) => (
+                            <option key={s.id} value={s.id}>{s.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Staff Member</Label>
+                        <select 
+                          value={assignmentData.userId}
+                          onChange={(e) => setAssignmentData({...assignmentData, userId: e.target.value})}
+                          className="w-full h-11 rounded-xl bg-white border-none ring-1 ring-black/5 px-4 font-bold text-sm shadow-sm"
+                        >
+                          <option value="">Staff...</option>
+                          {cashiers.map((s: any) => (
+                            <option key={s.user_id} value={s.user_id}>{s.profiles.full_name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Available Terminal</Label>
                       <select 
                         value={assignmentData.terminalId}
                         onChange={(e) => setAssignmentData({...assignmentData, terminalId: e.target.value})}
                         className="w-full h-11 rounded-xl bg-white border-none ring-1 ring-black/5 px-4 font-bold text-sm shadow-sm"
                       >
                         <option value="">Choose Terminal...</option>
-                        {terminals?.filter((t: any) => !activeShifts?.some((as: any) => as.terminal_id === t.id)).map((t: any) => (
+                        {terminals?.filter((t: any) => !sessionAssignments?.some((as: any) => as.terminal_id === t.id)).map((t: any) => (
                           <option key={t.id} value={t.id}>{t.name}</option>
                         ))}
                       </select>
                     </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-black uppercase tracking-widest ml-1">Shift Name</Label>
-                      <Input 
-                        value={assignmentData.shiftName}
-                        onChange={(e) => setAssignmentData({...assignmentData, shiftName: e.target.value})}
-                        className="bg-white border-none ring-1 ring-black/5 h-11 rounded-xl font-bold"
-                      />
-                    </div>
+                    <Button 
+                      onClick={() => assignStaffMutation.mutate(assignmentData)}
+                      disabled={!assignmentData.userId || !assignmentData.terminalId || !assignmentData.masterShiftId || assignStaffMutation.isPending}
+                      className="w-full rounded-2xl h-12 font-black uppercase tracking-widest text-xs shadow-lg shadow-emerald-500/10 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800"
+                    >
+                      {assignStaffMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Deploy Staff"}
+                    </Button>
                   </div>
-                  <Button 
-                    onClick={() => assignStaffMutation.mutate(assignmentData)}
-                    disabled={!assignmentData.userId || !assignmentData.terminalId || assignStaffMutation.isPending}
-                    className="w-full rounded-2xl h-12 font-black uppercase tracking-widest text-xs shadow-lg shadow-primary/10"
-                  >
-                    {assignStaffMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
-                    Assign & Open Session
-                  </Button>
                 </div>
               )}
 
-              {isLoadingShifts || isLoadingStaff ? (
-                <div className="py-4 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-muted-foreground/30" /></div>
-              ) : (
-                <div className="grid grid-cols-1 gap-4">
-                  {activeShifts?.map((shift: any) => {
-                    const assignedStaff = staff?.find((s: any) => s.user_id === shift.cashier_id);
-                    return (
-                      <div key={shift.id} className="flex items-center justify-between p-5 rounded-[2rem] bg-white border shadow-sm relative overflow-hidden group hover:border-primary/30 transition-all">
-                        <div className="flex items-center gap-5">
-                          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm border border-emerald-100/50">
-                            <Clock className="w-6 h-6" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2 mb-0.5">
-                              <p className="font-black text-base tracking-tight">{shift.name}</p>
-                              <Badge className="bg-emerald-500/10 text-emerald-600 border-none text-[8px] h-4 uppercase px-1.5 font-black">Active</Badge>
-                            </div>
-                            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                               <span className="text-primary font-black uppercase">{assignedStaff?.profiles?.full_name || "Self-Started"}</span> • Terminal: {shift.terminal}
-                            </p>
-                          </div>
+              <div className="space-y-6">
+                {masterShifts.map((master: any) => {
+                  const linkedSessions = sessionAssignments.filter((s: any) => s.parent_shift_id === master.id);
+                  return (
+                    <div key={master.id} className="space-y-3">
+                      <div className="flex items-center justify-between px-2">
+                        <div className="flex items-center gap-3">
+                           <h4 className="font-black text-lg tracking-tight">{master.name}</h4>
+                           <Badge className="bg-emerald-500/10 text-emerald-600 border-none text-[8px] h-4 uppercase px-1.5 font-black">Open</Badge>
                         </div>
-                        {isAdmin && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="rounded-xl font-black text-[10px] uppercase tracking-widest px-4 h-10 hover:bg-red-50 hover:text-red-600 transition-all"
-                            onClick={() => closeShiftMutation.mutate(shift.id)}
-                            disabled={closeShiftMutation.isPending}
-                          >
-                            {closeShiftMutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <>End Assignment <XCircle className="w-4 h-4 ml-2" /></>}
-                          </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50 font-black text-[9px] uppercase tracking-widest"
+                          onClick={() => {
+                             if (linkedSessions.length > 0 && !confirm("There are active staff linked to this shift. Closing it will end their sessions too. Proceed?")) return;
+                             closeShiftMutation.mutate(master.id)
+                          }}
+                        >
+                          End Shift Content
+                        </Button>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {linkedSessions.map((shift: any) => {
+                          const assignedStaff = staff?.find((s: any) => s.user_id === shift.cashier_id);
+                          return (
+                            <div key={shift.id} className="flex items-center justify-between p-5 rounded-[2rem] bg-white border shadow-sm relative overflow-hidden group hover:border-primary/30 transition-all">
+                              <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center border">
+                                  <User className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <p className="font-black text-sm">{assignedStaff?.profiles?.full_name || "Unknown Staff"}</p>
+                                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                    Terminal: {shift.terminal}
+                                  </p>
+                                </div>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="rounded-xl h-9 px-3 text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                                onClick={() => closeShiftMutation.mutate(shift.id)}
+                              >
+                                <XCircle className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )
+                        })}
+                        {linkedSessions.length === 0 && (
+                          <div className="col-span-full py-10 text-center bg-slate-50/50 rounded-[2rem] border border-dashed border-slate-200">
+                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-300">No staff assigned to this shift yet</p>
+                          </div>
                         )}
                       </div>
-                    )
-                  })}
-                  {(!activeShifts || activeShifts.length === 0) && (
-                    <div className="col-span-full py-12 text-center bg-muted/20 rounded-[2.5rem] border border-dashed text-muted-foreground">
-                      <p className="text-sm font-black uppercase tracking-widest opacity-30">No Active Assignments</p>
                     </div>
-                  )}
-                </div>
+                  )
+                })}
+              </div>
+
+              {isLoadingShifts || isLoadingStaff ? (
+                <div className="py-12 flex justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary/20" /></div>
+              ) : masterShifts.length === 0 && (
+                   <div className="py-20 text-center bg-muted/20 rounded-[3rem] border border-dashed text-muted-foreground">
+                      <p className="text-sm font-black uppercase tracking-widest opacity-30">No Active Master Shifts</p>
+                      <p className="text-xs font-bold opacity-30 mt-1">Open a shift first to begin assigning staff</p>
+                    </div>
               )}
             </div>
           </CardContent>

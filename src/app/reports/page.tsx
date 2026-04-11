@@ -118,7 +118,10 @@ export default function ReportsPage() {
     queryKey: ['reports-shifts', selectedStoreId, dateRange, customStart, customEnd],
     queryFn: async () => {
       if (!selectedStoreId) return []
-      let query = supabase.from('active_shifts').select('*').eq('store_id', selectedStoreId)
+      let query = supabase.from('active_shifts')
+        .select('*')
+        .eq('store_id', selectedStoreId)
+        .is('terminal_id', null) // ONLY FETCH MASTER SHIFTS FOR THE REPORT LIST
       
       if (dateRange === '7d') query = query.gte('start_time', format(subDays(new Date(), 7), 'yyyy-MM-dd'))
       else if (dateRange === '30d') query = query.gte('start_time', format(subDays(new Date(), 30), 'yyyy-MM-dd'))
@@ -126,7 +129,18 @@ export default function ReportsPage() {
       
       const { data, error } = await query.order('start_time', { ascending: false })
       if (error) throw error
-      return data
+      
+      // Also fetch all sessions for these shifts to help with aggregation
+      const { data: allSessions } = await supabase
+        .from('active_shifts')
+        .select('id, parent_shift_id')
+        .eq('store_id', selectedStoreId)
+        .not('terminal_id', 'is', null)
+
+      return data.map((m: any) => ({
+        ...m,
+        sessionIds: allSessions?.filter(s => s.parent_shift_id === m.id).map(s => s.id) || []
+      }))
     },
     enabled: !!selectedStoreId && activeReport === 'shift-sales'
   })
@@ -211,12 +225,10 @@ export default function ReportsPage() {
   const shiftSalesData = useMemo(() => {
     if (!shifts || !transactions) return []
     return shifts.map((shift: any) => {
-      const shiftTxs = transactions.filter(tx => {
-         const txDate = new Date(tx.date).getTime()
-         const start = new Date(shift.start_time).getTime()
-         const end = shift.end_time ? new Date(shift.end_time).getTime() : new Date().getTime()
-         return txDate >= start && txDate <= end
-      })
+      // Find all transactions either linked directly to master or to any of its sessions
+      const shiftTxs = transactions.filter(tx => 
+        tx.shift_id === shift.id || shift.sessionIds.includes(tx.shift_id)
+      )
       
       const completedTxs = shiftTxs.filter(tx => tx.status === 'completed')
       const total = completedTxs.reduce((sum, tx) => sum + Number(tx.total), 0)

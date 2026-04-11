@@ -85,16 +85,18 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
     const transaction = {
       id: newTxId,
       store_id: storeId,
+      shift_id: shiftId, // LINK TRANSACTION DIRECTLY TO SHIFT
       date: new Date().toISOString(),
       customerId: selectedCustomer?.id || null,
       customerName: selectedCustomer?.name || "Walk In",
       cashierId: currentUser.id,
       cashierName: currentUser.email || "Unknown Cashier",
-      terminalId: "TERM-01",
+      terminalId: terminalId || "TERM-01",
       itemsCount: items.length,
       subtotal: total,
       tax: tax,
       total: grandTotal,
+      tax_included: includeTax,
       method: paymentMethod as any,
       status: 'completed'
     }
