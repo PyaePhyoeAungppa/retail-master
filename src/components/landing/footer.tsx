@@ -1,7 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { ShoppingBag, Github, Twitter, Linkedin } from "lucide-react"
+import { ShoppingBag, Github, Twitter, Linkedin, Loader2, CheckCircle2 } from "lucide-react"
+import { useState } from "react"
+import { cn } from "@/lib/utils"
 
 const platformLinks = [
   { label: "POS Terminal", href: "#features" },
@@ -27,6 +29,38 @@ const companyLinks = [
 ]
 
 export function LandingFooter() {
+  const [email, setEmail] = useState("")
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
+  const [errorMessage, setErrorMessage] = useState("")
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email || !email.includes("@")) return
+
+    setStatus("loading")
+    setErrorMessage("")
+
+    try {
+      const res = await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong.")
+      }
+
+      setStatus("success")
+      setEmail("")
+    } catch (err: any) {
+      setStatus("error")
+      setErrorMessage(err.message)
+    }
+  }
+
   return (
     <footer className="bg-background border-t border-border pt-24 pb-12">
       <div className="container px-6 mx-auto">
@@ -102,17 +136,39 @@ export function LandingFooter() {
             <p className="text-sm text-muted-foreground font-medium mb-6">
               Subscribe for major feature announcements and retail industry insights.
             </p>
-            <div className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Email address"
-                aria-label="Newsletter email"
-                className="flex-1 px-4 py-3 bg-muted border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium"
-              />
-              <button className="px-5 py-3 bg-primary text-primary-foreground font-black text-sm rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
-                Join
-              </button>
-            </div>
+            
+            {status === "success" ? (
+              <div className="flex items-center gap-2 text-emerald-500 bg-emerald-50 border border-emerald-100 p-4 rounded-xl">
+                <CheckCircle2 className="w-5 h-5" />
+                <p className="text-xs font-black uppercase tracking-widest">You're Subscribed!</p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubscribe} className="space-y-3">
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    required
+                    placeholder="Email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    aria-label="Newsletter email"
+                    className="flex-1 px-4 py-3 bg-muted border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm font-medium"
+                  />
+                  <button 
+                    disabled={status === "loading"}
+                    className="px-5 py-3 bg-primary text-primary-foreground font-black text-sm rounded-xl shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all flex items-center justify-center min-w-[80px]"
+                  >
+                    {status === "loading" ? <Loader2 className="w-4 h-4 animate-spin" /> : "Join"}
+                  </button>
+                </div>
+                {status === "error" && (
+                  <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest ml-1">
+                    {errorMessage}
+                  </p>
+                )}
+              </form>
+            )}
+
             <div className="mt-8 p-4 rounded-2xl bg-muted/60 border border-border">
               <p className="text-xs font-black text-foreground mb-0.5">Need Help?</p>
               <address className="not-italic text-xs text-muted-foreground font-medium">
@@ -128,13 +184,7 @@ export function LandingFooter() {
             © 2026 Retail Master. All Rights Reserved.
           </p>
           <div className="flex gap-8">
-            <span className="text-[10px] font-black text-emerald-500 uppercase tracking-tighter flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-              All Systems Operational
-            </span>
-            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-tighter">
-              Asia South-1 Region
-            </span>
+            {/* Removed Systems Status text as requested */}
           </div>
         </div>
       </div>
