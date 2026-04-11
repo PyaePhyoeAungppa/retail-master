@@ -45,7 +45,7 @@ export function Sidebar() {
   })
 
   return (
-    <div className="flex lg:flex-col h-20 lg:h-screen w-full lg:w-[80px] border-t lg:border-t-0 lg:border-r bg-card text-card-foreground shadow-[0_-4px_20px_rgba(0,0,0,0.05)] lg:shadow-none">
+    <div className="flex lg:flex-col h-20 lg:h-screen w-full lg:w-[80px] border-t lg:border-t-0 lg:border-r bg-card text-card-foreground shadow-[0_-4px_20px_rgba(0,0,0,0.05)] lg:shadow-none fixed bottom-0 left-0 right-0 z-50 lg:static">
       <div className="hidden lg:flex p-4 items-center justify-center font-bold text-primary border-b bg-muted/20">
         <Store className="w-8 h-8" />
       </div>
@@ -76,13 +76,6 @@ export function Sidebar() {
               <div className="hidden lg:block absolute left-full ml-4 px-3 py-1.5 bg-foreground text-background text-xs font-bold rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50 shadow-xl translate-x-[-10px] group-hover:translate-x-0">
                 {item.name}
               </div>
-
-              {/* Mobile label */}
-              {isActive && (
-                <span className="lg:hidden absolute -bottom-1 text-[8px] font-black uppercase tracking-tighter text-primary">
-                  {item.name}
-                </span>
-              )}
             </Link>
           )
         })}
