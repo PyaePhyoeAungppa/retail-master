@@ -74,8 +74,7 @@ export function LandingFooter() {
               <span className="font-black text-2xl tracking-tighter">Retail Master</span>
             </Link>
             <p className="text-muted-foreground font-medium mb-8 text-sm leading-relaxed">
-              The premium, all-in-one POS platform designed for the next generation of retailers.
-              12 integrated modules. One beautiful interface.
+              Retail Master is a simple POS for online sellers to manage orders, track inventory, and send digital receipts.
             </p>
             <div className="flex gap-4">
               <Link

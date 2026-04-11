@@ -11,7 +11,7 @@ import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Retail Master | Point of Sale (POS) System for Online Sellers",
-  description: "Boost your business with Retail Master, the all-in-one Point of Sale (POS) platform designed to simplify inventory, sales, and CRM for social commerce and online retailers.",
+  description: "Retail Master is a simple POS for online sellers to manage orders, track inventory, and send digital receipts. Stay organized, see your sales clearly, and run your store more efficiently—all in one place.",
   alternates: {
     canonical: "https://retailmaster.store",
   }

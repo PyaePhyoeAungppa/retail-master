@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     template: "%s | Retail Master",
   },
   description:
-    "Retail Master is an all-in-one platform for modern online retailers and social commerce. Manage sales, inventory, customers, and digital receipts from a single interface.",
+    "Retail Master is a simple POS for online sellers to manage orders, track inventory, and send digital receipts. Stay organized, see your sales clearly, and run your store more efficiently—all in one place.",
   keywords: [
     "POS system",
     "point of sale",
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     siteName: "Retail Master",
     title: "Retail Master — Platform for Online Retailers",
     description:
-      "The all-in-one platform for modern online retailers. Sales, inventory, staff, customers, and digital receipts — beautifully unified.",
+      "Retail Master is a simple POS for online sellers to manage orders, track inventory, and send digital receipts. Stay organized, see your sales clearly, and run your store more efficiently—all in one place.",
     images: [
       {
         url: "/og-image.png",

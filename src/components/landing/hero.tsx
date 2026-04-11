@@ -218,14 +218,14 @@ export function LandingHero() {
             </div>
 
             <h1 className="text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter leading-[1.05]">
-              The POS platform for{" "}
+              Simple POS for{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-violet-500 to-indigo-600">
-                selling smarter online.
+                online sellers.
               </span>
             </h1>
 
             <p className="text-sm lg:text-base text-muted-foreground font-medium leading-relaxed max-w-md lg:max-w-none">
-              Stop managing orders in chat apps and stock in spreadsheets. Upgrade to a modern Point of Sale (POS) system offering complete inventory management, digital receipts, and actionable analytics — built for social sellers.
+              Retail Master is a simple POS to manage orders, track inventory, and send digital receipts. Stay organized, see your sales clearly, and run your store more efficiently — all in one place.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
