@@ -29,17 +29,18 @@ function useCountUp(target: number, duration: number = 1600, start: boolean = fa
 function StatItem({ value, suffix, label, description, animate, delay }: {
   value: number; suffix: string; label: string; description: string; animate: boolean; delay: string
 }) {
-  const count = useCountUp(value, 1800, animate)
+  const count = useCountUp(value, 2200, animate)
   return (
     <div
-      className="flex flex-col items-center text-center group p-8 rounded-3xl border border-border bg-card hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500"
+      className="flex flex-col items-center text-center group p-10 rounded-[2.5rem] border border-black/[0.03] bg-white hover:bg-slate-50 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-2 transition-all duration-700 aspect-square justify-center relative overflow-hidden"
       style={{ animationDelay: delay }}
     >
-      <div className="text-5xl lg:text-6xl font-black tracking-tighter text-foreground mb-2 group-hover:text-primary transition-colors duration-300">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="text-6xl font-black tracking-tighter text-foreground mb-4 group-hover:text-primary transition-colors duration-500">
         {count}{suffix}
       </div>
-      <div className="text-sm font-black mb-1 uppercase tracking-wider">{label}</div>
-      <div className="text-sm text-muted-foreground font-medium">{description}</div>
+      <div className="text-[10px] font-black mb-2 uppercase tracking-[0.2em] text-primary/60">{label}</div>
+      <div className="text-xs text-muted-foreground font-medium max-w-[120px] mx-auto leading-relaxed">{description}</div>
     </div>
   )
 }
@@ -51,33 +52,31 @@ export function LandingStats() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) setVisible(true) },
-      { threshold: 0.25 }
+      { threshold: 0.1 }
     )
     if (ref.current) observer.observe(ref.current)
     return () => observer.disconnect()
   }, [])
 
   return (
-    <section id="stats" className="py-28 bg-background relative overflow-hidden">
-      {/* Subtle background grid */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.5)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.5)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_70%_50%_at_50%_50%,black,transparent)]" />
+    <section id="stats" className="py-24 lg:py-40 bg-zinc-50/50 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-64 h-64 bg-primary/5 blur-3xl rounded-full" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-500/5 blur-3xl rounded-full" />
 
       <div className="container mx-auto px-6 relative">
-        <div className="text-center mb-16">
-          <div className="inline-block text-xs font-black text-primary uppercase tracking-widest bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full mb-5">
-            Trusted by Retailers
+        <div className="text-center mb-24 space-y-4">
+          <div className="inline-block text-[10px] font-black text-primary uppercase tracking-[0.2em] bg-primary/10 border border-primary/20 px-4 py-2 rounded-full">
+            Proven Scale
           </div>
-          <h2 className="text-4xl lg:text-5xl font-black tracking-tighter mb-4">
-            Numbers that <span className="text-primary">speak for themselves.</span>
+          <h2 className="text-4xl lg:text-7xl font-black tracking-tighter leading-[0.9]">
+            Powering retail <br /> <span className="text-primary/40">ambitions globally.</span>
           </h2>
-          <p className="text-lg text-muted-foreground font-medium max-w-xl mx-auto leading-relaxed">
-            From boutique shops to multi-location chains, Retail Master powers real businesses every day.
-          </p>
         </div>
 
-        <div ref={ref} className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
+        <div ref={ref} className="grid grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
           {stats.map((stat, i) => (
-            <StatItem key={i} {...stat} animate={visible} delay={`${i * 100}ms`} />
+            <StatItem key={i} {...stat} animate={visible} delay={`${i * 150}ms`} />
           ))}
         </div>
       </div>

@@ -1,5 +1,4 @@
 import { LandingHero } from "@/components/landing/hero"
-import { LandingStats } from "@/components/landing/stats"
 import { LandingFeatures } from "@/components/landing/features"
 import { LandingHowItWorks } from "@/components/landing/how-it-works"
 import { LandingContact } from "@/components/landing/contact"
@@ -7,6 +6,7 @@ import { LandingFooter } from "@/components/landing/footer"
 import { LandingNav } from "@/components/landing/nav"
 import { LandingTargetAudience } from "@/components/landing/target-audience"
 import { LandingPricing } from "@/components/landing/pricing"
+import { LandingFinalCTA } from "@/components/landing/final-cta"
 
 export default function LandingPage() {
   return (
@@ -14,11 +14,11 @@ export default function LandingPage() {
       <LandingNav />
       <main className="flex-1">
         <LandingHero />
-        <LandingStats />
-        <LandingTargetAudience />
-        <LandingHowItWorks />
         <LandingFeatures />
+        <LandingHowItWorks />
+        <LandingTargetAudience />
         <LandingPricing />
+        <LandingFinalCTA />
         <LandingContact />
       </main>
       <LandingFooter />

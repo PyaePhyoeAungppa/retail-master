@@ -3,7 +3,7 @@
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, Bell, User, Clock, Lock } from "lucide-react"
+import { Search, Bell, User, Clock } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useAuthStore } from "@/store/use-auth-store"
 
@@ -110,14 +110,6 @@ export function TopNav() {
         </div>
         
         <div className="flex items-center gap-3">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="rounded-full hover:bg-red-50 hover:text-red-500 transition-colors h-11 w-11"
-            onClick={() => useAuthStore.getState().lock()}
-          >
-            <Lock className="w-5 h-5" />
-          </Button>
 
           <Dialog>
             <DialogTrigger render={<Button variant="ghost" size="icon" className="relative rounded-full h-11 w-11 hover:bg-muted" />}>

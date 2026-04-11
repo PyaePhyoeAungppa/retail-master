@@ -6,10 +6,8 @@ import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
-  { label: "Features", href: "#features" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Stats", href: "#stats" },
-  { label: "Contact", href: "#contact" },
+  { label: "Features",  href: "#features" },
+  { label: "Pricing",   href: "#pricing" },
 ]
 
 export function LandingNav() {
@@ -22,7 +20,6 @@ export function LandingNav() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = isMobileMenuOpen ? "hidden" : ""
     return () => { document.body.style.overflow = "" }
@@ -50,19 +47,16 @@ export function LandingNav() {
               {link.label}
             </Link>
           ))}
-          <Link href="/login" className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors">
-            Login
-          </Link>
-          <Link href="/login" className="px-5 py-2.5 bg-foreground text-background rounded-xl font-black text-sm hover:bg-foreground/90 transition-all active:scale-95">
-            Launch POS →
+          <Link
+            href="#contact"
+            className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl font-black text-sm hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95"
+          >
+            Get Started →
           </Link>
         </nav>
 
-        {/* Mobile right side: Login + Hamburger */}
+        {/* Mobile right side: Hamburger only */}
         <div className="flex items-center gap-2 md:hidden">
-          <Link href="/login" className="text-sm font-bold text-muted-foreground hover:text-primary transition-colors px-2 py-1">
-            Login
-          </Link>
           <button
             className="p-2 rounded-xl bg-muted/60 text-foreground hover:bg-muted transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -109,20 +103,13 @@ export function LandingNav() {
             </Link>
           ))}
 
-          <div className="mt-auto pt-8 space-y-3">
+          <div className="mt-auto pt-8">
             <Link
-              href="/login"
-              className="flex items-center justify-center w-full py-4 bg-muted text-foreground rounded-2xl font-black text-lg border border-border hover:bg-muted/80 transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Login
-            </Link>
-            <Link
-              href="/login"
+              href="#contact"
               className="flex items-center justify-center w-full py-4 bg-primary text-primary-foreground rounded-2xl font-black text-lg shadow-xl shadow-primary/20 hover:bg-primary/90 transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              Launch POS Terminal →
+              Get Started →
             </Link>
           </div>
         </nav>

@@ -7,7 +7,6 @@ import { useEffect } from "react"
 import { Loader2 } from "lucide-react"
 import { Sidebar } from "./sidebar"
 import { TopNav } from "./top-nav"
-import { LockScreen } from "./lock-screen"
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const { currentUser, initialized, isProfileLoaded, storeId, role } = useAuthStore()
@@ -98,7 +97,6 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       <div className="order-2 lg:order-1 shrink-0">
         <Sidebar />
       </div>
-      <LockScreen />
     </div>
   )
 }

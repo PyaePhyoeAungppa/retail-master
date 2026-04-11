@@ -1,3 +1,5 @@
+"use client"
+
 import { Smartphone, Store, Instagram, Mail } from "lucide-react"
 import { MockReceiptPreview } from "./mock-receipt"
 
@@ -26,38 +28,57 @@ const audiences = [
 
 export function LandingTargetAudience() {
   return (
-    <section className="py-24 bg-primary/5 relative overflow-hidden">
+    <section className="py-24 lg:py-40 bg-white relative overflow-hidden">
+      {/* Background Text Overlay */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[20vw] font-black text-slate-50 select-none -z-10 tracking-tighter opacity-50">
+        RETAILERS
+      </div>
+
       <div className="container mx-auto px-6">
-        <div className="flex flex-col lg:flex-row items-center gap-16 mb-16">
-          <div className="lg:w-1/2">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black mb-6 tracking-tight leading-tight">
-              Built specifically for the Modern Online Merchant
+        <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-32 mb-24">
+          <div className="lg:w-1/2 space-y-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
+              Who we serve
+            </div>
+            <h2 className="text-4xl lg:text-7xl font-black tracking-tighter leading-[0.9] text-balance">
+              Tailored for the <br />
+              <span className="text-primary/40">Modern Merchant.</span>
             </h2>
-            <p className="text-muted-foreground text-lg leading-relaxed">
-              Whether you sell through DMs, run a Shopify alternative, or manage multiple digital brands, this platform adapts to your workflow. No hardware required.
+            <p className="text-lg lg:text-xl text-muted-foreground font-medium leading-relaxed max-w-xl">
+              From social commerce startups to established multi-brand boutiques, our platform scales with your ambition. No bulky hardware, just pure digital efficiency.
             </p>
           </div>
-          <div className="lg:w-1/2 relative flex justify-center pb-12 pr-12 pt-6">
-            <div className="absolute inset-0 bg-primary/10 rounded-[3rem] rotate-3 blur-sm" />
-            <div className="relative z-10 w-full max-w-sm">
+
+          <div className="lg:w-1/2 relative flex justify-center pb-12 pr-12 pt-12 group">
+            {/* Animated Glow */}
+            <div className="absolute inset-0 bg-primary/10 rounded-[4rem] rotate-6 blur-3xl opacity-50 group-hover:rotate-0 transition-transform duration-700" />
+            
+            <div className="relative z-10 w-full max-w-sm transform group-hover:scale-105 transition-transform duration-500">
                <MockReceiptPreview />
             </div>
-            {/* Pulsing visual to show it's active */}
-            <div className="absolute top-1/2 right-4 w-24 h-24 bg-primary/20 blur-2xl rounded-full" />
-            <div className="absolute bottom-1/4 left-10 w-32 h-32 bg-purple-500/10 blur-2xl rounded-full" />
+
+            {/* Float Elements */}
+            <div className="absolute -top-4 -right-4 w-24 h-24 bg-indigo-500/10 blur-2xl rounded-full animate-pulse-slow" />
+            <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-primary/10 blur-2xl rounded-full animate-pulse-slow" style={{ animationDelay: "1s" }} />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {audiences.map((audience, index) => (
-            <div key={index} className="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-black/5 hover:border-primary/20 hover:shadow-md transition-all group">
-              <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all">
-                <audience.icon className="w-6 h-6" />
+            <div 
+              key={index} 
+              className="group relative bg-slate-50/50 p-8 rounded-[2.5rem] border border-black/[0.02] hover:bg-white hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-2 transition-all duration-500"
+            >
+              <div className="w-16 h-16 rounded-[1.5rem] bg-white text-primary flex items-center justify-center mb-8 shadow-sm group-hover:scale-110 group-hover:shadow-xl group-hover:bg-primary group-hover:text-white transition-all duration-500">
+                <audience.icon className="w-7 h-7" />
               </div>
-              <h3 className="font-black text-lg sm:text-xl mb-3">{audience.title}</h3>
-              <p className="text-muted-foreground leading-relaxed text-xs sm:text-sm">
+              <h3 className="font-black text-xl mb-4 tracking-tight">{audience.title}</h3>
+              <p className="text-muted-foreground leading-relaxed text-sm font-medium">
                 {audience.description}
               </p>
+              
+              {/* Subtle hover indicator */}
+              <div className="absolute bottom-6 right-8 w-8 h-1 bg-primary/10 rounded-full group-hover:w-16 group-hover:bg-primary transition-all duration-500" />
             </div>
           ))}
         </div>

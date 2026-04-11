@@ -3,6 +3,7 @@
 import { Store, Package, Zap, TrendingUp } from "lucide-react"
 import { MockPOSPreview } from "./mock-pos"
 import { useEffect, useRef, useState } from "react"
+import { cn } from "@/lib/utils"
 
 const steps = [
   {
@@ -68,69 +69,82 @@ function useReveal() {
 export function LandingHowItWorks() {
   const { ref, visible } = useReveal()
   return (
-    <section id="how-it-works" className="py-28 bg-muted/30 relative overflow-hidden">
-      {/* Decorative orb */}
-      <div aria-hidden className="pointer-events-none absolute right-0 top-0 w-[400px] h-[400px] rounded-full bg-primary/5 blur-[100px]" />
+    <section id="how-it-works" className="py-24 lg:py-40 bg-slate-50 relative overflow-hidden">
+      {/* Decorative Orbs */}
+      <div aria-hidden className="pointer-events-none absolute left-0 top-0 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[120px]" />
+      <div aria-hidden className="pointer-events-none absolute right-0 bottom-0 w-[400px] h-[400px] rounded-full bg-indigo-500/5 blur-[100px]" />
 
       <div className="container mx-auto px-6">
-        <div className="text-center max-w-3xl mx-auto mb-20">
-          <div className="inline-block text-xs font-black text-primary uppercase tracking-widest bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full mb-5">
-            Getting Started
+        <div className="text-center max-w-4xl mx-auto mb-24">
+          <div className="inline-block text-[10px] font-black text-primary uppercase tracking-[0.2em] bg-primary/10 border border-primary/20 px-4 py-2 rounded-full mb-6">
+             The Onboarding Flow
           </div>
-          <h2 className="text-4xl lg:text-5xl font-black tracking-tighter mb-4">
-            Up and running{" "}
-            <span className="text-primary">in under an hour.</span>
+          <h2 className="text-4xl lg:text-7xl font-black tracking-tighter mb-6 leading-[0.9]">
+            Up and running in <span className="text-primary/60">minutes.</span>
           </h2>
-          <p className="text-lg text-muted-foreground font-medium leading-relaxed">
-            No lengthy onboarding. No steep learning curve. Four simple steps and you're ready to sell.
+          <p className="text-lg lg:text-xl text-muted-foreground font-medium leading-relaxed max-w-2xl mx-auto">
+            Our platform is designed for speed. No lengthy setups or complex hardware required — just your browser and a passion to sell.
           </p>
         </div>
 
-        <div ref={ref} className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-          {/* Connector line — desktop only */}
-          <div className="hidden lg:block absolute top-[58px] left-[13%] right-[13%] h-px bg-gradient-to-r from-indigo-200 via-emerald-200 to-amber-200 z-0" />
+        <div ref={ref} className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+          {/* Progress Indicator — Desktop */}
+          <div className="hidden lg:block absolute top-[44px] left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-primary/30 via-indigo-500/30 to-emerald-500/30 -z-10" />
 
           {steps.map((step, i) => (
             <div
               key={i}
-              className="relative z-10 flex flex-col items-center text-center"
+              className="group relative flex flex-col items-center text-center p-8 rounded-[2.5rem] bg-white border border-black/[0.03] shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-500"
               style={{
                 opacity: visible ? 1 : 0,
-                transform: visible ? "translateY(0)" : "translateY(24px)",
-                transition: `opacity 0.6s ease ${i * 120}ms, transform 0.6s cubic-bezier(0.16,1,0.3,1) ${i * 120}ms`,
+                transform: visible ? "translateY(0)" : "translateY(32px)",
+                transition: `opacity 0.8s ease ${i * 150}ms, transform 0.8s cubic-bezier(0.16,1,0.3,1) ${i * 150}ms`,
               }}
             >
-              {/* Icon bubble */}
-              <div className={`relative w-[72px] h-[72px] rounded-2xl ${step.color} text-white flex items-center justify-center shadow-xl ${step.shadow} mb-6 hover:scale-110 transition-transform duration-300 ring-4 ${step.ring}`}>
-                <step.icon className="w-8 h-8" />
-                <div className="absolute -top-2.5 -right-2.5 w-6 h-6 rounded-full bg-background border-2 border-border flex items-center justify-center text-[9px] font-black text-foreground shadow-sm">
+              {/* Step Icon */}
+              <div className={cn(
+                "w-20 h-20 rounded-3xl flex items-center justify-center text-white mb-8 shadow-2xl relative group-hover:scale-110 transition-transform duration-500",
+                step.color,
+                step.shadow
+              )}>
+                <step.icon className="w-9 h-9" />
+                <div className="absolute -bottom-3 -right-3 w-8 h-8 rounded-2xl bg-white border border-black/5 flex items-center justify-center text-xs font-black text-slate-800 shadow-lg">
                   {step.number}
                 </div>
               </div>
 
-              <div className={`p-6 rounded-3xl bg-gradient-to-b ${step.highlight} border w-full hover:shadow-xl hover:-translate-y-1 transition-all duration-300`}>
-                <h3 className={`text-base font-black mb-3 tracking-tight ${step.textColor}`}>{step.title}</h3>
-                <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                  {step.description}
-                </p>
-              </div>
+              <h3 className="text-lg font-black mb-4 tracking-tight">{step.title}</h3>
+              <p className="text-sm text-muted-foreground font-medium leading-relaxed">
+                {step.description}
+              </p>
             </div>
           ))}
         </div>
 
-        <div className="mt-24 max-w-5xl mx-auto flex flex-col items-center">
-          <div className="inline-block text-[10px] font-black text-primary uppercase tracking-widest bg-primary/10 border border-primary/20 px-3 py-1 rounded-full mb-6">
-            Live Preview
+        {/* Live Preview Section */}
+        <div className="mt-32 lg:mt-48 max-w-6xl mx-auto">
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-indigo-500 to-emerald-500 rounded-[3rem] blur opacity-10 group-hover:opacity-25 transition" />
+            <div className="relative p-2 lg:p-4 rounded-[3rem] bg-white border border-black/[0.05] shadow-2xl overflow-hidden">
+               <div className="flex items-center gap-3 px-6 py-4 border-b border-black/[0.03] bg-slate-50/50 mb-6 rounded-t-[2.5rem]">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-red-400/30" />
+                    <div className="w-3 h-3 rounded-full bg-amber-400/30" />
+                    <div className="w-3 h-3 rounded-full bg-emerald-400/30" />
+                  </div>
+                  <div className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest pl-4">LIVE POS INTERFACE PREVIEW</div>
+               </div>
+               <div className="px-4 pb-4">
+                  <MockPOSPreview />
+               </div>
+            </div>
           </div>
-          <h3 className="text-2xl sm:text-3xl font-black tracking-tight mb-12 text-center">
-            Your Checkout Process, Simplified.
-          </h3>
-          <div className="w-full hidden md:block">
-            <MockPOSPreview />
+          <div className="mt-12 text-center space-y-4">
+            <h3 className="text-2xl font-black tracking-tight">Zero learning curve. Pure efficiency.</h3>
+            <p className="text-muted-foreground font-medium max-w-xl mx-auto">
+              Our interface is built for high-volume retailers. Tap to add, swipe to remove, and share links instantly. It's the POS experience you've always wanted.
+            </p>
           </div>
-          <p className="mt-8 text-sm font-medium text-muted-foreground text-center max-w-lg">
-            A beautiful, intuitive interface means zero training time for you or your staff. Just tap, charge, and share the receipt.
-          </p>
         </div>
       </div>
     </section>
