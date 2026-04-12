@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
-import { CheckCircle2, Package, AlertTriangle, Download, Filter, Copy, Check, Search, TrendingUp, DollarSign, Users, Layers, ChevronRight } from "lucide-react"
+import { CheckCircle2, Package, AlertTriangle, Download, Filter, Copy, Check, Search, TrendingUp, DollarSign, Users, Layers, ChevronRight, ShoppingBag, Plus, Minus, CreditCard, Share2, ReceiptText, User, Save, Trash2, Send, Phone, MessageSquare, ListTodo } from "lucide-react"
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer
@@ -107,10 +107,10 @@ function SocialCommerceFlow() {
   const [activeStep, setActiveStep] = useState(0)
 
   const steps = [
-    { label: "Build Cart", icon: "🛒" },
-    { label: "Share Link", icon: "🔗" },
-    { label: "Send in DM", icon: "💬" },
-    { label: "Customer Pays", icon: "✅" },
+    { label: "Build Cart", icon: ShoppingBag },
+    { label: "Share Link", icon: Share2 },
+    { label: "Send in DM", icon: MessageSquare },
+    { label: "Customer Pays", icon: ReceiptText },
   ]
 
   return (
@@ -128,7 +128,7 @@ function SocialCommerceFlow() {
                 : "bg-white text-slate-500 border-slate-200 hover:border-primary/30"
             )}
           >
-            <span>{s.icon}</span> {s.label}
+            <s.icon className="w-3.5 h-3.5" /> {s.label}
           </button>
         ))}
       </div>
@@ -144,67 +144,131 @@ function SocialCommerceFlow() {
 
       {/* Step 0: POS Cart with Share Link button */}
       {activeStep === 0 && (
-        <div className="rounded-2xl bg-white border border-slate-100 shadow-xl overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-100 bg-slate-50">
-            <div className="flex gap-1"><div className="w-2 h-2 rounded-full bg-red-400/60" /><div className="w-2 h-2 rounded-full bg-amber-400/60" /><div className="w-2 h-2 rounded-full bg-emerald-400/60" /></div>
-            <div className="flex-1 flex justify-center"><p className="text-[8px] font-bold text-slate-400 bg-white border border-slate-200 px-2 py-0.5 rounded">retailmaster.store/pos</p></div>
-          </div>
+          <div className="flex divide-x divide-slate-100 h-80 sm:h-[480px]">
+            {/* Products area */}
+            <div className="flex-1 bg-slate-50/50 flex flex-col overflow-hidden">
+               {/* Categories - matches real app */}
+               <div className="px-3 py-2 flex gap-1.5 overflow-x-auto no-scrollbar border-b border-slate-100">
+                  <div className="px-2.5 py-1 bg-white shadow-sm border border-primary/20 text-primary text-[7px] font-black rounded-md flex-none">All Products</div>
+                  <div className="px-2.5 py-1 text-slate-400 text-[7px] font-bold rounded-md flex-none">Apparel</div>
+                  <div className="px-2.5 py-1 text-slate-400 text-[7px] font-bold rounded-md flex-none">Accessories</div>
+               </div>
 
-          <div className="flex divide-x divide-slate-100">
-            {/* Products grid */}
-            <div className="flex-1 p-3 bg-slate-50/50 space-y-2">
-              <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest">Products</p>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  { name: "Silk Midi Dress", price: "฿890", active: true },
-                  { name: "Pearl Earrings",   price: "฿280", active: false },
-                  { name: "Linen Set",        price: "฿650", active: false },
-                  { name: "Denim Jacket",     price: "฿1,200", active: false },
-                ].map((p, i) => (
-                  <div key={i} className={cn("rounded-xl p-2.5 border text-center hover:border-primary/30 transition-colors", p.active ? "bg-primary/5 border-primary/20" : "bg-white border-slate-100")}>
-                    <div className={cn("w-8 h-8 rounded-lg mx-auto mb-1.5 flex items-center justify-center text-sm", p.active ? "bg-primary/10" : "bg-slate-100")}>👗</div>
-                    <p className="text-[8px] font-black truncate">{p.name}</p>
-                    <p className={cn("text-[9px] font-black", p.active ? "text-primary" : "text-slate-600")}>{p.price}</p>
-                  </div>
-                ))}
+               <div className="flex-1 p-3 space-y-3 overflow-y-auto">
+                <div className="flex items-center justify-between">
+                  <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest">Products</p>
+                  <Search className="w-3 h-3 text-slate-300" />
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                  {[
+                    { name: "Silk Midi Dress", price: "890", active: true, color: "bg-indigo-50", icon: ShoppingBag },
+                    { name: "Pearl Earrings",   price: "280", active: false, color: "bg-amber-50", icon: Layers },
+                    { name: "Linen Set",        price: "650", active: false, color: "bg-emerald-50", icon: Package },
+                    { name: "Denim Jacket",     price: "1,200", active: false, color: "bg-blue-50", icon: ShoppingBag },
+                    { name: "Gold Necklace",    price: "450", active: false, color: "bg-yellow-50", icon: Layers },
+                    { name: "Leather Boots",    price: "2,400", active: false, color: "bg-orange-50", icon: Package },
+                    { name: "Wool Scarf",       price: "320", active: false, color: "bg-rose-50", icon: ShoppingBag },
+                    { name: "Cotton Tee",       price: "180", active: false, color: "bg-slate-50", icon: Layers },
+                    { name: "Silk Scarf",       price: "550", active: false, color: "bg-violet-50", icon: Layers },
+                    { name: "Pearl Ring",       price: "720", active: false, color: "bg-cyan-50", icon: Package },
+                    { name: "Canvas Bag",       price: "340", active: false, color: "bg-lime-50", icon: ShoppingBag },
+                    { name: "Summer Hat",       price: "290", active: false, color: "bg-orange-50", icon: Layers },
+                  ].map((p, i) => (
+                    <div key={i} className={cn("rounded-xl p-1.5 border transition-all flex flex-col h-full", p.active ? "bg-white border-primary shadow-sm" : "bg-white border-slate-100 shadow-sm")}>
+                      <div className={cn("w-full aspect-[16/10] rounded-lg mb-1 flex items-center justify-center relative overflow-hidden", p.color)}>
+                        <p.icon className={cn("w-3 h-3", p.active ? "text-primary" : "text-slate-200")} />
+                        {p.active && (
+                          <div className="absolute top-0.5 right-0.5 w-3 h-3 bg-primary rounded-full flex items-center justify-center text-white text-[6px] font-black">
+                             1
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-[6px] text-primary/70 font-bold uppercase tracking-widest mb-0.5">Apparel</p>
+                        <p className="text-[7px] font-black truncate leading-tight text-slate-700">{p.name}</p>
+                      </div>
+                      <div className="mt-1 flex items-center justify-between pt-1 border-t border-slate-50">
+                        <p className="text-[8px] font-black tracking-tighter">฿{p.price}</p>
+                        <div className="flex items-center gap-1">
+                           <div className="w-3 h-3 bg-primary rounded-md flex items-center justify-center text-white"><Plus className="w-2 h-2" /></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Cart */}
-            <div className="w-36 bg-white flex flex-col">
-              <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between">
-                <p className="text-[8px] font-black uppercase tracking-widest">Cart</p>
-                <span className="text-[8px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full font-bold">2 items</span>
+            {/* Cart sidebar mockup */}
+            <div className="w-44 bg-white flex flex-col overflow-hidden">
+              {/* Cart Header - matches real app */}
+              <div className="px-3 py-2.5 border-b border-slate-100 flex items-center gap-2 bg-slate-50/50">
+                <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                  <User className="w-2.5 h-2.5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                   <p className="text-[7px] font-black uppercase text-slate-400">Customer</p>
+                   <p className="text-[8px] font-bold truncate">Nini K.</p>
+                </div>
+                <div className="w-5 h-5 rounded-full border border-slate-200 flex items-center justify-center text-slate-400">
+                  <ListTodo className="w-2.5 h-2.5" />
+                </div>
               </div>
-              <div className="flex-1 p-3 space-y-2.5">
+
+              <div className="flex-1 p-3 space-y-3 overflow-y-auto">
                 {[
                   { name: "Silk Midi Dress", qty: 1, price: "฿890" },
                   { name: "Pearl Earrings",  qty: 2, price: "฿560" },
                 ].map((item, i) => (
-                  <div key={i} className="space-y-0.5">
-                    <p className="text-[8px] font-black truncate">{item.name}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[7px] text-slate-400">×{item.qty}</span>
-                      <span className="text-[8px] font-black text-primary">{item.price}</span>
+                  <div key={i} className="flex gap-2 group">
+                    <div className="w-7 h-7 bg-slate-100 rounded-lg flex items-center justify-center text-slate-300 shrink-0">
+                       <ShoppingBag className="w-3.5 h-3.5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start">
+                        <p className="text-[8px] font-black truncate pr-1">{item.name}</p>
+                        <Trash2 className="w-2.5 h-2.5 text-slate-200" />
+                      </div>
+                      <div className="flex items-center justify-between mt-1">
+                        <div className="flex items-center bg-slate-50 rounded-md p-0.5 border border-slate-100 scale-90 -ml-1">
+                          <Minus className="w-2 h-2 text-slate-300" />
+                          <span className="text-[8px] font-black w-2.5 text-center">{item.qty}</span>
+                          <Plus className="w-2 h-2 text-primary" />
+                        </div>
+                        <span className="text-[8px] font-black text-primary">{item.price}</span>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="p-2.5 border-t border-slate-100 bg-slate-50 space-y-2">
-                <div className="flex justify-between text-[9px] font-black">
-                  <span>Total</span>
-                  <span className="text-primary">฿1,551</span>
+
+              {/* Cart Totals */}
+              <div className="p-3 border-t border-slate-100 bg-slate-50 space-y-2">
+                <div className="space-y-1 text-[8px] font-medium text-slate-500">
+                  <div className="flex justify-between"><span>Subtotal</span><span className="text-slate-700">฿1,450.00</span></div>
+                  <div className="flex justify-between">
+                    <span>Tax (7%)</span>
+                    <span className="text-primary font-black">฿101.50</span>
+                  </div>
                 </div>
-                <button className="w-full py-1.5 bg-primary/10 text-primary border border-primary/20 rounded-lg text-[8px] font-black flex items-center justify-center gap-1">
-                  🔗 Share Link
-                </button>
-                <button className="w-full py-1.5 bg-slate-900 text-white rounded-lg text-[8px] font-black">
-                  💳 Checkout
+                <div className="flex justify-between items-end pt-1.5 border-t border-slate-200">
+                  <span className="text-[9px] font-black uppercase tracking-tight">Total</span>
+                  <span className="text-xs font-black text-primary">฿1,551.50</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5 pt-1">
+                  <button className="py-1.5 bg-white border border-slate-200 rounded-lg text-[7px] font-black flex items-center justify-center gap-1 shadow-sm">
+                    <Save className="w-2.5 h-2.5" /> Save
+                  </button>
+                  <button className="py-1.5 bg-primary text-white rounded-lg text-[7px] font-black flex items-center justify-center gap-1 shadow-lg shadow-primary/20">
+                    <CreditCard className="w-2.5 h-2.5" /> Pay
+                  </button>
+                </div>
+                <button className="w-full py-2 bg-primary/10 text-primary border border-primary/20 rounded-lg text-[8px] font-black flex items-center justify-center gap-1.5 hover:bg-primary/20 transition-all">
+                  <Share2 className="w-3 h-3" /> Share Order Link
                 </button>
               </div>
             </div>
           </div>
-        </div>
       )}
 
       {/* Step 1: Share link modal */}
@@ -248,12 +312,12 @@ function SocialCommerceFlow() {
             <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest">Share via</p>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { label: "Messenger", emoji: "💬", bg: "bg-blue-50 border-blue-100 text-blue-700" },
-                { label: "WhatsApp",  emoji: "📱", bg: "bg-emerald-50 border-emerald-100 text-emerald-700" },
-                { label: "Copy Link", emoji: "🔗", bg: "bg-slate-50 border-slate-200 text-slate-600" },
-              ].map(({ label, emoji, bg }) => (
+                { label: "Messenger", icon: MessageSquare, bg: "bg-blue-50 border-blue-100 text-blue-700" },
+                { label: "WhatsApp",  icon: Phone, bg: "bg-emerald-50 border-emerald-100 text-emerald-700" },
+                { label: "Copy Link", icon: Copy, bg: "bg-slate-50 border-slate-200 text-slate-600" },
+              ].map(({ label, icon: Icon, bg }) => (
                 <button key={label} className={cn("py-2.5 rounded-xl border text-[9px] font-black flex flex-col items-center gap-1 transition-all hover:scale-[1.02]", bg)}>
-                  <span className="text-base">{emoji}</span>
+                  <Icon className="w-4 h-4" />
                   {label}
                 </button>
               ))}
@@ -280,7 +344,7 @@ function SocialCommerceFlow() {
             <div className="flex justify-end">
               <div className="max-w-[75%] space-y-1.5">
                 <div className="bg-[#0084ff] text-white rounded-2xl rounded-tr-sm px-3 py-2">
-                  <p className="text-[10px] font-medium">Hi Nini! Here's your order summary 🧾</p>
+                  <p className="text-[10px] font-medium">Hi Nini! Here's your order summary.</p>
                 </div>
                 {/* Link card — how Messenger renders links */}
                 <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
@@ -290,7 +354,7 @@ function SocialCommerceFlow() {
                     <p className="text-[10px] font-black">Order #TX-2847 · ฿1,551.50</p>
                     <p className="text-[8px] text-slate-400">Silk Midi Dress + Pearl Earrings</p>
                     <div className="mt-2 text-[8px] font-black text-[#0084ff] flex items-center gap-1">
-                      🔗 retailmaster.store/order/tx-2847
+                      retailmaster.store/order/tx-2847
                     </div>
                   </div>
                 </div>
@@ -302,7 +366,7 @@ function SocialCommerceFlow() {
             <div className="flex justify-start">
               <div className="max-w-[60%]">
                 <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm px-3 py-2 shadow-sm">
-                  <p className="text-[10px] font-medium text-slate-700">Okay! Transferring now 😊</p>
+                  <p className="text-[10px] font-medium text-slate-700">Okay! Transferring now.</p>
                 </div>
                 <p className="text-[8px] text-slate-400 mt-1">2:16 PM · Seen</p>
               </div>
@@ -312,7 +376,7 @@ function SocialCommerceFlow() {
             <div className="flex justify-end">
               <div className="max-w-[70%]">
                 <div className="bg-[#0084ff] text-white rounded-2xl rounded-tr-sm px-3 py-2">
-                  <p className="text-[10px] font-medium">Received! Order confirmed ✅ Thank you!</p>
+                  <p className="text-[10px] font-medium">Received! Order confirmed. Thank you!</p>
                 </div>
               </div>
             </div>
@@ -368,7 +432,9 @@ function SocialCommerceFlow() {
                       <p className="text-[10px] font-black">ACC-****-3456</p>
                       <p className="text-[7px] text-slate-400">MON BOUTIQUE</p>
                     </div>
-                    <div className="w-6 h-6 rounded-lg bg-emerald-500 flex items-center justify-center text-white text-xs">✓</div>
+                    <div className="w-6 h-6 rounded-lg bg-emerald-500 flex items-center justify-center text-white">
+                      <Check className="w-3.5 h-3.5" />
+                    </div>
                   </div>
                 </div>
                 <p className="text-[8px] font-black uppercase tracking-widest italic text-slate-600">Thank You For Shopping!</p>
@@ -529,48 +595,62 @@ function ReportCenterMockup() {
 interface FeatureRowProps {
   badge: string; title: string; subtitle: string
   description: string; features: string[]
-  mockup: React.ReactNode; reverse?: boolean
+  mockup: React.ReactNode; reverse?: boolean; fullWidth?: boolean
 }
 
-function FeatureRow({ badge, title, subtitle, description, features, mockup, reverse }: FeatureRowProps) {
+function FeatureRow({ badge, title, subtitle, description, features, mockup, reverse, fullWidth }: FeatureRowProps) {
   const { ref, visible } = useReveal()
   return (
     <div
       ref={ref}
       className={cn(
-        "flex flex-col gap-10 lg:gap-20 py-16 lg:py-24",
-        "lg:flex-row lg:items-center",
+        "flex flex-col gap-10 py-16 lg:py-24 transition-all duration-700",
+        !fullWidth && "lg:flex-row lg:items-center lg:gap-20",
         reverse && "lg:flex-row-reverse",
-        "transition-all duration-700",
         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
       )}
     >
-      <div className="flex-1 space-y-6 max-w-lg">
-        <span className="inline-block text-[10px] font-black text-primary uppercase tracking-[0.2em] bg-primary/10 border border-primary/20 px-3 py-1 rounded-full">
-          {badge}
-        </span>
-        <h3 className="text-3xl sm:text-4xl font-black tracking-tight leading-[1.1]">
-          {title}
-          <span className="block text-primary/50 mt-1">{subtitle}</span>
-        </h3>
-        <p className="text-base lg:text-lg text-muted-foreground font-medium leading-relaxed">
-          {description}
-        </p>
-        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {features.map((f, i) => (
-            <li key={i} className="flex items-start gap-2.5 text-sm font-semibold">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
-              {f}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="flex-1 w-full">
-        <div className="relative">
-          <div className="absolute -inset-3 bg-gradient-to-br from-primary/8 via-transparent to-violet-500/8 rounded-3xl blur-2xl" />
-          <div className="relative">{mockup}</div>
+      <div className={cn("space-y-6", fullWidth ? "text-center max-w-5xl mx-auto w-full" : "flex-1 max-w-lg")}>
+        <div className={cn(fullWidth && "mb-12 space-y-4")}>
+          <span className="inline-block text-[10px] font-black text-primary uppercase tracking-[0.2em] bg-primary/10 border border-primary/20 px-3 py-1 rounded-full">
+            {badge}
+          </span>
+          <h3 className={cn("font-black tracking-tight leading-[1.1]", fullWidth ? "text-4xl lg:text-5xl" : "text-3xl sm:text-4xl")}>
+            {title}
+            <span className="block text-primary/50 mt-1">{subtitle}</span>
+          </h3>
+        </div>
+
+        {fullWidth && (
+          <div className="w-full mb-16 relative">
+             <div className="absolute -inset-4 bg-gradient-to-br from-primary/5 via-transparent to-violet-500/5 rounded-[3rem] blur-3xl opacity-50" />
+             <div className="relative">{mockup}</div>
+          </div>
+        )}
+
+        <div className={cn("space-y-6", fullWidth && "text-center")}>
+           <p className={cn("text-base lg:text-lg text-muted-foreground font-medium leading-relaxed mx-auto", fullWidth && "max-w-2xl")}>
+            {description}
+          </p>
+          <ul className={cn("grid grid-cols-1 sm:grid-cols-2 gap-3", fullWidth ? "max-w-2xl mx-auto" : "")}>
+            {features.map((f, i) => (
+              <li key={i} className={cn("flex items-start gap-2.5 text-sm font-semibold", fullWidth && "justify-center")}>
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                {f}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
+
+      {!fullWidth && (
+        <div className="flex-1 w-full">
+          <div className="relative">
+            <div className="absolute -inset-3 bg-gradient-to-br from-primary/8 via-transparent to-violet-500/8 rounded-3xl blur-2xl" />
+            <div className="relative">{mockup}</div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -596,7 +676,7 @@ export function LandingShowcase() {
         description="From building the cart to a paid order — the whole flow happens without leaving Messenger. Tap 'Share Link', send it in the DM, and your customer sees a clean receipt with payment instructions."
         features={["POS cart → instant share link", "Messenger / WhatsApp ready", "Customer copies payment account", "One-tap link generation"]}
         mockup={<SocialCommerceFlow />}
-        reverse
+        fullWidth
       />
       <FeatureRow
         badge="Report Center"

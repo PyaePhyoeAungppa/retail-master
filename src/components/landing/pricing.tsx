@@ -75,11 +75,7 @@ const tiers = [
   },
 ]
 
-const testimonials = [
-  { name: "Mya T.",   role: "Fashion Boutique, Yangon",    quote: "I used to manage stock in 3 different notebooks. Now it's all here and I never run out." },
-  { name: "Ko Aung",  role: "Accessories Seller, Mandalay", quote: "My customers love getting the receipt link — feels so professional compared to just typing in Messenger." },
-  { name: "Su Su",    role: "Multi-brand online seller",    quote: "The analytics showed me my top products clearly. I doubled reorders that week." },
-]
+
 
 export function LandingPricing() {
   return (
@@ -210,23 +206,7 @@ export function LandingPricing() {
           ))}
         </div>
 
-        {/* Testimonials */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 max-w-4xl mx-auto">
-          {testimonials.map((t, i) => (
-            <div key={i} className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
-              <div className="flex mb-3">
-                {[...Array(5)].map((_, s) => (
-                  <Star key={s} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                ))}
-              </div>
-              <p className="text-sm text-slate-700 font-medium leading-relaxed mb-4">"{t.quote}"</p>
-              <div>
-                <p className="text-xs font-black text-slate-800">{t.name}</p>
-                <p className="text-[10px] text-muted-foreground font-medium">{t.role}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+
 
       </div>
     </section>
