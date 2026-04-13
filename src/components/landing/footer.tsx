@@ -20,13 +20,7 @@ const platformLinks = [
   { label: "App Settings", href: "#features" },
 ]
 
-const companyLinks = [
-  { label: "Our Vision", href: "#" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Brand Assets", href: "#" },
-  { label: "Terms of Service", href: "#" },
-  { label: "Privacy Policy", href: "#" },
-]
+
 
 export function LandingFooter() {
   const [email, setEmail] = useState("")
@@ -64,7 +58,7 @@ export function LandingFooter() {
   return (
     <footer className="bg-background border-t border-border pt-24 pb-12">
       <div className="container px-6 mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1.5fr] gap-12 lg:gap-24 mb-20">
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-6" aria-label="Retail Master Home">
@@ -102,8 +96,8 @@ export function LandingFooter() {
           </div>
 
           {/* Platform */}
-          <div>
-            <h4 className="font-black uppercase tracking-widest text-xs mb-8 text-foreground">Platform</h4>
+          <div className="flex flex-col">
+            <h4 className="font-black uppercase tracking-widest text-[10px] mb-8 text-foreground/30">Platform</h4>
             <ul className="space-y-3">
               {platformLinks.map((link) => (
                 <li key={link.label}>
@@ -115,23 +109,11 @@ export function LandingFooter() {
             </ul>
           </div>
 
-          {/* Company */}
-          <div>
-            <h4 className="font-black uppercase tracking-widest text-xs mb-8 text-foreground">Company</h4>
-            <ul className="space-y-4">
-              {companyLinks.map((link) => (
-                <li key={link.label}>
-                  <Link href={link.href} className="text-muted-foreground font-medium hover:text-primary transition-colors">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+
 
           {/* Newsletter */}
-          <div>
-            <h4 className="font-black uppercase tracking-widest text-xs mb-8 text-foreground">Stay Updated</h4>
+          <div className="flex flex-col">
+            <h4 className="font-black uppercase tracking-widest text-[10px] mb-8 text-foreground/30">Stay Updated</h4>
             <p className="text-sm text-muted-foreground font-medium mb-6">
               Subscribe for major feature announcements and retail industry insights.
             </p>

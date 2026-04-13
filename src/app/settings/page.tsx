@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
+import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/store/use-auth-store"
 import { useToastStore } from "@/store/use-toast-store"
 import { StorePaymentAccount } from "@/lib/data"
@@ -13,12 +14,16 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { Bell, Shield, Store, Loader2, Save, CreditCard, Plus, Trash2, TerminalSquare, XCircle, Clock, User, AlertTriangle, Monitor, Info } from "lucide-react"
+import { Bell, Shield, Store, Loader2, Save, CreditCard, Plus, Trash2, TerminalSquare, XCircle, Clock, User, AlertTriangle, Monitor, Info, Printer, Settings2, Unlink } from "lucide-react"
+import { usePrinterSettings } from "@/hooks/use-printer-settings"
+import { Switch } from "@/components/ui/switch"
+import { USBPrinterDriver } from "@/lib/usb-printer-driver"
 
 export default function SettingsPage() {
   const { storeId, role } = useAuthStore()
   const isAdmin = role === 'admin' || role === 'owner' || role === 'superadmin'
   const { toast } = useToastStore()
+  const { settings: printerSettings, updateSettings: updatePrinterSettings, isLoaded: isPrinterLoaded } = usePrinterSettings()
   const queryClient = useQueryClient()
   const [formData, setFormData] = useState({
     name: "",
@@ -281,6 +286,91 @@ export default function SettingsPage() {
 
   const handleSave = () => {
     mutation.mutate(formData)
+  }
+
+  const handleConnectPrinter = async () => {
+    if (typeof navigator === 'undefined' || !(navigator as any).usb) {
+      toast({ 
+        title: "Browser Not Supported", 
+        description: "Your browser does not support USB devices. Try Chrome or Edge.", 
+        variant: "destructive" 
+      })
+      return
+    }
+
+    try {
+      const device = await (navigator as any).usb.requestDevice({ filters: [] })
+      updatePrinterSettings({
+        connectedDevice: {
+          vendorId: device.vendorId,
+          productId: device.productId,
+          productName: device.productName || "Unknown Printer"
+        }
+      })
+      toast({ title: "Printer Paired", description: "You might need to grant 'Direct Access' using Zadig for silent printing.", variant: "success" })
+    } catch (err: any) {
+      if (err.name === 'SecurityError' || err.message?.includes('Access denied')) {
+        toast({ 
+          title: "Access Denied", 
+          description: "Driver lock detected. Use Zadig to set your printer driver to 'WinUSB'.", 
+          variant: "destructive" 
+        })
+      } else if (err.name !== 'NotFoundError') {
+        toast({ title: "Connection Failed", description: err.message, variant: "destructive" })
+      }
+    }
+  }
+
+  const handleTestPrint = async () => {
+    if (!printerSettings.connectedDevice) return
+
+    try {
+      const pairedDevices = await (navigator as any).usb.getDevices()
+      const device = pairedDevices.find(
+        (d: any) => d.vendorId === printerSettings.connectedDevice?.vendorId && 
+             d.productId === printerSettings.connectedDevice?.productId
+      )
+
+      if (!device) {
+        toast({ title: "Printer Not Found", description: "Please re-connect your USB printer.", variant: "destructive" })
+        return
+      }
+
+      const driver = new USBPrinterDriver(device)
+      const connected = await driver.connect()
+
+      if (connected) {
+        await driver.printReceipt({
+          storeName: formData.name || "Test Store",
+          brand: "Test Connection",
+          address: "123 Logic Lane",
+          transactionId: "TEST-001",
+          date: new Date().toLocaleString(),
+          customerName: "Test Customer",
+          items: [{ name: "Test Product", price: 10.00, quantity: 1 }],
+          total: 10.00,
+          tax: 1.00,
+          grandTotal: 11.00,
+          currency: "$",
+          cashierName: "Admin",
+          paymentMethod: "Cash",
+          footerText: "Connection verified successfully!"
+        })
+        toast({ title: "Test Receipt Printed", variant: "success" })
+      } else {
+        throw new Error("Could not claim printer interface")
+      }
+    } catch (err: any) {
+      if (err.message === "ACCESS_DENIED") {
+        toast({ 
+          title: "Windows Driver Locked", 
+          description: "Browser cannot take control. Please use Zadig utility to replace the driver with 'WinUSB'.", 
+          variant: "destructive" 
+        })
+      } else {
+        toast({ title: "Test Failed", description: err.message, variant: "destructive" })
+      }
+    }
   }
 
   if (isLoading) {
@@ -724,6 +814,131 @@ export default function SettingsPage() {
                       <p className="text-xs font-bold opacity-30 mt-1">Open a shift first to begin assigning staff</p>
                     </div>
               )}
+            </div>
+          </CardContent>
+        </Card>
+        {/* Local Hardware Settings (Printer) */}
+        <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
+          <CardHeader className="bg-muted/30">
+            <CardTitle className="text-lg flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Printer className="w-5 h-5 text-primary" />
+                Local Terminal Hardware
+              </div>
+              <Badge variant="outline" className="bg-white text-[10px] font-bold uppercase tracking-tight text-muted-foreground border-dashed">
+                Browser Local Storage
+              </Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-8 space-y-8">
+            <div className="flex items-start gap-4 p-4 rounded-2xl bg-primary/5 border border-primary/10">
+              <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-primary">Device-Specific Settings</p>
+                <p className="text-xs text-primary/70 font-medium">
+                  These settings are saved locally on this physical device/browser. They will not sync to other cashier terminals.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between p-4 rounded-2xl border bg-white shadow-sm ring-1 ring-black/5">
+                  <div className="space-y-1">
+                    <p className="text-sm font-black tracking-tight">Auto-Print Receipt</p>
+                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">Trigger print dialog after checkout</p>
+                  </div>
+                  <Switch 
+                    checked={printerSettings.autoPrint}
+                    onCheckedChange={(checked) => updatePrinterSettings({ autoPrint: checked })}
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Connect Hardware</Label>
+                  {printerSettings.connectedDevice ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-4 rounded-2xl bg-emerald-50 border border-emerald-100 group">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-white text-emerald-600 flex items-center justify-center shadow-sm">
+                            <Printer className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-black text-emerald-900">{printerSettings.connectedDevice.productName}</p>
+                            <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-tight">
+                              Ready • ID {printerSettings.connectedDevice.vendorId}:{printerSettings.connectedDevice.productId}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={handleTestPrint}
+                            className="h-9 px-4 rounded-xl font-black text-[9px] uppercase tracking-widest bg-white"
+                          >
+                            Test Print
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => updatePrinterSettings({ connectedDevice: null })}
+                            className="text-emerald-300 hover:text-red-500 hover:bg-red-50 rounded-full opacity-0 group-hover:opacity-100 transition-all"
+                          >
+                            <Unlink className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-100/50 border border-slate-200/50 text-slate-500">
+                        <Info className="w-4 h-4 shrink-0" />
+                        <p className="text-[9px] font-bold leading-tight">
+                          Getting "Access Denied"? Ensure you've replaced your USB driver with <span className="text-primary italic">WinUSB</span> via Zadig.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button 
+                      onClick={handleConnectPrinter}
+                      variant="outline"
+                      className="w-full h-16 rounded-2xl border-dashed border-2 flex flex-col gap-1 hover:border-primary/50 hover:bg-primary/5 transition-all"
+                    >
+                      <Plus className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Select USB Printer</span>
+                    </Button>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Receipt Paper Size</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {['80mm', '58mm'].map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => updatePrinterSettings({ paperSize: size as any })}
+                        className={cn(
+                          "h-12 rounded-xl text-sm font-black uppercase tracking-widest transition-all border",
+                          printerSettings.paperSize === size
+                            ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
+                            : "bg-white text-muted-foreground border-slate-200 hover:border-primary/30"
+                        )}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Custom Receipt Footer</Label>
+                <textarea 
+                  value={printerSettings.footerText}
+                  onChange={(e) => updatePrinterSettings({ footerText: e.target.value })}
+                  placeholder="e.g. Come back and see us soon!"
+                  className="w-full h-32 rounded-2xl bg-white border-none ring-1 ring-black/5 focus:ring-2 focus:ring-primary p-4 text-sm font-medium shadow-sm resize-none"
+                />
+              </div>
             </div>
           </CardContent>
         </Card>

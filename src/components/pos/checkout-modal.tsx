@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useCartStore } from "@/store/use-cart-store"
 import { useQueryClient } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
@@ -23,6 +23,7 @@ import { supabase } from "@/lib/supabase"
 import { Transaction, TransactionItem, Store } from "@/lib/data"
 import { useQuery } from "@tanstack/react-query"
 import { ReceiptPreview } from "./receipt-preview"
+import { usePrinterSettings } from "@/hooks/use-printer-settings"
 
 interface CheckoutModalProps {
   open: boolean
@@ -45,6 +46,7 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
   } = useCartStore()
   const { currentUser, storeId, shiftId, terminalId } = useAuthStore()
   const { toast } = useToastStore()
+  const { settings: printerSettings } = usePrinterSettings()
   const [paymentMethod, setPaymentMethod] = useState<string | null>(null)
   const [isSuccess, setIsSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -166,6 +168,13 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
     }
   }
 
+  // Auto-print effect
+  useEffect(() => {
+    if (isSuccess && printerSettings.autoPrint) {
+      setReceiptPreviewOpen(true);
+    }
+  }, [isSuccess, printerSettings.autoPrint]);
+
   const handleDone = () => {
     clearCart()
     setOrderId(null)
@@ -244,6 +253,9 @@ export function CheckoutModal({ open, onOpenChange }: CheckoutModalProps) {
             onOpenChange={setReceiptPreviewOpen}
             transactionId={transactionId}
             paymentMethod={paymentMethod || "Cash"}
+            autoPrint={printerSettings.autoPrint}
+            footerText={printerSettings.footerText}
+            paperSize={printerSettings.paperSize}
           />
         </DialogContent>
       </Dialog>

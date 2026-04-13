@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useRef } from "react"
+import { useRef, useEffect } from "react"
 import { useCartStore } from "@/store/use-cart-store"
 import { toPng } from "html-to-image"
 import jsPDF from "jspdf"
@@ -19,6 +19,8 @@ import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { Transaction, TransactionItem } from "@/lib/data"
 import { useAuthStore } from "@/store/use-auth-store"
+import { USBPrinterDriver } from "@/lib/usb-printer-driver"
+import { usePrinterSettings } from "@/hooks/use-printer-settings"
 
 interface ReceiptPreviewProps {
   open: boolean
@@ -27,11 +29,15 @@ interface ReceiptPreviewProps {
   paymentMethod: string
   transaction?: Transaction
   historicalItems?: TransactionItem[]
+  autoPrint?: boolean
+  footerText?: string
+  paperSize?: '80mm' | '58mm'
 }
 
-export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMethod, transaction, historicalItems }: ReceiptPreviewProps) {
+export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMethod, transaction, historicalItems, autoPrint, footerText, paperSize }: ReceiptPreviewProps) {
   const receiptRef = useRef<HTMLDivElement>(null)
   const { storeId, currentUser } = useAuthStore()
+  const { settings: printerSettings } = usePrinterSettings()
   const { items: cartItems, total: cartTotal, receiptTemplate, selectedCustomer: cartCustomer } = useCartStore()
   
   // Use historical data if provided, otherwise use current cart
@@ -61,6 +67,63 @@ export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMetho
   const txDate = transaction ? new Date(transaction.date) : new Date()
   const date = txDate.toLocaleString()
 
+  useEffect(() => {
+    const handleAutoPrint = async () => {
+      if (!open || !autoPrint) return;
+
+      // Check if we have a paired USB device for direct printing
+      if (printerSettings.connectedDevice && (navigator as any).usb) {
+        try {
+          const pairedDevices = await (navigator as any).usb.getDevices();
+          const device = pairedDevices.find(
+            (d: any) => d.vendorId === printerSettings.connectedDevice?.vendorId && 
+                        d.productId === printerSettings.connectedDevice?.productId
+          );
+
+          if (device) {
+            const driver = new USBPrinterDriver(device);
+            const connected = await driver.connect();
+            
+            if (connected) {
+              await driver.printReceipt({
+                storeName: settings?.name || "Retail POS",
+                brand: settings?.brand,
+                address: settings?.address,
+                transactionId,
+                date,
+                customerName: selectedCustomer?.name || "Walk In",
+                items: items,
+                total: total,
+                tax: tax,
+                grandTotal: grandTotal,
+                currency: currency,
+                cashierName: cashierName,
+                paymentMethod: paymentMethod,
+                footerText: footerText,
+                paperSize: paperSize
+              });
+              
+              // If successful, close modal and skip window.print()
+              onOpenChange(false);
+              return;
+            }
+          }
+        } catch (err) {
+          console.error("Direct USB auto-print failed, falling back to window.print()", err);
+        }
+      }
+
+      // Fallback to standard browser printing
+      const timer = setTimeout(() => {
+        window.print();
+        onOpenChange(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    };
+
+    handleAutoPrint();
+  }, [open, autoPrint, onOpenChange, printerSettings.connectedDevice, settings, transactionId, date, selectedCustomer, items, total, tax, grandTotal, currency, cashierName, paymentMethod, footerText]);
+
   const generateReceiptText = () => {
     const storeName = settings?.name || "Retail POS"
     const itemsText = items.map((item: any) => 
@@ -71,6 +134,8 @@ export function ReceiptPreview({ open, onOpenChange, transactionId, paymentMetho
 Ref: ${transactionId}
 Date: ${date}
 Customer: ${selectedCustomer?.name || "Walk In"}
+
+${footerText ? `\n${footerText}\n` : ""}
 
 Items:
 ${itemsText}
@@ -225,13 +290,16 @@ Thank you for shopping!`
 
       <div className="mt-8 pt-4 border-t border-dashed text-center space-y-1">
         <p className="text-xs font-bold uppercase tracking-widest">Payment Method: {paymentMethod}</p>
-        <p className="text-[10px] text-muted-foreground">Thank you for shopping with us!</p>
+        <p className="text-[10px] text-muted-foreground whitespace-pre-wrap">{footerText || "Thank you for shopping with us!"}</p>
       </div>
     </div>
   )
 
   const renderThermal = () => (
-    <div className="bg-[#f8f9fa] p-6 text-black font-mono text-xs w-full max-w-[300px] mx-auto shadow-inner rounded-sm border-x-8 border-y-4 border-white">
+    <div className={cn(
+      "bg-[#f8f9fa] p-6 text-black font-mono text-xs mx-auto shadow-inner rounded-sm border-x-8 border-y-4 border-white transition-all",
+      paperSize === '58mm' ? "max-w-[220px]" : "max-w-[300px]"
+    )}>
       <div className="text-center mb-4 leading-tight">
         <p className="font-bold text-sm">{(settings?.name || "RETAIL POS TERMINAL").toUpperCase()}</p>
         <p>{(settings?.brand || "STORE #001").toUpperCase()}</p>
@@ -284,7 +352,7 @@ Thank you for shopping!`
       <div className="text-center space-y-1">
         <p>PAID BY {paymentMethod.toUpperCase()}</p>
         <p className="mt-4">*** THANK YOU ***</p>
-        <p>PLEASE VISIT AGAIN</p>
+        <p className="uppercase">{footerText || "Please visit again"}</p>
       </div>
     </div>
   )
@@ -348,6 +416,7 @@ Thank you for shopping!`
       
       <p className="relative z-10 text-[10px] text-center text-white/30 font-black tracking-widest uppercase mt-8">
         Ref: {transactionId}
+        {footerText && <span className="block mt-1">{footerText}</span>}
       </p>
     </div>
   )
