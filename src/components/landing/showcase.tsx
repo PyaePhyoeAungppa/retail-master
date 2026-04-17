@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
+import { useLanguageStore } from "@/store/use-language-store"
+import { translations } from "@/lib/translations"
 import { CheckCircle2, Package, AlertTriangle, Download, Filter, Copy, Check, Search, TrendingUp, DollarSign, Users, Layers, ChevronRight, ShoppingBag, Plus, Minus, CreditCard, Share2, ReceiptText, User, Save, Trash2, Send, Phone, MessageSquare, ListTodo } from "lucide-react"
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -659,31 +661,34 @@ function FeatureRow({ badge, title, subtitle, description, features, mockup, rev
 // Exported Component
 // ─────────────────────────────────────────────
 export function LandingShowcase() {
+  const { language } = useLanguageStore()
+  const t = translations[language].showcase
+
   return (
     <div className="divide-y divide-slate-100">
       <FeatureRow
-        badge="Smart Inventory"
-        title="Your full catalog."
-        subtitle="Always up to date."
-        description="No more counting by hand or losing track in a spreadsheet. See all your products, stock levels, and alerts in one clean view — just like inside the app."
-        features={["Track by size, color & variation", "Low-stock & out-of-stock alerts", "Bulk CSV import/export", "Multi-store catalog sync"]}
+        badge={t.inventory_badge}
+        title={t.inventory_title}
+        subtitle={t.inventory_subtitle}
+        description={t.inventory_description}
+        features={t.inventory_points}
         mockup={<ProductsPageMockup />}
       />
       <FeatureRow
-        badge="Social Commerce"
-        title="Send receipts."
-        subtitle="Close sales in DMs."
-        description="From building the cart to a paid order — the whole flow happens without leaving Messenger. Tap 'Share Link', send it in the DM, and your customer sees a clean receipt with payment instructions."
-        features={["POS cart → instant share link", "Messenger / WhatsApp ready", "Customer copies payment account", "One-tap link generation"]}
+        badge={t.social_badge}
+        title={t.social_title}
+        subtitle={t.social_subtitle}
+        description={t.social_description}
+        features={t.social_points}
         mockup={<SocialCommerceFlow />}
         fullWidth
       />
       <FeatureRow
-        badge="Report Center"
-        title="Know exactly"
-        subtitle="what's making you money."
-        description="Four report modules — Sales Summary, Transaction Details, Top Items, and Category Breakdown — give you complete visibility into your business performance."
-        features={["Revenue & tax summaries", "Top product rankings", "Peak hour insights", "Excel & PDF export"]}
+        badge={t.reports_badge}
+        title={t.reports_title}
+        subtitle={t.reports_subtitle}
+        description={t.reports_description}
+        features={t.reports_points}
         mockup={<ReportCenterMockup />}
       />
     </div>

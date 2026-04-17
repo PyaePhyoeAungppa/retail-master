@@ -4,53 +4,8 @@ import { Store, Package, Zap, TrendingUp } from "lucide-react"
 import { MockPOSPreview } from "./mock-pos"
 import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
-
-const steps = [
-  {
-    number: "01",
-    icon: Store,
-    title: "Set Up Your Store",
-    description: "Register your store in minutes. Configure name, branding, currency, tax rate, and add your team members with the right roles.",
-    color: "bg-indigo-500",
-    shadow: "shadow-indigo-500/30",
-    ring: "ring-indigo-100",
-    highlight: "from-indigo-50/80 to-white border-indigo-100",
-    textColor: "text-indigo-600",
-  },
-  {
-    number: "02",
-    icon: Package,
-    title: "Add Your Products",
-    description: "Import or manually add your product catalogue with categories, pricing, and stock quantities. Set low-stock alerts so you never run out.",
-    color: "bg-purple-500",
-    shadow: "shadow-purple-500/30",
-    ring: "ring-purple-100",
-    highlight: "from-purple-50/80 to-white border-purple-100",
-    textColor: "text-purple-600",
-  },
-  {
-    number: "03",
-    icon: Zap,
-    title: "Launch Your POS",
-    description: "Open a shift and start selling immediately. Accept cash, card, QR, or NFC and share digital receipts via WhatsApp or Messenger.",
-    color: "bg-emerald-500",
-    shadow: "shadow-emerald-500/30",
-    ring: "ring-emerald-100",
-    highlight: "from-emerald-50/80 to-white border-emerald-100",
-    textColor: "text-emerald-600",
-  },
-  {
-    number: "04",
-    icon: TrendingUp,
-    title: "Track & Grow",
-    description: "Monitor revenue, top-sellers, peak hours, and customer loyalty from your analytics dashboard and report centre.",
-    color: "bg-amber-500",
-    shadow: "shadow-amber-500/30",
-    ring: "ring-amber-100",
-    highlight: "from-amber-50/80 to-white border-amber-100",
-    textColor: "text-amber-600",
-  },
-]
+import { useLanguageStore } from "@/store/use-language-store"
+import { translations } from "@/lib/translations"
 
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null)
@@ -67,7 +22,23 @@ function useReveal() {
 }
 
 export function LandingHowItWorks() {
+  const { language } = useLanguageStore()
+  const t = translations[language].how_it_works
+
+  const stepIcons = [Store, Package, Zap, TrendingUp]
+  const stepColors = ["bg-indigo-500", "bg-purple-500", "bg-emerald-500", "bg-amber-500"]
+  const stepShadows = ["shadow-indigo-500/30", "shadow-purple-500/30", "shadow-emerald-500/30", "shadow-amber-500/30"]
+
+  const steps = t.steps.map((s, i) => ({
+    ...s,
+    number: `0${i + 1}`,
+    icon: stepIcons[i],
+    color: stepColors[i],
+    shadow: stepShadows[i]
+  }))
+
   const { ref, visible } = useReveal()
+
   return (
     <section id="how-it-works" className="py-24 lg:py-40 bg-slate-50 relative overflow-hidden">
       {/* Decorative Orbs */}
@@ -77,13 +48,13 @@ export function LandingHowItWorks() {
       <div className="container mx-auto px-6">
         <div className="text-center max-w-4xl mx-auto mb-24">
           <div className="inline-block text-[10px] font-black text-primary uppercase tracking-[0.2em] bg-primary/10 border border-primary/20 px-4 py-2 rounded-full mb-6">
-             The Onboarding Flow
+             {t.badge}
           </div>
           <h2 className="text-4xl lg:text-7xl font-black tracking-tighter mb-6 leading-[0.9]">
-            Up and running in <span className="text-primary/60">minutes.</span>
+            {t.title} <span className="text-primary/60">{t.subtitle}</span>
           </h2>
           <p className="text-lg lg:text-xl text-muted-foreground font-medium leading-relaxed max-w-2xl mx-auto">
-            Our platform is designed for speed. No lengthy setups or complex hardware required — just your browser and a passion to sell.
+            {t.description}
           </p>
         </div>
 
@@ -132,7 +103,7 @@ export function LandingHowItWorks() {
                     <div className="w-3 h-3 rounded-full bg-amber-400/30" />
                     <div className="w-3 h-3 rounded-full bg-emerald-400/30" />
                   </div>
-                  <div className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest pl-4">LIVE POS INTERFACE PREVIEW</div>
+                  <div className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-widest pl-4">{t.preview_badge}</div>
                </div>
                <div className="px-4 pb-4">
                   <MockPOSPreview />
@@ -140,9 +111,9 @@ export function LandingHowItWorks() {
             </div>
           </div>
           <div className="mt-12 text-center space-y-4">
-            <h3 className="text-2xl font-black tracking-tight">Zero learning curve. Pure efficiency.</h3>
+            <h3 className="text-2xl font-black tracking-tight">{t.preview_title}</h3>
             <p className="text-muted-foreground font-medium max-w-xl mx-auto">
-              Our interface is built for high-volume retailers. Tap to add, swipe to remove, and share links instantly. It's the POS experience you've always wanted.
+              {t.preview_desc}
             </p>
           </div>
         </div>

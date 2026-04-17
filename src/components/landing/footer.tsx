@@ -23,6 +23,9 @@ const platformLinks = [
 
 
 export function LandingFooter() {
+  const { language } = useLanguageStore()
+  const t = translations[language].hero // Use hero description for now or generic if needed
+
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState("")
@@ -68,30 +71,24 @@ export function LandingFooter() {
               <span className="font-black text-2xl tracking-tighter">Retail Master</span>
             </Link>
             <p className="text-muted-foreground font-medium mb-8 text-sm leading-relaxed">
-              Retail Master is a simple POS for online sellers to manage orders, track inventory, and send digital receipts.
+              {t.description}
             </p>
-            <div className="flex gap-4">
-              <Link
-                href="#"
-                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-white transition-all"
-                aria-label="Twitter"
-              >
-                <Twitter className="w-5 h-5" />
-              </Link>
-              <Link
-                href="#"
-                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-white transition-all"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="w-5 h-5" />
-              </Link>
-              <Link
-                href="#"
-                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-white transition-all"
-                aria-label="GitHub"
-              >
-                <Github className="w-5 h-5" />
-              </Link>
+            <div className="flex gap-3">
+              {[
+                { label: "Facebook", icon: MessageSquare, href: "#" },
+                { label: "Viber", icon: Phone, href: "#" },
+                { label: "WhatsApp", icon: Phone, href: "#" },
+                { label: "GitHub", icon: Github, href: "https://github.com/PyaePhyoeAungppa/retail-master" }
+              ].map((social) => (
+                <Link
+                  key={social.label}
+                  href={social.href}
+                  className="w-11 h-11 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white hover:border-primary hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300"
+                  aria-label={social.label}
+                >
+                  <social.icon className="w-5 h-5" />
+                </Link>
+              ))}
             </div>
           </div>
 

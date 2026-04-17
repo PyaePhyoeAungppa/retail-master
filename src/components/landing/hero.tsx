@@ -194,8 +194,14 @@ function HeroDashboardPreview() {
   )
 }
 
+import { useLanguageStore } from "@/store/use-language-store"
+import { translations } from "@/lib/translations"
+
 // ─── Exported Hero Section ────────────────────────────────────
 export function LandingHero() {
+  const { language } = useLanguageStore()
+  const t = translations[language].hero
+
   return (
     <section className="relative overflow-hidden bg-background pt-28 pb-16 lg:pt-36 lg:pb-24">
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
@@ -214,18 +220,15 @@ export function LandingHero() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
               </span>
-              Built for Online Retailers
+              {t.badge}
             </div>
 
             <h1 className="text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter leading-[1.05]">
-              Simple POS for{" "}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-violet-500 to-indigo-600">
-                online sellers.
-              </span>
+              {t.title}
             </h1>
 
             <p className="text-sm lg:text-base text-muted-foreground font-medium leading-relaxed max-w-md lg:max-w-none">
-              Retail Master is a simple POS to manage orders, track inventory, and send digital receipts. Stay organized, see your sales clearly, and run your store more efficiently — all in one place.
+              {t.description}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
@@ -233,21 +236,21 @@ export function LandingHero() {
                 href="/login"
                 className="group h-12 px-7 bg-primary text-primary-foreground rounded-xl font-black text-sm shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
               >
-                Start 1-Month Free Trial
+                {t.cta_primary}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
                 href="#features"
                 className="h-12 px-7 bg-card text-foreground border border-border rounded-xl font-bold text-sm hover:bg-muted/50 transition-all flex items-center justify-center"
               >
-                See All Features
+                {t.cta_secondary}
               </Link>
             </div>
 
             <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs font-semibold text-muted-foreground justify-center lg:justify-start pt-1">
-              <span className="flex items-center gap-1.5"><Receipt className="w-3.5 h-3.5 text-primary" /> Receipts via Messenger</span>
-              <span className="flex items-center gap-1.5"><Zap className="w-3.5 h-3.5 text-primary" /> Setup in 10 minutes</span>
-              <span className="flex items-center gap-1.5"><BarChart3 className="w-3.5 h-3.5 text-primary" /> Live analytics</span>
+              <span className="flex items-center gap-1.5"><Receipt className="w-3.5 h-3.5 text-primary" /> {t.highlight_whatsapp}</span>
+              <span className="flex items-center gap-1.5"><Zap className="w-3.5 h-3.5 text-primary" /> {t.highlight_setup}</span>
+              <span className="flex items-center gap-1.5"><BarChart3 className="w-3.5 h-3.5 text-primary" /> {t.highlight_analytics}</span>
             </div>
           </div>
 

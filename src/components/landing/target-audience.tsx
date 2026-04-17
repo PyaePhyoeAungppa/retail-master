@@ -2,31 +2,19 @@
 
 import { Smartphone, Store, Instagram, Mail } from "lucide-react"
 import { MockReceiptPreview } from "./mock-receipt"
-
-const audiences = [
-  {
-    icon: Instagram,
-    title: "Social Commerce",
-    description: "Perfect for Instagram, Facebook, and TikTok sellers. Share order links directly in DMs for instant checkout."
-  },
-  {
-    icon: Smartphone,
-    title: "Online Boutiques",
-    description: "Run your entire clothing, beauty, or craft business from your phone without needing a physical terminal."
-  },
-  {
-    icon: Store,
-    title: "Multi-Brand Sellers",
-    description: "Manage multiple online stores from a single account. Separate inventory, branding, and staff permissions."
-  },
-  {
-    icon: Mail,
-    title: "Wholesale & Dropship",
-    description: "Generate professional PDF and image receipts, or send automated order summaries via email instantly."
-  }
-]
+import { useLanguageStore } from "@/store/use-language-store"
+import { translations } from "@/lib/translations"
 
 export function LandingTargetAudience() {
+  const { language } = useLanguageStore()
+  const t = translations[language].audience
+
+  const icons = [Instagram, Smartphone, Store, Mail]
+  const audiences = t.items.map((item, i) => ({
+    ...item,
+    icon: icons[i] || Store
+  }))
+
   return (
     <section className="py-24 lg:py-40 bg-white relative overflow-hidden">
       {/* Background Text Overlay */}
@@ -38,14 +26,14 @@ export function LandingTargetAudience() {
         <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-32 mb-24">
           <div className="lg:w-1/2 space-y-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-widest">
-              Who we serve
+              {t.badge}
             </div>
             <h2 className="text-4xl lg:text-7xl font-black tracking-tighter leading-[0.9] text-balance">
-              Tailored for the <br />
-              <span className="text-primary/40">Modern Merchant.</span>
+              {t.title} <br />
+              <span className="text-primary/40">{t.subtitle}</span>
             </h2>
             <p className="text-lg lg:text-xl text-muted-foreground font-medium leading-relaxed max-w-xl">
-              From social commerce startups to established multi-brand boutiques, our platform scales with your ambition. No bulky hardware, just pure digital efficiency.
+              {t.description}
             </p>
           </div>
 

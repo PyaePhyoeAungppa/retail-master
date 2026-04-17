@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { ShoppingBag, Menu, X } from "lucide-react"
+import { ShoppingBag, Menu, X, Globe } from "lucide-react"
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
+import { useLanguageStore } from "@/store/use-language-store"
 
 const navLinks = [
   { label: "Features",  href: "#features" },
@@ -12,6 +13,7 @@ const navLinks = [
 export function LandingNav() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { language, setLanguage } = useLanguageStore()
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20)
@@ -46,6 +48,28 @@ export function LandingNav() {
               {link.label}
             </Link>
           ))}
+
+          <div className="flex items-center bg-muted/50 rounded-xl p-1 border">
+            <button
+              onClick={() => setLanguage('en')}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all",
+                language === 'en' ? "bg-white text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              EN
+            </button>
+            <button
+              onClick={() => setLanguage('mm')}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all",
+                language === 'mm' ? "bg-white text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              MM
+            </button>
+          </div>
+
           <Link
             href="#contact"
             className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl font-black text-sm hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95"
