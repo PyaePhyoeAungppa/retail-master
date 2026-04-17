@@ -183,3 +183,31 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* ─────────────────────────────────────────────
+   Myanmar Script Line-Height Fix
+   Myanmar script has complex ascenders and descenders. 
+   Standard line-heights often cause overlapping.
+   ───────────────────────────────────────────── */
+[lang="mm"],
+.lang-mm {
+  --myanmar-lh: 1.8;
+}
+
+/* Apply higher line-height globally when language is mm */
+[lang="mm"] body,
+.lang-mm {
+  line-height: var(--myanmar-lh) !important;
+}
+
+/* Adjust standard Tailwind leading classes for Myanmar */
+[lang="mm"] .leading-tight { line-height: 1.5 !important; }
+[lang="mm"] .leading-snug { line-height: 1.6 !important; }
+[lang="mm"] .leading-normal { line-height: 1.7 !important; }
+[lang="mm"] .leading-relaxed { line-height: 1.9 !important; }
+[lang="mm"] .leading-loose { line-height: 2.2 !important; }
+
+/* Ensure specific types inherit the corrected line height */
+[lang="mm"] h1, [lang="mm"] h2, [lang="mm"] h3, [lang="mm"] p, [lang="mm"] span, [lang="mm"] li {
+    line-height: inherit;
+}

@@ -5,9 +5,22 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 import { useAuthStore } from "@/store/use-auth-store"
+import { useLanguageStore } from "@/store/use-language-store"
 import { ToastContainer } from "@/components/ui/toast"
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const { language } = useLanguageStore()
+
+  useEffect(() => {
+    // Update HTML lang and body class for CSS targeting (e.g., line-height fixes)
+    document.documentElement.lang = language
+    if (language === 'mm') {
+      document.body.classList.add('lang-mm')
+    } else {
+      document.body.classList.remove('lang-mm')
+    }
+  }, [language])
+
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
