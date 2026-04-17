@@ -112,9 +112,8 @@ export function LandingNav() {
             <X className="w-5 h-5" />
           </button>
         </div>
-
-        {/* Drawer links */}
-        <nav className="flex flex-col px-4 pt-6 pb-8 gap-1 flex-1" aria-label="Mobile navigation">
+        {/* Drawer content */}
+        <nav className="flex flex-col px-4 pt-6 pb-8 gap-y-1 flex-1 overflow-y-auto" aria-label="Mobile navigation">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -126,7 +125,32 @@ export function LandingNav() {
             </Link>
           ))}
 
-          <div className="mt-auto pt-8">
+          {/* Language Switcher in Mobile Menu */}
+          <div className="px-4 py-6 border-t mt-4">
+            <p className="text-xs font-black uppercase text-muted-foreground mb-4 px-1">Select Language</p>
+            <div className="flex items-center bg-muted rounded-2xl p-1.5 border">
+              <button
+                onClick={() => setLanguage('en')}
+                className={cn(
+                  "flex-1 py-3 rounded-xl text-xs font-black uppercase transition-all",
+                  language === 'en' ? "bg-white text-primary shadow-md" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                English
+              </button>
+              <button
+                onClick={() => setLanguage('mm')}
+                className={cn(
+                  "flex-1 py-3 rounded-xl text-xs font-black uppercase transition-all",
+                  language === 'mm' ? "bg-white text-primary shadow-md" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                Myanmar
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-auto pt-4">
             <Link
               href="#contact"
               className="flex items-center justify-center w-full py-4 bg-primary text-primary-foreground rounded-2xl font-black text-lg shadow-xl shadow-primary/20 hover:bg-primary/90 transition-colors"
