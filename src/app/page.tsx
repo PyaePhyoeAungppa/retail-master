@@ -5,7 +5,6 @@ import { LandingContact } from "@/components/landing/contact"
 import { LandingFooter } from "@/components/landing/footer"
 import { LandingNav } from "@/components/landing/nav"
 import { LandingTargetAudience } from "@/components/landing/target-audience"
-import { LandingPricing } from "@/components/landing/pricing"
 import { LandingFinalCTA } from "@/components/landing/final-cta"
 import { Metadata } from "next"
 
@@ -26,7 +25,6 @@ export default function LandingPage() {
         <LandingFeatures />
         <LandingHowItWorks />
         <LandingTargetAudience />
-        <LandingPricing />
         <LandingFinalCTA />
         <LandingContact />
       </main>
