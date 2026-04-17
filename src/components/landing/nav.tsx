@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 import { useLanguageStore } from "@/store/use-language-store"
 
 const navLinks = [
-  { label: "Features",  href: "#features" },
+  { label: "Features", href: "#features" },
 ]
 
 export function LandingNav() {
@@ -149,7 +149,7 @@ export function LandingNav() {
                     language === 'mm' ? "bg-white text-primary shadow-lg shadow-black/5 border border-border/50" : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                   ဗမာ (MM)
+                  Myanmar
                 </button>
               </div>
             </div>
