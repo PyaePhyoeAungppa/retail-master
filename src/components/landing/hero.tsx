@@ -2,6 +2,8 @@
 
 import Link from "next/link"
 import { ArrowRight, BarChart3, Receipt, Zap } from "lucide-react"
+import { useLanguageStore } from "@/store/use-language-store"
+import { translations } from "@/lib/translations"
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer
@@ -194,8 +196,6 @@ function HeroDashboardPreview() {
   )
 }
 
-import { useLanguageStore } from "@/store/use-language-store"
-import { translations } from "@/lib/translations"
 
 // ─── Exported Hero Section ────────────────────────────────────
 export function LandingHero() {

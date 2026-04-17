@@ -1,9 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { ShoppingBag, Github, Twitter, Linkedin, Loader2, CheckCircle2 } from "lucide-react"
+import { ShoppingBag, Github, Twitter, Linkedin, Loader2, CheckCircle2, MessageSquare, Phone } from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
+import { useLanguageStore } from "@/store/use-language-store"
+import { translations } from "@/lib/translations"
 
 const platformLinks = [
   { label: "POS Terminal", href: "#features" },
