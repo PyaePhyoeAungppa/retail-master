@@ -34,8 +34,8 @@ export function LandingNav() {
     )}>
       <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group flex-shrink-0" aria-label="Retail Master Home">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-105 transition-transform">
-            <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-black/5 group-hover:scale-105 transition-transform border overflow-hidden">
+            <img src="/logo.png" alt="Retail Master" className="w-full h-full object-contain p-1.5" />
           </div>
           <span className="font-black text-xl sm:text-2xl tracking-tighter">Retail Master</span>
         </Link>
@@ -76,8 +76,8 @@ export function LandingNav() {
         {/* Drawer header */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-border">
           <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
-            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-              <ShoppingBag className="w-5 h-5 text-primary-foreground" />
+            <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-black/5 border overflow-hidden">
+              <img src="/logo.png" alt="Retail Master" className="w-full h-full object-contain p-1" />
             </div>
             <span className="font-black text-xl tracking-tighter">Retail Master</span>
           </Link>

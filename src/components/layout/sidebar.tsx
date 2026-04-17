@@ -46,8 +46,8 @@ export function Sidebar() {
 
   return (
     <div className="flex lg:flex-col h-20 lg:h-screen w-full lg:w-[80px] border-t lg:border-t-0 lg:border-r bg-card text-card-foreground shadow-[0_-4px_20px_rgba(0,0,0,0.05)] lg:shadow-none">
-      <div className="hidden lg:flex p-4 items-center justify-center font-bold text-primary border-b bg-muted/20">
-        <Store className="w-8 h-8" />
+      <div className="hidden lg:flex p-4 items-center justify-center font-bold text-primary border-b bg-white/50 backdrop-blur-sm overflow-hidden">
+        <img src="/logo.png" alt="Logo" className="w-10 h-10 object-contain" />
       </div>
       
       <nav className="flex-1 flex lg:flex-col items-center justify-around lg:justify-start px-3 lg:space-y-4 lg:mt-6">

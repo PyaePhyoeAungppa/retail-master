@@ -42,8 +42,8 @@ export default function LoginPage() {
 
       <Card className="w-full max-w-md border-none shadow-[0_32px_128px_rgba(0,0,0,0.08)] rounded-[2.5rem] overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-700 p-8">
         <CardHeader className="p-0 pb-8 text-center space-y-4">
-          <div className="mx-auto w-16 h-16 rounded-[1.5rem] bg-primary flex items-center justify-center shadow-2xl shadow-primary/30 rotate-3">
-            <Store className="w-8 h-8 text-white" />
+          <div className="mx-auto w-24 h-24 rounded-[1.5rem] bg-white flex items-center justify-center shadow-2xl shadow-black/5 rotate-3 border p-3 overflow-hidden">
+            <img src="/logo.png" alt="Retail Master Logo" className="w-full h-full object-contain" />
           </div>
           <div className="space-y-1">
             <h1 className="text-3xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/70">
