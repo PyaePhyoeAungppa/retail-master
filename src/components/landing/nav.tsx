@@ -93,11 +93,11 @@ export function LandingNav() {
 
       {/* Mobile Menu Drawer */}
       <div className={cn(
-        "fixed inset-0 top-0 bg-background/98 backdrop-blur-md z-40 md:hidden transition-all duration-400 ease-out flex flex-col",
-        isMobileMenuOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-8 pointer-events-none"
+        "fixed inset-0 h-[100dvh] bg-white z-[60] md:hidden transition-all duration-300 ease-in-out flex flex-col",
+        isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
       )}>
         {/* Drawer header */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-border">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-border">
           <Link href="/" className="flex items-center gap-2" onClick={() => setIsMobileMenuOpen(false)}>
             <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-black/5 border overflow-hidden">
               <img src="/logo.png" alt="Retail Master" className="w-full h-full object-contain p-1" />
@@ -105,55 +105,58 @@ export function LandingNav() {
             <span className="font-black text-xl tracking-tighter">Retail Master</span>
           </Link>
           <button
-            className="p-2 rounded-xl bg-muted text-foreground"
+            className="p-2.5 rounded-xl bg-muted/50 text-foreground hover:bg-muted transition-colors border"
             onClick={() => setIsMobileMenuOpen(false)}
             aria-label="Close menu"
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6" />
           </button>
         </div>
-        {/* Drawer content */}
-        <nav className="flex flex-col px-4 pt-6 pb-8 gap-y-1 flex-1 overflow-y-auto" aria-label="Mobile navigation">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="flex items-center px-4 py-4 rounded-2xl font-black text-xl tracking-tight hover:bg-muted transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
 
-          {/* Language Switcher in Mobile Menu */}
-          <div className="px-4 py-6 border-t mt-4">
-            <p className="text-xs font-black uppercase text-muted-foreground mb-4 px-1">Select Language</p>
-            <div className="flex items-center bg-muted rounded-2xl p-1.5 border">
-              <button
-                onClick={() => setLanguage('en')}
-                className={cn(
-                  "flex-1 py-3 rounded-xl text-xs font-black uppercase transition-all",
-                  language === 'en' ? "bg-white text-primary shadow-md" : "text-muted-foreground hover:text-foreground"
-                )}
+        {/* Drawer content */}
+        <nav className="flex flex-col px-6 pt-8 pb-10 flex-1 overflow-y-auto no-scrollbar" aria-label="Mobile navigation">
+          <div className="flex flex-col gap-2">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="flex items-center px-5 py-4 rounded-2xl font-black text-2xl tracking-tight hover:bg-muted transition-all active:scale-95 text-foreground"
+                onClick={() => setIsMobileMenuOpen(false)}
               >
-                English
-              </button>
-              <button
-                onClick={() => setLanguage('mm')}
-                className={cn(
-                  "flex-1 py-3 rounded-xl text-xs font-black uppercase transition-all",
-                  language === 'mm' ? "bg-white text-primary shadow-md" : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                Myanmar
-              </button>
-            </div>
+                {link.label}
+              </Link>
+            ))}
           </div>
 
-          <div className="mt-auto pt-4">
+          <div className="mt-8 space-y-8">
+            {/* Language Switcher in Mobile Menu */}
+            <div className="pt-8 border-t border-border/60">
+              <p className="text-[10px] font-black uppercase text-muted-foreground/60 mb-4 px-1 tracking-widest">Select Language</p>
+              <div className="flex items-center bg-muted/50 rounded-2xl p-1.5 border border-border/50">
+                <button
+                  onClick={() => setLanguage('en')}
+                  className={cn(
+                    "flex-1 py-3.5 rounded-xl text-xs font-black uppercase transition-all",
+                    language === 'en' ? "bg-white text-primary shadow-lg shadow-black/5 border border-border/50" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  English
+                </button>
+                <button
+                  onClick={() => setLanguage('mm')}
+                  className={cn(
+                    "flex-1 py-3.5 rounded-xl text-xs font-black uppercase transition-all",
+                    language === 'mm' ? "bg-white text-primary shadow-lg shadow-black/5 border border-border/50" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                   ဗမာ (MM)
+                </button>
+              </div>
+            </div>
+
             <Link
               href="#contact"
-              className="flex items-center justify-center w-full py-4 bg-primary text-primary-foreground rounded-2xl font-black text-lg shadow-xl shadow-primary/20 hover:bg-primary/90 transition-colors"
+              className="flex items-center justify-center w-full py-5 bg-primary text-primary-foreground rounded-2xl font-black text-lg shadow-2xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98]"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Get Started →
