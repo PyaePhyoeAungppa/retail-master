@@ -86,7 +86,7 @@ export function LandingHowItWorks() {
 
               <h3 className="text-lg font-black mb-4 tracking-tight">{step.title}</h3>
               <p className="text-sm text-muted-foreground font-medium leading-relaxed">
-                {step.description}
+                {step.desc}
               </p>
             </div>
           ))}

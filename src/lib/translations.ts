@@ -65,9 +65,50 @@ export interface Translation {
 export const translations: Record<Language, Translation> = {
   en: {
     hero: {
-// ... existing hero translations ...
+      badge: "Efficiency & Accuracy for Online Retail",
+      title: "Built to manage online Retail business with efficiency",
+      description: "Retail Master is a high-performance platform designed specifically for the modern online merchant. Eliminate order errors and save hours on administration every single day.",
+      cta_primary: "Start One Month Free Trial",
+      cta_secondary: "Explore Impact",
+      highlight_whatsapp: "Viber & WhatsApp Ready",
+      highlight_setup: "Zero Hardware Needed",
+      highlight_analytics: "Live Sales Accuracy",
     },
-// ... existing other translations ...
+    features: {
+      badge: "Efficiency First",
+      title: "Built for how you",
+      subtitle: "actually sell.",
+      description: "Every tool is designed to maximize your business impact. No bloat, no jargon—just pure digital efficiency for your store.",
+    },
+    showcase: {
+      inventory_badge: "Accurate Inventory",
+      inventory_title: "Automate your stock.",
+      inventory_subtitle: "Stop losing sales.",
+      inventory_description: "Real-time tracking that alerts you before stock runs out. Precision inventory management that you can choose to enable or disable per product.",
+      inventory_points: ["Low-stock alerts & out-of-stock tracking", "Optional stock tracking per item", "Bulk SKU management", "Multi-brand catalog sync"],
+      social_badge: "Digital POS",
+      social_title: "Close deals in DMs.",
+      social_subtitle: "Instant Share Links.",
+      social_description: "Generate professional order lists via unique shareable links. Share instantly to WhatsApp, Messenger, and Viber with payment instructions integrated.",
+      social_points: ["58mm & 80mm receipt support", "Viber, WhatsApp & Messenger sharing", "Unique customer order links", "Seamless payment account sharing"],
+      reports_badge: "Impact Analytics",
+      reports_title: "Track your growth",
+      reports_subtitle: "with absolute precision.",
+      reports_description: "Know exactly which products drive your revenue. Detailed staff roles for Owners, Managers, and Cashiers ensure your data stays secure and accurate.",
+      reports_points: ["Owner: Full Control & Full Reports", "Manager: Stock & Shift Operations", "Cashier: POS & Customer Tracking", "Detailed spending history per customer"],
+    },
+    audience: {
+      badge: "The Modern Merchant",
+      title: "Scaling with",
+      subtitle: "Absolute Confidence.",
+      description: "From solo entrepreneurs on social media to established retail teams, we provide the accuracy needed to scale.",
+      items: [
+        { title: "Social Commerce", desc: "Perfect for sellers on Instagram, Facebook & TikTok." },
+        { title: "Online Boutiques", desc: "Run your entire business from your smartphone." },
+        { title: "Multi-Brand Hubs", desc: "Manage separate stores with distinct staff permissions." },
+        { title: "Wholesale Teams", desc: "Generate bulk orders and track long-term customer value." },
+      ],
+    },
     cta: {
       badge: "One Month Free Trial",
       title: "Ready to automate your retail business?",
@@ -93,8 +134,51 @@ export const translations: Record<Language, Translation> = {
     },
   },
   mm: {
-// ... existing mm hero translations ...
-// ... existing mm other translations ...
+    hero: {
+      badge: "အွန်လိုင်းလက်လီလုပ်ငန်းများအတွက် ထိရောက်တိကျမှု",
+      title: "အွန်လိုင်းလက်လီလုပ်ငန်းများကို ထိရောက်တိကျစွာ စီမံခန့်ခွဲနိုင်ရန်",
+      description: "Retail Master သည် ခေတ်မီအွန်လိုင်းလုပ်ငန်းရှင်များအတွက် အထူးရည်ရွယ်ထုတ်လုပ်ထားသော ပလက်ဖောင်းတစ်ခုဖြစ်သည်။ အော်ဒါအမှားများကို လျှော့ချပြီး နေ့စဉ်စီမံခန့်ခွဲမှုအချိန်များကို သက်သာစေပါသည်။",
+      cta_primary: "၁ လ အခမဲ့ စမ်းသုံးကြည့်ရန်",
+      cta_secondary: "အကျိုးကျေးဇူးများကို ကြည့်ရန်",
+      highlight_whatsapp: "Viber နှင့် WhatsApp တွင် ပို့နိုင်သည်",
+      highlight_setup: "စက်ပစ္စည်းဝယ်ရန် မလိုပါ",
+      highlight_analytics: "အရောင်းမှတ်တမ်း တိကျမှု",
+    },
+    features: {
+      badge: "ထိရောက်မှုဦးစားပေး",
+      title: "သင့်လုပ်ငန်း ပိုမို",
+      subtitle: "တိုးတက်စေရန်။",
+      description: "လုပ်ငန်းတစ်ခုချင်းစီ၏ လိုအပ်ချက်များကို အကောင်းဆုံးဖြည့်ဆည်းပေးရန် တည်ဆောက်ထားပါသည်။ ရိုးရှင်းပြီး အမှန်တကယ် ထိရောက်သော နည်းပညာများကိုသာ အသုံးပြုထားပါသည်။",
+    },
+    showcase: {
+      inventory_badge: "တိကျသော စတော့မှတ်တမ်း",
+      inventory_title: "စတော့များကို အလိုအလျောက် ထိန်းချုပ်ပါ။",
+      inventory_subtitle: "အရောင်းမလွတ်ပါစေနှင့်။",
+      inventory_description: "ပစ္စည်းပြတ်တော့မည့်အချိန်တွင် ကြိုတင်အကြောင်းကြားပေးသော တိကျသည့် စီမံခန့်ခွဲမှုစနစ်။ ပစ္စည်းတစ်ခုချင်းစီအလိုက် စတော့မှတ်စရာလို/မလို စိတ်ကြိုက်ရွေးချယ်နိုင်သည်။",
+      inventory_points: ["ပစ္စည်းပြတ်ရန်နီးကပ်ပါက အကြောင်းကြားပေးခြင်း", "ပစ္စည်းအလိုက် စတော့မှတ်စရာလို/မလို ရွေးချယ်နိုင်ခြင်း", "ပစ္စည်းအများအပြားကို တစ်ခါတည်း စီမံနိုင်ခြင်း", "လုပ်ငန်းခွဲများအကြား စတော့ချိတ်ဆက်နိုင်ခြင်း"],
+      social_badge: "Digital POS စနစ်",
+      social_title: "ချက်တင် (Chat) ထဲမှာတင် အရောင်းပိတ်ပါ။",
+      social_subtitle: "အော်ဒါလင့်ခ်များ ချက်ချင်းပေးပို့ရန်။",
+      social_description: "ကျွမ်းကျင်ဆန်သော အော်ဒါမှတ်တမ်းများကို လင့်ခ်များဖြင့် ပို့ပေးနိုင်သည်။ WhatsApp, Messenger နှင့် Viber တို့မှတစ်ဆင့် ငွေပေးချေရန် အချက်အလက်များကို ချက်ချင်း ပေးပို့နိုင်ပါသည်။",
+      social_points: ["58mm နှင့် 80mm ဘေလ်စာရွက်စနစ်", "Viber, WhatsApp နှင့် Messenger မျှဝေနိုင်ခြင်း", "ဝယ်ယူသူအတွက် ကိုယ်ပိုင်အော်ဒါလင့်ခ်များ", "ငွေလွှဲအကောင့် အချက်အလက်များကို လွယ်ကူစွာပေးပို့နိုင်ခြင်း"],
+      reports_badge: "ထိရောက်မှု တိုင်းတာခြင်း",
+      reports_title: "လုပ်ငန်းတိုးတက်မှုကို",
+      reports_subtitle: "တိကျစွာ စောင့်ကြည့်ပါ။",
+      reports_description: "ဘယ်ပစ္စည်းတွေက အမြတ်အများဆုံးရလဲဆိုတာကို သိရှိနိုင်ပါသည်။ ဆိုင်ပိုင်ရှင်၊ မန်နေဂျာ နှင့် အရောင်းဝန်ထမ်း များအတွက် သီးခြားအခွင့်အာဏာများ သတ်မှတ်ပေးထားနိုင်သဖြင့် အချက်အလက်များ လုံခြုံစေပါသည်။",
+      reports_points: ["ပိုင်ရှင်: လုပ်ငန်းတစ်ခုလုံးကို ထိန်းချုပ်နိုင်ခြင်း", "မန်နေဂျာ: စတော့နှင့် အဆိုင်းများ စီမံနိုင်ခြင်း", "အရောင်းဝန်ထမ်း: အရောင်းနှင့် ဝယ်သူများကို စီမံနိုင်ခြင်း", "ဝယ်သူတစ်ဦးချင်းစီ၏ ဝယ်ယူမှုမှတ်တမ်းများ"],
+    },
+    audience: {
+      badge: "ခေတ်မီလုပ်ငန်းရှင်များအတွက်",
+      title: "ယုံကြည်မှုအပြည့်ဖြင့်",
+      subtitle: "လုပ်ငန်းချဲ့ထွင်ပါ။",
+      description: "တစ်နိုင်တစ်ပိုင် အွန်လိုင်းလုပ်ငန်းရှင်များမှစ၍ အဖွဲ့အစည်းဖြင့် လုပ်ကိုင်နေသော ဆိုင်ခွဲများအထိ တိကျသေချာသော ဝန်ဆောင်မှုပေးနိုင်ရန် အထောက်အကူပြုသည်။",
+      items: [
+        { title: "Social Commerce", desc: "Instagram, Facebook နှင့် TikTok ရောင်းချသူများအတွက် အထူးသင့်လျော်သည်။" },
+        { title: "Online Boutiques", desc: "သင့်ဖုန်းတစ်လုံးတည်းဖြင့် လုပ်ငန်းတစ်ခုလုံးကို စီမံနိုင်သည်။" },
+        { title: "ဆိုင်ခွဲများ", desc: "ဆိုင်ခွဲအသီးသီးအတွက် ဝန်ထမ်းအခွင့်အာဏာများကို သီးခြားစီမံနိုင်သည်။" },
+        { title: "လက်ကားလုပ်ငန်းများ", desc: "အော်ဒါအများအပြားကို စနစ်တကျ စီမံနိုင်ပြီး ဝယ်သူမှတ်တမ်းများကို သိည်းဆည်းနိုင်သည်။" },
+      ],
+    },
     cta: {
       badge: "၁ လ အခမဲ့ စမ်းသုံးခွင့်",
       title: "သင့်လုပ်ငန်းကို အလိုအလျောက် စနစ်ပြောင်းလဲဖို့ အဆင်သင့်ပဲလား?",
@@ -120,4 +204,3 @@ export const translations: Record<Language, Translation> = {
     },
   },
 };
-

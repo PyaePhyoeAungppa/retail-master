@@ -62,7 +62,7 @@ export function LandingTargetAudience() {
               </div>
               <h3 className="font-black text-xl mb-4 tracking-tight">{audience.title}</h3>
               <p className="text-muted-foreground leading-relaxed text-sm font-medium">
-                {audience.description}
+                {audience.desc}
               </p>
               
               {/* Subtle hover indicator */}
