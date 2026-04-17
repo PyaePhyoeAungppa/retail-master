@@ -62,8 +62,8 @@ export function LandingFooter() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-6" aria-label="Retail Master Home">
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-                <ShoppingBag className="w-6 h-6 text-primary-foreground" />
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg shadow-black/5 border overflow-hidden">
+                <img src="/logo.png" alt="Retail Master" className="w-full h-full object-contain p-1.5" />
               </div>
               <span className="font-black text-2xl tracking-tighter">Retail Master</span>
             </Link>
