@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { ShoppingBag, Loader2, CheckCircle2 } from "lucide-react"
-import { SiWhatsapp, SiViber, SiTelegram } from "react-icons/si"
+import { SiWhatsapp, SiTelegram } from "react-icons/si"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { useLanguageStore } from "@/store/use-language-store"
@@ -140,7 +140,6 @@ export function LandingFooter() {
               <div className="flex gap-4">
                 {[
                   { label: "WhatsApp", href: "https://wa.me/66811128174", icon: SiWhatsapp, color: "#25D366" },
-                  { label: "Viber", href: "viber://add?number=66811128174", icon: SiViber, color: "#7360F2" },
                   { label: "Telegram", href: "https://t.me/xenon_miller155", icon: SiTelegram, color: "#26A5E4" }
                 ].map((social) => (
                   <Link

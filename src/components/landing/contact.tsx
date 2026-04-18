@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { Send, CheckCircle2, Loader2, Mail, Phone } from "lucide-react"
+import { Send, CheckCircle2, Loader2, Phone } from "lucide-react"
+import { SiWhatsapp, SiTelegram } from "react-icons/si"
 
 const BUSINESS_SIZES = [
   "Just me (solo seller)",
@@ -76,25 +77,22 @@ export function LandingContact() {
                 Tell us a bit about your business and we'll set up a personalised demo and get you started within 24 hours.
               </p>
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 text-white">
-                  <div className="w-11 h-11 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
-                    <Mail className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Email Us</p>
-                    <p className="font-black">hello@retailmaster.store</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 text-white">
-                  <div className="w-11 h-11 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
-                    <Phone className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Response Time</p>
-                    <p className="font-black">Within 24 hours</p>
-                  </div>
-                </div>
+              <div className="flex gap-4 mt-8">
+                {[
+                  { label: "WhatsApp", href: "https://wa.me/66811128174", icon: SiWhatsapp, color: "#25D366" },
+                  { label: "Telegram", href: "https://t.me/xenon_miller155", icon: SiTelegram, color: "#26A5E4" }
+                ].map((social) => (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    className="w-16 h-16 rounded-3xl bg-white/10 border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all duration-300 hover:-translate-y-1 shadow-xl"
+                    aria-label={social.label}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <social.icon className="w-8 h-8" style={{ color: social.color }} />
+                  </a>
+                ))}
               </div>
             </div>
 
