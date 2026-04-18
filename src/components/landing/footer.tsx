@@ -78,24 +78,6 @@ export function LandingFooter() {
                 ? "Retail Master သည် ခေတ်မီအွန်လိုင်းရောင်းချသူများအတွက် အထူးဒီဇိုင်းထုတ်ထားသော POS ဖြစ်သည်။ အော်ဒါအမှားများကို လျှော့ချပေးပြီး စီမံခန့်ခွဲမှုအချိန်များကို သက်သာစေကာ လုပ်ငန်းကို ပိုမိုမြန်ဆန်လာစေပါသည်။"
                 : t.description}
             </p>
-            <div className="flex gap-4">
-              {[
-                { label: "WhatsApp", href: "https://wa.me/66811128174", icon: SiWhatsapp },
-                { label: "Viber", href: "viber://add?number=66811128174", icon: SiViber },
-                { label: "Telegram", href: "https://t.me/xenon_miller155", icon: SiTelegram }
-              ].map((social) => (
-                <Link
-                  key={social.label}
-                  href={social.href}
-                  className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-primary hover:text-white hover:border-primary hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300"
-                  aria-label={social.label}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <social.icon className="w-5 h-5" />
-                </Link>
-              ))}
-            </div>
           </div>
 
           {/* Platform */}
@@ -153,12 +135,26 @@ export function LandingFooter() {
               </form>
             )}
 
-            <div className="mt-8 p-4 rounded-2xl bg-muted/60 border border-border">
-              <p className="text-xs font-black text-foreground mb-0.5">Need Help?</p>
-              <address className="not-italic text-xs text-muted-foreground font-medium">
-                <a href="mailto:hello@retailmaster.store" className="hover:text-primary transition-colors">hello@retailmaster.store</a>
-              </address>
-              <p className="text-xs text-muted-foreground mt-1 font-medium">24/7 support available</p>
+            <div className="mt-8">
+              <h4 className="font-black uppercase tracking-widest text-[10px] mb-4 text-foreground/30">Contact Us</h4>
+              <div className="flex gap-4">
+                {[
+                  { label: "WhatsApp", href: "https://wa.me/66811128174", icon: SiWhatsapp, color: "#25D366" },
+                  { label: "Viber", href: "viber://add?number=66811128174", icon: SiViber, color: "#7360F2" },
+                  { label: "Telegram", href: "https://t.me/xenon_miller155", icon: SiTelegram, color: "#26A5E4" }
+                ].map((social) => (
+                  <Link
+                    key={social.label}
+                    href={social.href}
+                    className="w-12 h-12 rounded-2xl bg-white border border-slate-100 flex items-center justify-center shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                    aria-label={social.label}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <social.icon className="w-6 h-6" style={{ color: social.color }} />
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </div>
