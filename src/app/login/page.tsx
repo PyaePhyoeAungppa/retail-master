@@ -28,7 +28,7 @@ export default function LoginPage() {
       })
 
       if (authError) throw authError
-      
+
       window.location.href = "/dashboard"
     } catch (err: any) {
       setError(err.message || "Failed to sign in")
@@ -61,7 +61,7 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
-            
+
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-4">Email Address</label>
               <div className="relative">
@@ -92,8 +92,8 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full h-14 rounded-2xl font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
               disabled={loading}
             >
@@ -104,9 +104,7 @@ export default function LoginPage() {
               )}
             </Button>
 
-            <p className="text-center text-xs text-muted-foreground font-medium pt-4">
-              Protected by Enterprise Row-Level Security
-            </p>
+            <a href="https://www.retailmaster.store/#contact" className="text-center text-xs text-muted-foreground font-medium pt-4">Contact Us</a>
           </form>
         </CardContent>
       </Card>
