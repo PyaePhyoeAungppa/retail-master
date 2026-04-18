@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { ShoppingBag, Menu, X, Globe } from "lucide-react"
 import { useState, useEffect } from "react"
+import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { useLanguageStore } from "@/store/use-language-store"
 
@@ -11,9 +12,20 @@ const navLinks = [
 ]
 
 export function LandingNav() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { language, setLanguage } = useLanguageStore()
+
+  const handleLanguageSwitch = (newLang: 'en' | 'mm') => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('lan', newLang)
+    router.push(`${pathname}?${params.toString()}`, { scroll: false })
+    // setLanguage(newLang) // We can let LanguageSync handle the store update
+  }
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20)
@@ -51,7 +63,7 @@ export function LandingNav() {
 
           <div className="flex items-center bg-muted/50 rounded-xl p-1 border">
             <button
-              onClick={() => setLanguage('en')}
+              onClick={() => handleLanguageSwitch('en')}
               className={cn(
                 "px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all",
                 language === 'en' ? "bg-white text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
@@ -60,7 +72,7 @@ export function LandingNav() {
               EN
             </button>
             <button
-              onClick={() => setLanguage('mm')}
+              onClick={() => handleLanguageSwitch('mm')}
               className={cn(
                 "px-3 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all",
                 language === 'mm' ? "bg-white text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
@@ -134,7 +146,7 @@ export function LandingNav() {
               <p className="text-[10px] font-black uppercase text-muted-foreground/60 mb-4 px-1 tracking-widest">Select Language</p>
               <div className="flex items-center bg-muted/50 rounded-2xl p-1.5 border border-border/50">
                 <button
-                  onClick={() => setLanguage('en')}
+                  onClick={() => handleLanguageSwitch('en')}
                   className={cn(
                     "flex-1 py-3.5 rounded-xl text-xs font-black uppercase transition-all",
                     language === 'en' ? "bg-white text-primary shadow-lg shadow-black/5 border border-border/50" : "text-muted-foreground hover:text-foreground"
@@ -143,7 +155,7 @@ export function LandingNav() {
                   English
                 </button>
                 <button
-                  onClick={() => setLanguage('mm')}
+                  onClick={() => handleLanguageSwitch('mm')}
                   className={cn(
                     "flex-1 py-3.5 rounded-xl text-xs font-black uppercase transition-all",
                     language === 'mm' ? "bg-white text-primary shadow-lg shadow-black/5 border border-border/50" : "text-muted-foreground hover:text-foreground"

@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { AuthGate } from "@/components/layout/auth-gate";
+import { LanguageSync } from "@/components/language-sync";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -119,6 +120,7 @@ export default function RootLayout({
         }} />
       </head>
       <body className={`${inter.className} bg-background text-foreground`}>
+        <LanguageSync />
         <Providers>
           <AuthGate>{children}</AuthGate>
         </Providers>
